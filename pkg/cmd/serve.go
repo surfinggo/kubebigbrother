@@ -7,13 +7,16 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/server"
 )
 
+var Version = "unknown"
+
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Run server",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		app, err := server.SetupApp(&server.Options{
-			Env:  viper.GetString("env"),
-			Addr: viper.GetString("addr"),
+			Version: Version,
+			Env:     viper.GetString("env"),
+			Addr:    viper.GetString("addr"),
 		})
 		if err != nil {
 			return errors.Wrap(err, "setup app error")

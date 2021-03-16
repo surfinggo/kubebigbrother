@@ -12,5 +12,7 @@ func (app *App) Index(c *gin.Context) {
 
 // Healthz, health check
 func (app *App) Healthz(c *gin.Context) {
-	c.JSON(200, fmt.Sprintf("Hi, current running version: %s", app.Version))
+	c.JSON(200, gin.H{
+		"version": app.Version,
+	})
 }

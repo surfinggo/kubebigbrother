@@ -29,6 +29,7 @@ func SetupApp(options *Options) (*App, error) {
 
 	app := &App{}
 	app.Addr = options.Addr
+	app.Version = options.Version
 
 	if options.GinDebug {
 		gin.SetMode(gin.DebugMode)
@@ -47,6 +48,7 @@ func SetupApp(options *Options) (*App, error) {
 
 	r.GET("/", app.Index)
 	r.Any("/healthz", app.Healthz)
+	r.GET("/api/v1/healthz", app.Healthz)
 
 	r.HandleMethodNotAllowed = true
 
