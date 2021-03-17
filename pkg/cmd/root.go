@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/spongeprojects/kubebigbrother/pkg/log"
+	"github.com/spongeprojects/magicconch"
+	"io"
 	"math/rand"
 	"time"
 )
@@ -12,6 +15,15 @@ import (
 var Version = "unknown"
 
 var cfgFile string
+
+const (
+	EnvDebug = "debug"
+	EnvEmpty = ""
+
+	DebugConfigFile = "config/config.local.yaml"
+
+	ConfigFileTemplate = "config/config.tmpl.yaml"
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -44,10 +56,34 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	viper.AutomaticEnv()
+
+	env := viper.GetString("env")
+
+	if cfgFile == "" && (env == EnvDebug || env == EnvEmpty) {
+		fs := afero.NewOsFs()
+		exist, err := afero.Exists(fs, DebugConfigFile)
+		magicconch.Must(err)
+		if !exist {
+			f1, err := fs.Open(ConfigFileTemplate)
+			magicconch.Must(err)
+			defer func() {
+				magicconch.Must(f1.Close())
+			}()
+			f2, err := fs.Create(DebugConfigFile)
+			magicconch.Must(err)
+			defer func() {
+				defer magicconch.Must(f2.Close())
+			}()
+			_, err = io.Copy(f2, f1)
+			magicconch.Must(err)
+		}
+		log.Infof("config file not specified, using default for debugging: %s", DebugConfigFile)
+		cfgFile = DebugConfigFile
+	}
+
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
-
-		viper.AutomaticEnv()
 
 		err := viper.ReadInConfig()
 		if err != nil {
@@ -55,5 +91,7 @@ func initConfig() {
 		} else {
 			log.Infof("using config file: %s", viper.ConfigFileUsed())
 		}
+	} else {
+		log.Info("config file not specified, not reading from file")
 	}
 }
