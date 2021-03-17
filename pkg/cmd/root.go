@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+var Version = "unknown"
+
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
@@ -32,6 +34,7 @@ func init() {
 
 	f := rootCmd.PersistentFlags()
 	f.StringVarP(&cfgFile, "config", "c", "", "config file")
+	f.String("env", "", "production, preview, debug")
 
 	err := viper.BindPFlags(f)
 	if err != nil {

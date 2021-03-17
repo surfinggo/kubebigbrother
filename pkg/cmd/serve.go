@@ -7,8 +7,6 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/server"
 )
 
-var Version = "unknown"
-
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Run server",
@@ -30,7 +28,6 @@ func init() {
 
 	f := serveCmd.PersistentFlags()
 	f.String("addr", "0.0.0.0:1984", "serving address")
-	f.String("env", "", "production, preview, debug")
 
 	err := viper.BindPFlags(f)
 	if err != nil {
