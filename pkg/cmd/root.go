@@ -9,6 +9,7 @@ import (
 	"github.com/spongeprojects/magicconch"
 	"io"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -47,6 +48,9 @@ func init() {
 	f := rootCmd.PersistentFlags()
 	f.StringVarP(&cfgFile, "config", "c", "", "config file")
 	f.String("env", "", "production, preview, debug")
+	f.String("db-dialect", "sqlite", "database dialect [mysql, postgres, sqlite]")
+	f.String("db-args", "", "database args")
+	f.String("kube-config", magicconch.Getenv("KUBECONFIG", os.Getenv("HOME")+"/.kube/config"), "kube config file path")
 
 	err := viper.BindPFlags(f)
 	if err != nil {
@@ -73,7 +77,7 @@ func initConfig() {
 			f2, err := fs.Create(DebugConfigFile)
 			magicconch.Must(err)
 			defer func() {
-				defer magicconch.Must(f2.Close())
+				magicconch.Must(f2.Close())
 			}()
 			_, err = io.Copy(f2, f1)
 			magicconch.Must(err)

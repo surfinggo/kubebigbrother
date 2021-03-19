@@ -1,1 +1,2 @@
-nothing: here
+db-dialect: sqlite
+db-args: tmp/kubebigbrother.sqlite

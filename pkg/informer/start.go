@@ -1,7 +1,6 @@
-package watcher
+package informer
 
 import (
-	"github.com/spongeprojects/kubebigbrother/pkg/log"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
@@ -10,8 +9,8 @@ import (
 	"syscall"
 )
 
-func (app *Watcher) Start() error {
-	informer := informers.NewSharedInformerFactory(app.Clientset, 0)
+func (i *Informer) Start() error {
+	informer := informers.NewSharedInformerFactory(i.Clientset, 0)
 
 	configMapInformer := informer.Core().V1().ConfigMaps().Informer()
 
@@ -19,20 +18,21 @@ func (app *Watcher) Start() error {
 		AddFunc: func(obj interface{}) {
 			configMap, ok := obj.(*v1.ConfigMap)
 			if ok {
-				log.Infof("created %s/%s", configMap.Namespace, configMap.Name)
+				i.ConfigMapAddFunc(configMap)
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			oldConfigMap, ok1 := oldObj.(*v1.ConfigMap)
 			newConfigMap, ok2 := newObj.(*v1.ConfigMap)
 			if ok1 && ok2 {
-				log.Infof("updated %s/%s", oldConfigMap.Namespace, newConfigMap.Name)
+				i.ConfigMapUpdateFunc(oldConfigMap, newConfigMap)
+
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			configMap, ok := obj.(*v1.ConfigMap)
 			if ok {
-				log.Infof("deleted %s/%s", configMap.Namespace, configMap.Name)
+				i.ConfigMapDeleteFunc(configMap)
 			}
 		},
 	})

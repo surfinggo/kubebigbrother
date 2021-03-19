@@ -2,47 +2,46 @@ package watcher
 
 import (
 	"github.com/pkg/errors"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	"github.com/spongeprojects/kubebigbrother/pkg/informer"
+	"github.com/spongeprojects/kubebigbrother/pkg/log"
+	v1 "k8s.io/api/core/v1"
 )
 
 type Options struct {
-	Version string
-
 	Env string
 
-	GinDebug   bool
 	KubeConfig string
 	Resource   string
 }
 
 type Watcher struct {
-	Version string
-
-	Addr string
-
-	Clientset kubernetes.Interface
-
-	Controller interface{}
+	Informer *informer.Informer
 }
 
-func SetupWatcher(options Options) (*Watcher, error) {
-	app := &Watcher{}
-	app.Addr = options.Resource
-	app.Version = options.Version
-	app.Controller = nil
+func Setup(options Options) (*Watcher, error) {
+	watcher := &Watcher{}
 
-	config, err := clientcmd.BuildConfigFromFlags("", options.KubeConfig)
+	informerInstance, err := informer.Setup(informer.Options{
+		KubeConfig: options.KubeConfig,
+		Resource:   options.Resource,
+		ConfigMapAddFunc: func(configMap *v1.ConfigMap) {
+			log.Infof("created: %s/%s", configMap.Namespace, configMap.Name)
+		},
+		ConfigMapUpdateFunc: func(oldConfigMap *v1.ConfigMap, newConfigMap *v1.ConfigMap) {
+			log.Infof("updated: %s/%s", newConfigMap.Namespace, newConfigMap.Name)
+		},
+		ConfigMapDeleteFunc: func(configMap *v1.ConfigMap) {
+			log.Infof("deleted: %s/%s", configMap.Namespace, configMap.Name)
+		},
+	})
 	if err != nil {
-		return nil, errors.Wrap(err, "get kube config error")
+		return nil, errors.Wrap(err, "setup informer error")
 	}
+	watcher.Informer = informerInstance
 
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, errors.Wrap(err, "create kube client error")
-	}
+	return watcher, nil
+}
 
-	app.Clientset = clientset
-
-	return app, nil
+func (w *Watcher) Start() error {
+	return w.Informer.Start()
 }

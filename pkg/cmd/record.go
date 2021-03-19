@@ -7,9 +7,9 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/watcher"
 )
 
-var watchCmd = &cobra.Command{
-	Use:   "watch",
-	Short: "Run watcher",
+var recordCmd = &cobra.Command{
+	Use:   "record",
+	Short: "Run recorder, watch events and persistent into database",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		watcher, err := watcher.Setup(watcher.Options{
 			Env:        viper.GetString("env"),
@@ -24,9 +24,9 @@ var watchCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(watchCmd)
+	rootCmd.AddCommand(recordCmd)
 
-	f := watchCmd.PersistentFlags()
+	f := recordCmd.PersistentFlags()
 	f.String("resource", "", "resource to watch")
 
 	err := viper.BindPFlags(f)
