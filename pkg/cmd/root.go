@@ -25,9 +25,11 @@ const (
 )
 
 var (
-	cfgFile string
-
-	env string
+	cfgFile    string
+	env        string
+	dbDialect  string
+	dbArgs     string
+	kubeConfig string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -52,9 +54,11 @@ func init() {
 	f := rootCmd.PersistentFlags()
 	f.StringVarP(&cfgFile, "config", "c", "", "config file")
 	f.StringVarP(&env, "env", "e", "", "environment")
-	f.String("db-dialect", "sqlite", "database dialect [mysql, postgres, sqlite]")
-	f.String("db-args", "", "database args")
-	f.String("kube-config", magicconch.Getenv("KUBECONFIG", os.Getenv("HOME")+"/.kube/config"), "kube config file path")
+	f.StringVar(&dbDialect, "db-dialect", "sqlite", "database dialect [mysql, postgres, sqlite]")
+	f.StringVar(&dbArgs, "db-args", "", "database args")
+	f.StringVar(&kubeConfig, "kube-config",
+		magicconch.Getenv("KUBECONFIG", os.Getenv("HOME")+"/.kube/config"),
+		"kube config file path")
 
 	err := viper.BindPFlags(f)
 	if err != nil {

@@ -13,7 +13,7 @@ var historyCmd = &cobra.Command{
 	Use:   "history",
 	Short: "Run historyer",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		db, err := gormdb.New(viper.GetString("db-dialect"), viper.GetString("db-args"))
+		db, err := gormdb.New(dbDialect, dbArgs)
 		if err != nil {
 			return errors.Wrap(err, "create db error")
 		}
