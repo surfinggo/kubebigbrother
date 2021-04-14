@@ -9,11 +9,11 @@ import (
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Run server",
+	Short: "Run the server to serve backend APIs",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		app, err := server.SetupApp(&server.Options{
 			Version: Version,
-			Env:     viper.GetString("env"),
+			Env:     env,
 			Addr:    viper.GetString("addr"),
 		})
 		if err != nil {

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,15 +16,18 @@ import (
 
 var Version = "unknown"
 
-var cfgFile string
-
 const (
 	EnvDebug = "debug"
-	EnvEmpty = ""
 
 	DebugConfigFile = "config/config.local.yaml"
 
 	ConfigFileTemplate = "config/config.tmpl.yaml"
+)
+
+var (
+	cfgFile string
+
+	env string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -47,7 +51,7 @@ func init() {
 
 	f := rootCmd.PersistentFlags()
 	f.StringVarP(&cfgFile, "config", "c", "", "config file")
-	f.String("env", "", "production, preview, debug")
+	f.StringVarP(&env, "env", "e", "", "environment")
 	f.String("db-dialect", "sqlite", "database dialect [mysql, postgres, sqlite]")
 	f.String("db-args", "", "database args")
 	f.String("kube-config", magicconch.Getenv("KUBECONFIG", os.Getenv("HOME")+"/.kube/config"), "kube config file path")
@@ -62,28 +66,37 @@ func init() {
 func initConfig() {
 	viper.AutomaticEnv()
 
-	env := viper.GetString("env")
+	if env == "" {
+		env = EnvDebug
+	}
 
-	if cfgFile == "" && (env == EnvDebug || env == EnvEmpty) {
-		fs := afero.NewOsFs()
-		exist, err := afero.Exists(fs, DebugConfigFile)
-		magicconch.Must(err)
-		if !exist {
-			f1, err := fs.Open(ConfigFileTemplate)
-			magicconch.Must(err)
-			defer func() {
-				magicconch.Must(f1.Close())
-			}()
-			f2, err := fs.Create(DebugConfigFile)
-			magicconch.Must(err)
-			defer func() {
-				magicconch.Must(f2.Close())
-			}()
-			_, err = io.Copy(f2, f1)
-			magicconch.Must(err)
+	if env == EnvDebug {
+		if _, exist := os.LookupEnv("LOG_LEVEL"); !exist {
+			log.Logger.SetLevel(logrus.DebugLevel)
 		}
-		log.Infof("config file not specified, using default for debugging: %s", DebugConfigFile)
-		cfgFile = DebugConfigFile
+
+		if cfgFile == "" {
+			// get debug config file in place automatically
+			fs := afero.NewOsFs()
+			exist, err := afero.Exists(fs, DebugConfigFile)
+			magicconch.Must(err)
+			if !exist {
+				tmpl, err := fs.Open(ConfigFileTemplate)
+				magicconch.Must(err)
+				defer func() {
+					magicconch.Must(tmpl.Close())
+				}()
+				debugConfig, err := fs.Create(DebugConfigFile)
+				magicconch.Must(err)
+				defer func() {
+					magicconch.Must(debugConfig.Close())
+				}()
+				_, err = io.Copy(debugConfig, tmpl)
+				magicconch.Must(err)
+			}
+			log.Infof("config file not specified, using default for debugging: %s", DebugConfigFile)
+			cfgFile = DebugConfigFile
+		}
 	}
 
 	if cfgFile != "" {

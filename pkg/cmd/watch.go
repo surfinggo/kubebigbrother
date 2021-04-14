@@ -12,7 +12,7 @@ var watchCmd = &cobra.Command{
 	Short: "Run watcher",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		watcher, err := watcher.Setup(watcher.Options{
-			Env:        viper.GetString("env"),
+			Env:        env,
 			KubeConfig: viper.GetString("kube-config"),
 			Resource:   viper.GetString("resource"),
 		})
