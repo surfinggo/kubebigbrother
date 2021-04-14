@@ -9,7 +9,7 @@ import (
 
 var recordCmd = &cobra.Command{
 	Use:   "record",
-	Short: "Run recorder, watch events and persistent into database",
+	Short: "Run recorder, watch events and persistent into database (only one instance should be running)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		watcher, err := watcher.Setup(watcher.Options{
 			Env:        env,

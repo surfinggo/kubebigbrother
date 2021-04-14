@@ -11,7 +11,7 @@ import (
 
 var historyCmd = &cobra.Command{
 	Use:   "history",
-	Short: "Run historyer",
+	Short: "Query event history",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		db, err := gormdb.New(dbDialect, dbArgs)
 		if err != nil {

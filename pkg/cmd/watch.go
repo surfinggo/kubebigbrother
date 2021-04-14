@@ -9,7 +9,7 @@ import (
 
 var watchCmd = &cobra.Command{
 	Use:   "watch",
-	Short: "Run watcher",
+	Short: "Run watch to watch specific resource's event",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		watcher, err := watcher.Setup(watcher.Options{
 			Env:        env,
