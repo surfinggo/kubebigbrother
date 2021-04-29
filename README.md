@@ -1,8 +1,8 @@
 # kubebigbrother
 
-> Big brother is watching you.
-
 Kube Big Brother is a platform that monitors and records everything happens in a cluster.
+
+> Big brother is watching you.
 
 ## Development
 
