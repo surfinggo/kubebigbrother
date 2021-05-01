@@ -27,7 +27,7 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	f := serveCmd.PersistentFlags()
-	f.String("addr", "0.0.0.0:1949", "serving address")
+	f.String("addr", "0.0.0.0:8984", "serving address")
 
 	err := viper.BindPFlags(f)
 	if err != nil {
