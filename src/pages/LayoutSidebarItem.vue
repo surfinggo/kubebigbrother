@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <router-link :to="to" class="">
-      <fa fixed-width :icon="icon"/>
+      <font-awesome-icon fixed-width :icon="icon"/>
       <span class="ml-1">{{ title }}</span>
     </router-link>
   </div>

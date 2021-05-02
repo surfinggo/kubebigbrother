@@ -22,6 +22,6 @@ app.use(store)
 app.use(utils)
 app.use(VueAxios, axios)
 
-app.component('fa', FontAwesomeIcon)
+app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.mount('#app')

@@ -15,7 +15,6 @@ go run . serve
 ### Frontend (Vite, Vue)
 
 ```shell
-cd frontend
 npm i
 vite
 ```

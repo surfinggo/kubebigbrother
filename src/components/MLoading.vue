@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fa spin icon="spinner"/>
+    <font-awesome-icon spin icon="spinner"/>
     Loading
   </div>
 </template>
