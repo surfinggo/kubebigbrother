@@ -6,21 +6,23 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/spongeprojects/kubebigbrother/pkg/gormdb"
+	"github.com/spongeprojects/kubebigbrother/pkg/log"
 	"github.com/spongeprojects/kubebigbrother/pkg/stores/event_store"
+	"github.com/spongeprojects/magicconch"
 )
 
 var historyCmd = &cobra.Command{
 	Use:   "history",
 	Short: "Query event history",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		db, err := gormdb.New(dbDialect, dbArgs)
+	Run: func(cmd *cobra.Command, args []string) {
+		db, err := gormdb.New(viper.GetString("db-dialect"), viper.GetString("db-args"))
 		if err != nil {
-			return errors.Wrap(err, "create db error")
+			log.Fatal(errors.Wrap(err, "connect to db error"))
 		}
 		store := event_store.New(db)
 		events, err := store.List()
 		if err != nil {
-			return errors.Wrap(err, "list events error")
+			log.Fatal(errors.Wrap(err, "list events error"))
 		}
 		if len(events) == 0 {
 			fmt.Println("nothing")
@@ -28,7 +30,6 @@ var historyCmd = &cobra.Command{
 		for _, event := range events {
 			fmt.Printf("ID: %d, %s\n", event.ID, event.Description)
 		}
-		return nil
 	},
 }
 
@@ -37,10 +38,8 @@ func init() {
 
 	f := historyCmd.PersistentFlags()
 	f.String("resource", "", "resource to query")
-	//f.String("kube-config", magicconch.Getenv("KUBECONFIG", os.Getenv("HOME")+"/.kube/config"), "kube config file path")
+	f.String("db-dialect", "sqlite", "database dialect [mysql, postgres, sqlite]")
+	f.String("db-args", "", "database args")
 
-	err := viper.BindPFlags(f)
-	if err != nil {
-		panic(err)
-	}
+	magicconch.Must(viper.BindPFlags(f))
 }

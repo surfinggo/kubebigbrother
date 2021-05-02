@@ -7,10 +7,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"os"
+	"path"
 )
 
-func New(dialect, url string) (*gorm.DB, error) {
-	dbi, err := newDB(dialect, url)
+func New(dialect, dsn string) (*gorm.DB, error) {
+	dbi, err := newDB(dialect, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -22,15 +24,20 @@ func New(dialect, url string) (*gorm.DB, error) {
 	return dbi, nil
 }
 
-func newDB(dialect, url string) (*gorm.DB, error) {
+func newDB(dialect, dsn string) (*gorm.DB, error) {
+	config := &gorm.Config{}
 	switch dialect {
 	case "mysql":
-		return gorm.Open(mysql.Open(url), &gorm.Config{})
+		return gorm.Open(mysql.Open(dsn), config)
 	case "postgres":
-		return gorm.Open(postgres.Open(url), &gorm.Config{})
+		return gorm.Open(postgres.Open(dsn), config)
 	case "sqlite":
-		return gorm.Open(sqlite.Open(url), &gorm.Config{})
+		// dsn == "" means in-memory
+		if dsn != "" {
+			_ = os.MkdirAll(path.Dir(dsn), 0755)
+		}
+		return gorm.Open(sqlite.Open(dsn), config)
 	default:
-		return nil, errors.Errorf("unknown dialect: %s", dialect)
+		return nil, errors.Errorf("unsupported dialect: %s", dialect)
 	}
 }

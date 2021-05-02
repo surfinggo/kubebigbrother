@@ -58,6 +58,6 @@ func SetupApp(options *Options) (*App, error) {
 }
 
 func (app *App) Serve() error {
-	log.Infof("serving on %s", app.Addr)
+	log.Infof("listening on %s", app.Addr)
 	return app.Router.Run(app.Addr)
 }

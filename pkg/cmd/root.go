@@ -6,11 +6,13 @@ import (
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/spongeprojects/kubebigbrother/pkg/helpers/homedir"
 	"github.com/spongeprojects/kubebigbrother/pkg/log"
 	"github.com/spongeprojects/magicconch"
 	"io"
 	"math/rand"
 	"os"
+	"path"
 	"time"
 )
 
@@ -25,17 +27,16 @@ const (
 )
 
 var (
-	cfgFile    string
-	env        string
-	dbDialect  string
-	dbArgs     string
-	kubeConfig string
+	cfgFile string
+	env     string
+
+	defaultKubeconfig = magicconch.Getenv("KUBECONFIG", path.Join(homedir.HomeDir(), ".kube", "config"))
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "nest",
-	Short: "`nest` command line tool",
+	Use:   "kbb",
+	Short: "`kbb` command line tool",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -53,21 +54,14 @@ func init() {
 
 	f := rootCmd.PersistentFlags()
 	f.StringVarP(&cfgFile, "config", "c", "", "config file")
-	f.StringVarP(&env, "env", "e", "", "environment")
-	f.StringVar(&dbDialect, "db-dialect", "sqlite", "database dialect [mysql, postgres, sqlite]")
-	f.StringVar(&dbArgs, "db-args", "", "database args")
-	f.StringVar(&kubeConfig, "kube-config",
-		magicconch.Getenv("KUBECONFIG", os.Getenv("HOME")+"/.kube/config"),
-		"kube config file path")
+	f.StringVarP(&env, "env", "e", os.Getenv("ENV"), "environment")
 
-	err := viper.BindPFlags(f)
-	if err != nil {
-		panic(err)
-	}
+	magicconch.Must(viper.BindPFlags(f))
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	viper.SetEnvPrefix("KBB")
 	viper.AutomaticEnv()
 
 	if env == "" {

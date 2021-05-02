@@ -4,22 +4,27 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/spongeprojects/kubebigbrother/pkg/log"
 	"github.com/spongeprojects/kubebigbrother/pkg/watcher"
+	"github.com/spongeprojects/magicconch"
 )
 
 var watchCmd = &cobra.Command{
 	Use:   "watch",
 	Short: "Run watch to watch specific resource's event",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		watcher, err := watcher.Setup(watcher.Options{
 			Env:        env,
-			KubeConfig: kubeConfig,
+			KubeConfig: viper.GetString("kubeconfig"),
 			Resource:   viper.GetString("resource"),
 		})
 		if err != nil {
-			return errors.Wrap(err, "setup watcher error")
+			log.Fatal(errors.Wrap(err, "setup watcher error"))
 		}
-		return watcher.Start()
+		err = watcher.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
@@ -28,9 +33,7 @@ func init() {
 
 	f := watchCmd.PersistentFlags()
 	f.String("resource", "", "resource to watch")
+	f.String("kubeconfig", defaultKubeconfig, "kube config file path")
 
-	err := viper.BindPFlags(f)
-	if err != nil {
-		panic(err)
-	}
+	magicconch.Must(viper.BindPFlags(f))
 }
