@@ -2,46 +2,34 @@ package watcher
 
 import (
 	"github.com/pkg/errors"
-	"github.com/spongeprojects/kubebigbrother/pkg/informer"
-	"github.com/spongeprojects/kubebigbrother/pkg/log"
-	v1 "k8s.io/api/core/v1"
+	"github.com/spongeprojects/kubebigbrother/pkg/informers"
 )
 
 type Options struct {
-	Env string
-
-	KubeConfig string
-	Resource   string
+	KubeConfig      string
+	InformersConfig *informers.Config
 }
 
 type Watcher struct {
-	Informer *informer.Informer
+	Informers informers.Interface
+}
+
+func (w *Watcher) Start(stopCh <-chan struct{}) {
+	w.Informers.Start(stopCh)
 }
 
 func Setup(options Options) (*Watcher, error) {
 	watcher := &Watcher{}
 
-	informerInstance, err := informer.Setup(informer.Options{
+	informerSet, err := informers.Setup(informers.Options{
 		KubeConfig: options.KubeConfig,
-		Resource:   options.Resource,
-		ConfigMapAddFunc: func(configMap *v1.ConfigMap) {
-			log.Infof("created: %s/%s", configMap.Namespace, configMap.Name)
-		},
-		ConfigMapUpdateFunc: func(oldConfigMap *v1.ConfigMap, newConfigMap *v1.ConfigMap) {
-			log.Infof("updated: %s/%s", newConfigMap.Namespace, newConfigMap.Name)
-		},
-		ConfigMapDeleteFunc: func(configMap *v1.ConfigMap) {
-			log.Infof("deleted: %s/%s", configMap.Namespace, configMap.Name)
-		},
+		Config:     options.InformersConfig,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "setup informer error")
+		return nil, errors.Wrap(err, "setup informers error")
 	}
-	watcher.Informer = informerInstance
+
+	watcher.Informers = informerSet
 
 	return watcher, nil
-}
-
-func (w *Watcher) Start() error {
-	return w.Informer.Start()
 }

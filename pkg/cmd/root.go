@@ -3,13 +3,12 @@ package cmd
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/spongeprojects/kubebigbrother/pkg/fileorcreate"
 	"github.com/spongeprojects/kubebigbrother/pkg/helpers/homedir"
 	"github.com/spongeprojects/kubebigbrother/pkg/log"
 	"github.com/spongeprojects/magicconch"
-	"io"
 	"math/rand"
 	"os"
 	"path"
@@ -21,9 +20,13 @@ var Version = "unknown"
 const (
 	EnvDebug = "debug"
 
-	DebugConfigFile = "config/config.local.yaml"
+	DefaultConfigFile = "config/config.local.yaml"
 
 	ConfigFileTemplate = "config/config.tmpl.yaml"
+
+	DefaultInformersConfigFile = "config/informers-config.local.yaml"
+
+	InformersConfigFileTemplate = "config/informers-config.tmpl.yaml"
 )
 
 var (
@@ -53,7 +56,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	f := rootCmd.PersistentFlags()
-	f.StringVarP(&cfgFile, "config", "c", "", "config file")
+	f.StringVarP(&cfgFile, "config", "c", DefaultConfigFile, "config file")
 	f.StringVarP(&env, "env", "e", os.Getenv("ENV"), "environment")
 
 	magicconch.Must(viper.BindPFlags(f))
@@ -72,29 +75,11 @@ func initConfig() {
 		if _, exist := os.LookupEnv("LOG_LEVEL"); !exist {
 			log.Logger.SetLevel(logrus.DebugLevel)
 		}
+	}
 
-		if cfgFile == "" {
-			// get debug config file in place automatically
-			fs := afero.NewOsFs()
-			exist, err := afero.Exists(fs, DebugConfigFile)
-			magicconch.Must(err)
-			if !exist {
-				tmpl, err := fs.Open(ConfigFileTemplate)
-				magicconch.Must(err)
-				defer func() {
-					magicconch.Must(tmpl.Close())
-				}()
-				debugConfig, err := fs.Create(DebugConfigFile)
-				magicconch.Must(err)
-				defer func() {
-					magicconch.Must(debugConfig.Close())
-				}()
-				_, err = io.Copy(debugConfig, tmpl)
-				magicconch.Must(err)
-			}
-			log.Infof("config file not specified, using default for debugging: %s", DebugConfigFile)
-			cfgFile = DebugConfigFile
-		}
+	err := fileorcreate.Ensure(cfgFile, ConfigFileTemplate)
+	if err != nil {
+		log.Error(errors.Wrap(err, "apply config template error"))
 	}
 
 	if cfgFile != "" {
