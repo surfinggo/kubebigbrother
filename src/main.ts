@@ -11,6 +11,8 @@ import utils from './utils'
 
 import App from './App.vue'
 
+import 'virtual:windi.css'
+
 import './index.css'
 
 library.add(faHandHolding, faSpinner, faTachometerAlt, faTrash)
