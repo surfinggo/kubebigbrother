@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/spongeprojects/kubebigbrother/pkg/log"
 )
 
 type Options struct {
@@ -18,6 +17,7 @@ type App struct {
 	Version string
 
 	Addr string
+	Env  string
 
 	Router *gin.Engine
 }
@@ -28,8 +28,9 @@ func SetupApp(options *Options) (*App, error) {
 	}
 
 	app := &App{}
-	app.Addr = options.Addr
 	app.Version = options.Version
+	app.Addr = options.Addr
+	app.Env = options.Env
 
 	if options.GinDebug {
 		gin.SetMode(gin.DebugMode)
@@ -40,7 +41,6 @@ func SetupApp(options *Options) (*App, error) {
 	r := gin.New()
 	r.Use(
 		gin.LoggerWithConfig(gin.LoggerConfig{
-			Output:    log.Logger.Out,
 			SkipPaths: []string{"/healthz"},
 		}),
 		gin.Recovery(),
@@ -58,6 +58,5 @@ func SetupApp(options *Options) (*App, error) {
 }
 
 func (app *App) Serve() error {
-	log.Infof("listening on %s", app.Addr)
 	return app.Router.Run(app.Addr)
 }

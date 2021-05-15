@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/spongeprojects/kubebigbrother/pkg/log"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -12,6 +11,7 @@ import (
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/klog/v2"
 	"math/rand"
 	"os"
 	"path"
@@ -148,7 +148,7 @@ type InformerSet struct {
 
 func (set *InformerSet) Start(stopCh <-chan struct{}) {
 	for i, factory := range set.Factories {
-		log.Infof("starting factory %d/%d", i+1, len(set.Factories))
+		klog.Infof("starting factory %d/%d", i+1, len(set.Factories))
 		go factory.Start(stopCh)
 	}
 }
@@ -174,12 +174,12 @@ func Setup(options Options) (*InformerSet, error) {
 	}
 
 	for i, namespace := range config.Namespaces {
-		log.Infof("setup namespace %d/%d", i+1, len(config.Namespaces))
+		klog.Infof("setup namespace %d/%d", i+1, len(config.Namespaces))
 		factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(
 			dynamicClient, resyncPeriodFunc(), namespace.Namespace, nil)
 
 		for j, resource := range namespace.Resources {
-			log.Infof("setup resource %d/%d, namespace: %s, resource: %s",
+			klog.Infof("setup resource %d/%d, namespace: %s, resource: %s",
 				j+1, len(namespace.Resources), namespace.Namespace, resource.Resource)
 			gvr, _ := schema.ParseResourceArg(resource.Resource)
 			if gvr == nil {

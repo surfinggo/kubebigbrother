@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"github.com/spongeprojects/kubebigbrother/pkg/log"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -44,7 +44,7 @@ func (app *App) HandleError(c *gin.Context, err error) {
 			c.JSON(400, t)
 		}
 	default:
-		log.Errorf("server error occurred: %s", err)
+		klog.Errorf("server error occurred: %s", err)
 		c.JSON(500, e(500, ReasonServerError, err.Error()))
 	}
 }
