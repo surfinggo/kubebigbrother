@@ -1,136 +1,20 @@
 package informers
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
-	"math/rand"
-	"os"
-	"path"
-	"strings"
+	"sync"
 	"time"
 )
-
-// ChannelName is name of channel
-type ChannelName string
-
-// ChannelType is type of channel
-type ChannelType string
-
-// ChannelGroup is a special type of channel, which includes a slice of channels
-type ChannelGroup []ChannelName
-
-// ChannelTelegram is the Telegram channel
-type ChannelTelegram struct {
-	Token string `json:"token" yaml:"token"`
-}
-
-// ChannelCallback is the callback channel
-type ChannelCallback struct {
-	URL string `json:"url" yaml:"url"`
-}
-
-// Channel defines a channel to receive notifications
-type Channel struct {
-	// Name is the name of the channel
-	Name ChannelName `json:"name" yaml:"name"`
-
-	// Type is the type of the channel
-	Type ChannelType `json:"type" yaml:"type"`
-
-	Group    *ChannelGroup    `json:"group" yaml:"group"`
-	Telegram *ChannelTelegram `json:"telegram" yaml:"telegram"`
-	Callback *ChannelCallback `json:"callback" yaml:"callback"`
-}
-
-type Resource struct {
-	// Resource is the resource to watch, e.g. "deployments.v1.apps"
-	Resource string `json:"resource" yaml:"resource"`
-
-	// NoticeWhenAdded determine whether to notice when a resource is added
-	NoticeWhenAdded bool `json:"noticeWhenAdded" yaml:"noticeWhenAdded"`
-
-	// NoticeWhenDeleted determine whether to notice when a resource is deleted
-	NoticeWhenDeleted bool `json:"noticeWhenDeleted" yaml:"noticeWhenDeleted"`
-
-	// NoticeWhenUpdated determine whether to notice when a resource is updated,
-	// When UpdateOn is not nil, only notice when fields in UpdateOn is changed
-	NoticeWhenUpdated bool `json:"noticeWhenUpdated" yaml:"noticeWhenUpdated"`
-
-	// UpdateOn defines fields to watch, used with NoticeWhenUpdated
-	UpdateOn []string `json:"updateOn" yaml:"updateOn"`
-
-	// Channels defines channels to send notification
-	Channels []ChannelName `json:"channels" yaml:"channels"`
-}
-
-type Namespace struct {
-	// Namespace is the namespace to watch, default to "*", which means all namespaces
-	Namespace string `json:"namespace" yaml:"namespace"`
-
-	// Resources is the resources you want to watch
-	Resources []Resource `json:"resources" yaml:"resources"`
-}
-
-type Config struct {
-	// Namespaces defines namespaces and resources to watch
-	Namespaces []Namespace `json:"namespaces" yaml:"namespaces"`
-
-	// Channels defines channels that receive notifications
-	Channels map[ChannelName]Channel `json:"channels" yaml:"channels"`
-
-	// MinResyncPeriod is the resync period in reflectors; will be random between
-	// MinResyncPeriod and 2*minResyncPeriod.
-	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
-}
-
-// LoadConfigFromFile loads config from file
-func LoadConfigFromFile(file string) (*Config, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, errors.Wrap(err, "os.Open error")
-	}
-	var config Config
-	switch t := strings.ToLower(path.Ext(file)); t {
-	case ".yaml":
-		err = yaml.NewDecoder(f).Decode(&config)
-		if err != nil {
-			return nil, errors.Wrap(err, "yaml decode error")
-		}
-	case ".json":
-		err = json.NewDecoder(f).Decode(&config)
-		if err != nil {
-			return nil, errors.Wrap(err, "json decode error")
-		}
-	default:
-		return nil, errors.Errorf("unsupported file type: %s", t)
-	}
-	return &config, nil
-}
-
-func (c Config) ResyncPeriodFunc() (func() time.Duration, error) {
-	if c.MinResyncPeriod == "" {
-		c.MinResyncPeriod = "12h"
-	}
-	duration, err := time.ParseDuration(c.MinResyncPeriod)
-	if err != nil {
-		return nil, errors.Wrap(err, "time.ParseDuration error")
-	}
-	f := float64(duration.Nanoseconds())
-	// generation time.Duration between MinResyncPeriod and 2*MinResyncPeriod
-	return func() time.Duration {
-		factor := rand.Float64() + 1
-		return time.Duration(f * factor)
-	}, nil
-}
 
 type Options struct {
 	KubeConfig string
@@ -139,18 +23,44 @@ type Options struct {
 }
 
 type Interface interface {
-	Start(stopCh <-chan struct{})
+	Start(stopCh <-chan struct{}) error
 }
 
 type InformerSet struct {
 	Factories []dynamicinformer.DynamicSharedInformerFactory
+	Resources []Resource
 }
 
-func (set *InformerSet) Start(stopCh <-chan struct{}) {
+func (set *InformerSet) Start(stopCh <-chan struct{}) error {
+	defer func() {
+		for _, resource := range set.Resources {
+			resource.Queue.ShutDown()
+		}
+	}()
+
 	for i, factory := range set.Factories {
 		klog.Infof("starting factory %d/%d", i+1, len(set.Factories))
 		go factory.Start(stopCh)
 	}
+
+	for i, factory := range set.Factories {
+		for gvr, ok := range factory.WaitForCacheSync(stopCh) {
+			if !ok {
+				return fmt.Errorf(
+					"timed out waiting for caches to sync, .Factories[%d][%s]", i, gvr)
+			}
+		}
+	}
+
+	for _, resource := range set.Resources {
+		for i := 0; i < resource.Workers; i++ {
+			go wait.Until(resource.RunWorker, time.Second, stopCh)
+		}
+	}
+
+	<-stopCh
+
+	return nil
 }
 
 func Setup(options Options) (*InformerSet, error) {
@@ -168,58 +78,151 @@ func Setup(options Options) (*InformerSet, error) {
 		return nil, errors.Wrap(err, "dynamic.NewForConfig error")
 	}
 
-	resyncPeriodFunc, err := config.ResyncPeriodFunc()
-	if err != nil {
-		return nil, errors.Wrap(err, "config.ResyncPeriodFunc error")
+	channelMap := make(ChannelMap)
+	for name, channelConfig := range config.Channels {
+		channel, err := BuildChannelFromConfig(&channelConfig)
+		if err != nil {
+			return nil, errors.Wrap(err, "build channel error")
+		}
+		channelMap[name] = channel
 	}
 
+	defaultResyncPeriodFunc, err := config.BuildResyncPeriodFunc()
+	if err != nil {
+		return nil, errors.Wrap(err, "config.BuildResyncPeriodFunc error")
+	}
+	defaultChannelNames := config.DefaultChannelNames
+	klog.Infof("default channelNames: %v", defaultChannelNames)
+	defaultWorkers := config.DefaultWorkers
+	if defaultWorkers < 1 {
+		defaultWorkers = 3
+	}
+	klog.Infof("default workers: %d", defaultWorkers)
+
 	for i, namespace := range config.Namespaces {
-		klog.Infof("setup namespace %d/%d", i+1, len(config.Namespaces))
+		klog.Infof("[n%d] setup namespace %d/%d: %s",
+			i+1, i+1, len(config.Namespaces), namespace.Namespace)
+
+		namespaceDefaultResyncPeriodFunc, err := namespace.BuildResyncPeriodFuncWithDefault(
+			defaultResyncPeriodFunc)
+		if err != nil {
+			return nil, errors.Wrapf(err,
+				"namespace.BuildResyncPeriodFuncWithDefault error, .Namespaces[%d]: %s",
+				i, namespace.MinResyncPeriod)
+		}
+		namespaceDefaultChannelNames := namespace.DefaultChannelNames
+		if len(namespaceDefaultChannelNames) == 0 {
+			namespaceDefaultChannelNames = defaultChannelNames
+		}
+		klog.Infof("[n%d] default channelNames: %v",
+			i+1, namespaceDefaultChannelNames)
+		namespaceDefaultWorkers := namespace.DefaultWorkers
+		if namespaceDefaultWorkers < 1 {
+			namespaceDefaultWorkers = defaultWorkers
+		}
+		klog.Infof("[n%d] default workers: %d",
+			i+1, namespaceDefaultWorkers)
+
 		factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(
-			dynamicClient, resyncPeriodFunc(), namespace.Namespace, nil)
+			dynamicClient, namespaceDefaultResyncPeriodFunc(), namespace.Namespace, nil)
 
 		for j, resource := range namespace.Resources {
-			klog.Infof("setup resource %d/%d, namespace: %s, resource: %s",
-				j+1, len(namespace.Resources), namespace.Namespace, resource.Resource)
+			klog.Infof("[n%d,r%d] setup resource %d/%d: %s",
+				i+1, j+1, j+1, len(namespace.Resources), resource.Resource)
+
+			resyncPeriodFunc, err := resource.BuildResyncPeriodFuncWithDefault(
+				namespaceDefaultResyncPeriodFunc)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"resource.BuildResyncPeriodFuncWithDefault error, .Namespaces[%d].Resources[%d]: %s",
+					i, j, resource.ResyncPeriod)
+			}
+			channelNames := resource.ChannelNames
+			if len(channelNames) == 0 {
+				channelNames = namespaceDefaultChannelNames
+			}
+			klog.Infof("[n%d,r%d] final channelNames: %v", i+1, j+1, channelNames)
+			workers := resource.Workers
+			if workers < 1 {
+				workers = namespaceDefaultWorkers
+			}
+			klog.Infof("[n%d,r%d] final workers: %v", i+1, j+1, workers)
+
+			rateLimiter := workqueue.DefaultControllerRateLimiter()
+			queue := workqueue.NewRateLimitingQueue(rateLimiter)
 			gvr, _ := schema.ParseResourceArg(resource.Resource)
 			if gvr == nil {
-				return nil, errors.Wrapf(err, "schema.ParseResourceArg error, .Namespaces[%d].Resource[%d]: %s",
+				return nil, errors.Wrapf(err,
+					"schema.ParseResourceArg error, .Namespaces[%d].Resource[%d]: %s",
 					i, j, resource.Resource)
 			}
 			informer := factory.ForResource(*gvr).Informer()
-			informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: func(obj interface{}) {
+			handlerFuncs := cache.ResourceEventHandlerFuncs{}
+			if resource.NoticeWhenAdded {
+				klog.Infof("[n%d,r%d] set AddFunc", i+1, j+1)
+				handlerFuncs.AddFunc = func(obj interface{}) {
 					s, ok := obj.(*unstructured.Unstructured)
 					if !ok {
 						return
 					}
-					fmt.Printf("created: %s\n", s.GetName())
-				},
-				UpdateFunc: func(oldObj, newObj interface{}) {
+					e := &Event{
+						Type:         EventTypeAdded,
+						Obj:          s,
+						ChannelNames: channelNames,
+					}
+					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
+					queue.Add(e)
+				}
+			}
+			if resource.NoticeWhenDeleted {
+				klog.Infof("[n%d,r%d] set DeleteFunc", i+1, j+1)
+				handlerFuncs.DeleteFunc = func(obj interface{}) {
+					s, ok := obj.(*unstructured.Unstructured)
+					if !ok {
+						return
+					}
+					e := &Event{
+						Type:         EventTypeDeleted,
+						Obj:          s,
+						ChannelNames: channelNames,
+					}
+					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
+					queue.Add(e)
+				}
+			}
+			if resource.NoticeWhenUpdated {
+				klog.Infof("[%d,%d] set UpdateFunc", i+1, j+1)
+				handlerFuncs.UpdateFunc = func(oldObj, obj interface{}) {
 					oldS, ok1 := oldObj.(*unstructured.Unstructured)
-					newS, ok2 := newObj.(*unstructured.Unstructured)
+					s, ok2 := obj.(*unstructured.Unstructured)
 					if !ok1 || !ok2 {
 						return
 					}
-					oldColor, ok1, err1 := unstructured.NestedString(oldS.Object, "spec", "color")
-					newColor, ok2, err2 := unstructured.NestedString(newS.Object, "spec", "color")
-					if !ok1 || !ok2 || err1 != nil || err2 != nil {
-						fmt.Printf("updated: %s\n", newS.GetName())
+					e := &Event{
+						Type:         EventTypeUpdated,
+						Obj:          s,
+						OldObj:       oldS,
+						ChannelNames: channelNames,
 					}
-					fmt.Printf("updated: %s, old color: %s, new color: %s\n", newS.GetName(), oldColor, newColor)
-				},
-				DeleteFunc: func(obj interface{}) {
-					s, ok := obj.(*unstructured.Unstructured)
-					if !ok {
-						return
-					}
-					fmt.Printf("deleted: %s\n", s.GetName())
-				},
-			})
-		}
+					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
+					queue.Add(e)
+				}
+			}
+			informer.AddEventHandlerWithResyncPeriod(handlerFuncs, resyncPeriodFunc())
 
+			informerSet.Resources = append(informerSet.Resources, Resource{
+				Resource:        resource.Resource,
+				UpdateOn:        resource.UpdateOn,
+				ChannelMap:      channelMap,
+				Queue:           queue,
+				Workers:         workers,
+				processingItems: &sync.WaitGroup{}, // TODO: wait before exit
+			})
+		} // end resources loop
+
+		// a factory for a namespace
 		informerSet.Factories = append(informerSet.Factories, factory)
-	}
+	} // end namespaces loop
 
 	return informerSet, nil
 }
