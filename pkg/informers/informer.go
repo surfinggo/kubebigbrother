@@ -32,9 +32,9 @@ type Interface interface {
 }
 
 type InformerSet struct {
-	RESTClientGetter resource.RESTClientGetter
-	Factories        []dynamicinformer.DynamicSharedInformerFactory
-	Resources        []Resource
+	RESTClientGetter  resource.RESTClientGetter
+	Factories         []dynamicinformer.DynamicSharedInformerFactory
+	ResourceInformers []Resource
 }
 
 func (set *InformerSet) Start(stopCh <-chan struct{}) error {
@@ -52,9 +52,9 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 		}
 	}
 
-	for _, resource := range set.Resources {
-		for i := 0; i < resource.Workers; i++ {
-			go wait.Until(resource.RunWorker, time.Second, stopCh)
+	for _, resourceInformer := range set.ResourceInformers {
+		for i := 0; i < resourceInformer.Workers; i++ {
+			go wait.Until(resourceInformer.RunWorker, time.Second, stopCh)
 		}
 	}
 
@@ -64,8 +64,8 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 }
 
 func (set *InformerSet) Shutdown() {
-	for _, resource := range set.Resources {
-		resource.Queue.ShutDown()
+	for _, resourceInformer := range set.ResourceInformers {
+		resourceInformer.Queue.ShutDown()
 	}
 }
 
@@ -243,7 +243,7 @@ func Setup(options Options) (*InformerSet, error) {
 			}
 			informer.AddEventHandlerWithResyncPeriod(handlerFuncs, resyncPeriodFunc())
 
-			informerSet.Resources = append(informerSet.Resources, Resource{
+			informerSet.ResourceInformers = append(informerSet.ResourceInformers, Resource{
 				Resource:        resourceConfig.Resource,
 				UpdateOn:        resourceConfig.UpdateOn,
 				ChannelMap:      channelMap,
