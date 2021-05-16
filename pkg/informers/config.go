@@ -67,7 +67,7 @@ func (c *ResourceConfig) BuildResyncPeriodFunc() (f func() time.Duration, set bo
 }
 
 type NamespaceConfig struct {
-	// Namespace is the namespace to watch, default to "*", which means all namespaces
+	// Namespace is the namespace to watch, default to "", which means all namespaces
 	Namespace string `json:"namespace" yaml:"namespace"`
 
 	// Resources is the resources you want to watch
