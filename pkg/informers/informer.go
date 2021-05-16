@@ -112,7 +112,7 @@ func Setup(options Options) (*InformerSet, error) {
 
 	for i, namespaceConfig := range config.Namespaces {
 		klog.Infof("[n%d] setup namespace %d/%d: %s",
-			i+1, i+1, len(config.Namespaces), namespaceConfig.Namespace)
+			i, i+1, len(config.Namespaces), namespaceConfig.Namespace)
 
 		namespaceDefaultResyncPeriodFunc, err := namespaceConfig.BuildResyncPeriodFuncWithDefault(
 			defaultResyncPeriodFunc)
@@ -126,13 +126,13 @@ func Setup(options Options) (*InformerSet, error) {
 			namespaceDefaultChannelNames = defaultChannelNames
 		}
 		klog.V(1).Infof("[n%d] default channelNames: %v",
-			i+1, namespaceDefaultChannelNames)
+			i, namespaceDefaultChannelNames)
 		namespaceDefaultWorkers := namespaceConfig.DefaultWorkers
 		if namespaceDefaultWorkers < 1 {
 			namespaceDefaultWorkers = defaultWorkers
 		}
 		klog.V(1).Infof("[n%d] default workers: %d",
-			i+1, namespaceDefaultWorkers)
+			i, namespaceDefaultWorkers)
 
 		factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(
 			dynamicClient, namespaceDefaultResyncPeriodFunc(), namespaceConfig.Namespace, nil)
@@ -141,7 +141,7 @@ func Setup(options Options) (*InformerSet, error) {
 
 		for j, resourceConfig := range namespaceConfig.Resources {
 			klog.Infof("[n%d,r%d] setup resource %d/%d: %s",
-				i+1, j+1, j+1, len(namespaceConfig.Resources), resourceConfig.Resource)
+				i, j, j+1, len(namespaceConfig.Resources), resourceConfig.Resource)
 
 			if _, ok := duplicate[resourceConfig.Resource]; ok {
 				return nil, errors.Errorf(
@@ -161,12 +161,12 @@ func Setup(options Options) (*InformerSet, error) {
 			if len(channelNames) == 0 {
 				channelNames = namespaceDefaultChannelNames
 			}
-			klog.V(1).Infof("[n%d,r%d] final channelNames: %v", i+1, j+1, channelNames)
+			klog.V(1).Infof("[n%d,r%d] final channelNames: %v", i, j, channelNames)
 			workers := resourceConfig.Workers
 			if workers < 1 {
 				workers = namespaceDefaultWorkers
 			}
-			klog.V(1).Infof("[n%d,r%d] final workers: %v", i+1, j+1, workers)
+			klog.V(1).Infof("[n%d,r%d] final workers: %v", i, j, workers)
 
 			rateLimiter := workqueue.DefaultControllerRateLimiter()
 			queue := workqueue.NewRateLimitingQueue(rateLimiter)
@@ -177,10 +177,11 @@ func Setup(options Options) (*InformerSet, error) {
 					"parse resource error, .Namespaces[%d].Resource[%d]: %s",
 					i, j, resourceConfig.Resource)
 			}
+
 			informer := factory.ForResource(gvr).Informer()
 			handlerFuncs := cache.ResourceEventHandlerFuncs{}
 			if resourceConfig.NoticeWhenAdded {
-				klog.V(1).Infof("[n%d,r%d] set AddFunc", i+1, j+1)
+				klog.V(1).Infof("[n%d,r%d] set AddFunc", i, j)
 				handlerFuncs.AddFunc = func(obj interface{}) {
 					s, ok := obj.(*unstructured.Unstructured)
 					if !ok {
@@ -196,7 +197,7 @@ func Setup(options Options) (*InformerSet, error) {
 				}
 			}
 			if resourceConfig.NoticeWhenDeleted {
-				klog.V(1).Infof("[n%d,r%d] set DeleteFunc", i+1, j+1)
+				klog.V(1).Infof("[n%d,r%d] set DeleteFunc", i, j)
 				handlerFuncs.DeleteFunc = func(obj interface{}) {
 					s, ok := obj.(*unstructured.Unstructured)
 					if !ok {
@@ -212,7 +213,7 @@ func Setup(options Options) (*InformerSet, error) {
 				}
 			}
 			if resourceConfig.NoticeWhenUpdated {
-				klog.V(1).Infof("[%d,%d] set UpdateFunc", i+1, j+1)
+				klog.V(1).Infof("[%d,%d] set UpdateFunc", i, j)
 				handlerFuncs.UpdateFunc = func(oldObj, obj interface{}) {
 					oldS, ok1 := oldObj.(*unstructured.Unstructured)
 					s, ok2 := obj.(*unstructured.Unstructured)
