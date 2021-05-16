@@ -125,7 +125,7 @@ func (c *ChannelGroup) Handle(e *Event) error {
 	for _, channel := range c.Channels {
 		err := channel.Handle(e)
 		if err != nil {
-			klog.V(6).Info(errors.Wrap(err, "handle event error"))
+			klog.Warning(errors.Wrap(err, "handle event error"))
 		}
 	}
 	// TODO: if an error is returned, all channels in c.ChannelNames will be retried.
