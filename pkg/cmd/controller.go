@@ -49,7 +49,7 @@ func NewControllerCommand() *cobra.Command {
 
 			informersConfig, err := informers.LoadConfigFromFile(informersConfigPath)
 			if err != nil {
-				klog.Fatal(errors.Wrap(err, "informers.LoadConfigFromFile error"))
+				klog.Exit(errors.Wrap(err, "informers.LoadConfigFromFile error"))
 			}
 
 			c, err := controller.Setup(controller.Options{
@@ -59,13 +59,13 @@ func NewControllerCommand() *cobra.Command {
 				InformersConfig: informersConfig,
 			})
 			if err != nil {
-				klog.Fatal(errors.Wrap(err, "setup controller error"))
+				klog.Exit(errors.Wrap(err, "setup controller error"))
 			}
 
 			stopCh := signals.SetupSignalHandler()
 
 			if err := c.Start(stopCh); err != nil {
-				klog.Fatal(errors.Wrap(err, "start controller error"))
+				klog.Exit(errors.Wrap(err, "start controller error"))
 			}
 			defer c.Shutdown()
 

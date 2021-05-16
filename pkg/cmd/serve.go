@@ -39,7 +39,7 @@ func NewServeCommand() *cobra.Command {
 				Addr:    o.Addr,
 			})
 			if err != nil {
-				klog.Fatal(errors.Wrap(err, "setup app error"))
+				klog.Exit(errors.Wrap(err, "setup app error"))
 			}
 
 			klog.Infof("env: %s", app.Env)
@@ -47,7 +47,7 @@ func NewServeCommand() *cobra.Command {
 
 			err = app.Serve()
 			if err != nil {
-				klog.Fatal(err)
+				klog.Exit(err)
 			}
 		},
 	}

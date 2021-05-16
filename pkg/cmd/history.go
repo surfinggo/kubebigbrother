@@ -34,13 +34,13 @@ func NewHistoryCommand() *cobra.Command {
 
 			db, err := gormdb.New(o.DatabaseOptions.DBDialect, o.DatabaseOptions.DBArgs)
 			if err != nil {
-				klog.Fatal(errors.Wrap(err, "connect to db error"))
+				klog.Exit(errors.Wrap(err, "connect to db error"))
 			}
 
 			store := event_store.New(db)
 			events, err := store.List()
 			if err != nil {
-				klog.Fatal(errors.Wrap(err, "list events error"))
+				klog.Exit(errors.Wrap(err, "list events error"))
 			}
 			if len(events) == 0 {
 				fmt.Println("nothing")

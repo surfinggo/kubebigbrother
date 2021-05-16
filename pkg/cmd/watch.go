@@ -47,7 +47,7 @@ func NewWatchCommand() *cobra.Command {
 
 			informersConfig, err := informers.LoadConfigFromFile(informersConfigPath)
 			if err != nil {
-				klog.Fatal(errors.Wrap(err, "informers.LoadConfigFromFile error"))
+				klog.Exit(errors.Wrap(err, "informers.LoadConfigFromFile error"))
 			}
 
 			w, err := watcher.Setup(watcher.Options{
@@ -55,13 +55,13 @@ func NewWatchCommand() *cobra.Command {
 				InformersConfig: informersConfig,
 			})
 			if err != nil {
-				klog.Fatal(errors.Wrap(err, "setup watcher error"))
+				klog.Exit(errors.Wrap(err, "setup watcher error"))
 			}
 
 			stopCh := signals.SetupSignalHandler()
 
 			if err := w.Start(stopCh); err != nil {
-				klog.Fatal(errors.Wrap(err, "start watcher error"))
+				klog.Exit(errors.Wrap(err, "start watcher error"))
 			}
 			defer w.Shutdown()
 

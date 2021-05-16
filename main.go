@@ -15,6 +15,6 @@ func main() {
 	command := cmd.NewKbbCommand()
 
 	if err := command.Execute(); err != nil {
-		klog.Fatal(err)
+		klog.Exit(err)
 	}
 }

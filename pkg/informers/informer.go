@@ -131,9 +131,18 @@ func Setup(options Options) (*InformerSet, error) {
 		factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(
 			dynamicClient, namespaceDefaultResyncPeriodFunc(), namespace.Namespace, nil)
 
+		duplicate := make(map[string]bool)
+
 		for j, resource := range namespace.Resources {
 			klog.Infof("[n%d,r%d] setup resource %d/%d: %s",
 				i+1, j+1, j+1, len(namespace.Resources), resource.Resource)
+
+			if _, ok := duplicate[resource.Resource]; ok {
+				return nil, errors.Errorf(
+					"duplicated resources in same namespace, .Namespaces[%d].Resources[%d]: %s",
+					i, j, resource.Resource)
+			}
+			duplicate[resource.Resource] = true
 
 			resyncPeriodFunc, err := resource.BuildResyncPeriodFuncWithDefault(
 				namespaceDefaultResyncPeriodFunc)
