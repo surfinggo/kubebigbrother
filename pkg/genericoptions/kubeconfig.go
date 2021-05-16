@@ -2,8 +2,9 @@ package genericoptions
 
 import (
 	"github.com/spf13/pflag"
-	"github.com/spongeprojects/kubebigbrother/pkg/helpers/homedir"
+	"github.com/spf13/viper"
 	"github.com/spongeprojects/magicconch"
+	"k8s.io/client-go/util/homedir"
 	"path"
 )
 
@@ -13,7 +14,7 @@ type KubeconfigOptions struct {
 
 func GetKubeconfigOptions() *KubeconfigOptions {
 	return &KubeconfigOptions{
-		Kubeconfig: magicconch.Getenv("KUBECONFIG", path.Join(homedir.HomeDir(), ".kube", "config")),
+		Kubeconfig: viper.GetString("kubeconfig"),
 	}
 }
 
