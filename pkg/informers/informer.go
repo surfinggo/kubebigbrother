@@ -166,7 +166,7 @@ func Setup(options Options) (*InformerSet, error) {
 			if workers < 1 {
 				workers = namespaceDefaultWorkers
 			}
-			klog.V(1).Infof("[n%d,r%d] final workers: %v", i, j, workers)
+			klog.V(1).Infof("[n%d,r%d] final workers: %d", i, j, workers)
 
 			rateLimiter := workqueue.DefaultControllerRateLimiter()
 			queue := workqueue.NewRateLimitingQueue(rateLimiter)
@@ -177,7 +177,7 @@ func Setup(options Options) (*InformerSet, error) {
 					"parse resource error, .Namespaces[%d].Resource[%d]: %s",
 					i, j, resourceConfig.Resource)
 			}
-
+			klog.V(1).Infof("[n%d,r%d] gvr: {%v}", i, j, gvr)
 			informer := factory.ForResource(gvr).Informer()
 			handlerFuncs := cache.ResourceEventHandlerFuncs{}
 			if resourceConfig.NoticeWhenAdded {
