@@ -71,13 +71,13 @@ func NewPersistentRESTClientGetter(kubeconfig string) (*PersistentRESTClientGett
 }
 
 type ResourceBuilder struct {
-	BaseBuilder *resource.Builder
+	ClientGetter resource.RESTClientGetter
 }
 
 // ParseGroupResource parses resource string as schema.GroupVersionResource,
-func (b *ResourceBuilder) ParseGroupResource(resource string) (schema.GroupVersionResource, error) {
-	r := b.BaseBuilder.Unstructured().SingleResourceType().
-		ResourceTypeOrNameArgs(true, resource).Do()
+func (b *ResourceBuilder) ParseGroupResource(resourceArg string) (schema.GroupVersionResource, error) {
+	r := resource.NewBuilder(b.ClientGetter).Unstructured().SingleResourceType().
+		ResourceTypeOrNameArgs(true, resourceArg).Do()
 
 	infos, err := r.Infos()
 	if err != nil {
@@ -91,7 +91,7 @@ func (b *ResourceBuilder) ParseGroupResource(resource string) (schema.GroupVersi
 
 func NewResourceBuilderFromClientGetter(clientGetter resource.RESTClientGetter) (*ResourceBuilder, error) {
 	return &ResourceBuilder{
-		BaseBuilder: resource.NewBuilder(clientGetter),
+		ClientGetter: clientGetter,
 	}, nil
 }
 
