@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
+	"github.com/spongeprojects/magicconch"
 	"k8s.io/klog/v2"
 	"os"
 )
@@ -37,7 +38,7 @@ func addKlogFlags(fs *pflag.FlagSet) {
 }
 
 func AddGlobalFlags(f *pflag.FlagSet) {
-	f.String("env", crumbs.EnvDebug, "environment")
+	f.String("env", magicconch.Getenv("ENV", crumbs.EnvDebug), "environment")
 	f.StringP("config", "c", crumbs.DefaultConfigFile, "path to config file (klog flags are not loaded from file, like -v)")
 	addKlogFlags(f)
 }
