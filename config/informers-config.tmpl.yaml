@@ -1,5 +1,5 @@
 namespaces:
 - namespace: default
   resources:
-  - resource: "configmaps.v1."
+  - resource: "configmaps"
     noticeWhenAdded: true

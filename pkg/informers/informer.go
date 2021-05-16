@@ -51,7 +51,9 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 		}
 	}
 
-	for _, resourceInformer := range set.ResourceInformers {
+	for i, resourceInformer := range set.ResourceInformers {
+		klog.Infof("starting resource informer %d/%d, workers: %d, resource: %s",
+			i+1, len(set.ResourceInformers), resourceInformer.Workers, resourceInformer.Resource)
 		for i := 0; i < resourceInformer.Workers; i++ {
 			go wait.Until(resourceInformer.RunWorker, time.Second, stopCh)
 		}
@@ -181,6 +183,14 @@ func Setup(options Options) (*InformerSet, error) {
 
 			informer := factory.ForResource(gvr).Informer()
 			handlerFuncs := cache.ResourceEventHandlerFuncs{}
+			if !resourceConfig.NoticeWhenAdded &&
+				!resourceConfig.NoticeWhenDeleted &&
+				!resourceConfig.NoticeWhenUpdated {
+				// for some reason, informer won't start if they are all false,
+				// maybe someday someone can clarify why this happen.
+				return nil, errors.New(
+					"NoticeWhenAdded, NoticeWhenDeleted and NoticeWhenUpdated cannot be false simultaneously")
+			}
 			if resourceConfig.NoticeWhenAdded {
 				klog.V(1).Infof("[n%d,r%d] set AddFunc", i, j)
 				handlerFuncs.AddFunc = func(obj interface{}) {

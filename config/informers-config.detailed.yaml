@@ -1,0 +1,62 @@
+namespaces:
+- namespace: "tmp"
+  resources:
+  - resource: "configmaps.v1."
+    noticeWhenAdded: true
+    noticeWhenDeleted: true
+    noticeWhenUpdated: true
+    updateOn:
+    - ".data"
+    channelNames:
+    - print-to-stdout
+    resyncPeriod: 12h
+    workers: 3
+  defaultChannelNames:
+  - print-to-stdout
+  defaultWorkers: 3
+  minResyncPeriod: 12h
+- resources: # all namespaces demonstration (namespace="")
+  - resource: "secrets.v1."
+    noticeWhenAdded: true
+    noticeWhenDeleted: true
+- resources: # resource name demonstration 1
+  - resource: "cm"
+  - resource: "deploy"
+  channelNames:
+  - non-exist
+- resources: # resource name demonstration 2
+  - resource: "configmaps"
+  - resource: "deployments"
+  channelNames:
+  - non-exist
+- resources: # resource name demonstration 3
+  - resource: "configmaps."
+  - resource: "deployments.apps"
+  channelNames:
+  - non-exist
+- resources: # resource name demonstration 4
+  - resource: "configmaps.v1."
+  - resource: "deployments.v1.apps"
+  channelNames:
+  - non-exist
+channels:
+  callback-demo:
+    type: callback
+    callback:
+      url: "http://localhost:8984/callback"
+  group-demo:
+    type: group
+    group:
+    - print
+  print-to-stdout:
+    type: print
+    print:
+      writer: stdout
+  telegram-demo:
+    type: telegram
+    telegram:
+      token: "xxx"
+defaultChannelNames:
+- print-to-stdout
+defaultWorkers: 3
+minResyncPeriod: 12h
