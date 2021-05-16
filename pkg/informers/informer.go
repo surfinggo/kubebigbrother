@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/cli-runtime/pkg/resource"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
@@ -32,7 +31,7 @@ type Interface interface {
 }
 
 type InformerSet struct {
-	RESTClientGetter  resource.RESTClientGetter
+	ResourceBuilder   *ResourceBuilder
 	Factories         []dynamicinformer.DynamicSharedInformerFactory
 	ResourceInformers []Resource
 }
@@ -74,11 +73,11 @@ func Setup(options Options) (*InformerSet, error) {
 
 	informerSet := &InformerSet{}
 
-	clientGetter, err := NewPersistentRESTClientGetter(options.KubeConfig)
+	resourceBuilder, err := NewResourceBuilder(options.KubeConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "NewPersistentRESTClientGetter error")
+		return nil, errors.Wrap(err, "NewResourceBuilder error")
 	}
-	informerSet.RESTClientGetter = clientGetter
+	informerSet.ResourceBuilder = resourceBuilder
 
 	restConfig, err := clientcmd.BuildConfigFromFlags("", options.KubeConfig)
 	if err != nil {
@@ -172,24 +171,13 @@ func Setup(options Options) (*InformerSet, error) {
 			rateLimiter := workqueue.DefaultControllerRateLimiter()
 			queue := workqueue.NewRateLimitingQueue(rateLimiter)
 
-			r := resource.NewBuilder(informerSet.RESTClientGetter).
-				Unstructured().
-				SingleResourceType().
-				ResourceTypeOrNameArgs(true, resourceConfig.Resource).
-				Do()
-			infos, err := r.Infos()
+			gvr, err := informerSet.ResourceBuilder.ParseGroupResource(resourceConfig.Resource)
 			if err != nil {
 				return nil, errors.Wrapf(err,
 					"parse resource error, .Namespaces[%d].Resource[%d]: %s",
 					i, j, resourceConfig.Resource)
 			}
-			if len(infos) != 1 {
-				return nil, errors.Errorf(
-					"parse resource error, .Namespaces[%d].Resource[%d]: %s",
-					i, j, resourceConfig.Resource)
-			}
-			theInfo := infos[0]
-			informer := factory.ForResource(theInfo.Mapping.Resource).Informer()
+			informer := factory.ForResource(gvr).Informer()
 			handlerFuncs := cache.ResourceEventHandlerFuncs{}
 			if resourceConfig.NoticeWhenAdded {
 				klog.V(1).Infof("[n%d,r%d] set AddFunc", i+1, j+1)

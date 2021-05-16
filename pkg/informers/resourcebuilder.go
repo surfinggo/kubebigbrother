@@ -4,6 +4,8 @@ import (
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/cli-runtime/pkg/resource"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/disk"
 	"k8s.io/client-go/rest"
@@ -66,4 +68,37 @@ func NewPersistentRESTClientGetter(kubeconfig string) (*PersistentRESTClientGett
 		CachedDiscoveryInterface: cachedDiscoveryClient,
 		RESTMapper:               expander,
 	}, nil
+}
+
+type ResourceBuilder struct {
+	BaseBuilder *resource.Builder
+}
+
+// ParseGroupResource parses resource string as schema.GroupVersionResource,
+func (b *ResourceBuilder) ParseGroupResource(resource string) (schema.GroupVersionResource, error) {
+	r := b.BaseBuilder.Unstructured().SingleResourceType().
+		ResourceTypeOrNameArgs(true, resource).Do()
+
+	infos, err := r.Infos()
+	if err != nil {
+		return schema.GroupVersionResource{}, err
+	}
+	if len(infos) != 1 {
+		return schema.GroupVersionResource{}, errors.New("multiple info returned, expect 1")
+	}
+	return infos[0].Mapping.Resource, nil
+}
+
+func NewResourceBuilderFromClientGetter(clientGetter resource.RESTClientGetter) (*ResourceBuilder, error) {
+	return &ResourceBuilder{
+		BaseBuilder: resource.NewBuilder(clientGetter),
+	}, nil
+}
+
+func NewResourceBuilder(kubeconfig string) (*ResourceBuilder, error) {
+	clientGetter, err := NewPersistentRESTClientGetter(kubeconfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "NewPersistentRESTClientGetter error")
+	}
+	return NewResourceBuilderFromClientGetter(clientGetter)
 }
