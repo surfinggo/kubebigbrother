@@ -32,6 +32,7 @@ func NewServeCommand() *cobra.Command {
 		Short: "Run the server to serve backend APIs",
 		Run: func(cmd *cobra.Command, args []string) {
 			o := GetServeOptions()
+
 			app, err := server.SetupApp(&server.Options{
 				Version: Version,
 				Env:     o.GlobalOptions.Env,
@@ -40,8 +41,10 @@ func NewServeCommand() *cobra.Command {
 			if err != nil {
 				klog.Fatal(errors.Wrap(err, "setup app error"))
 			}
+
 			klog.Infof("env: %s", app.Env)
 			klog.Infof("listening on: %s", app.Addr)
+
 			err = app.Serve()
 			if err != nil {
 				klog.Fatal(err)

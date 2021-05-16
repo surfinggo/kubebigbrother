@@ -49,6 +49,7 @@ func NewWatchCommand() *cobra.Command {
 			if err != nil {
 				klog.Fatal(errors.Wrap(err, "informers.LoadConfigFromFile error"))
 			}
+
 			w, err := watcher.Setup(watcher.Options{
 				KubeConfig:      o.KubeconfigOptions.Kubeconfig,
 				InformersConfig: informersConfig,

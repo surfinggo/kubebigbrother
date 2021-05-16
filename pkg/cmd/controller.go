@@ -51,6 +51,7 @@ func NewControllerCommand() *cobra.Command {
 			if err != nil {
 				klog.Fatal(errors.Wrap(err, "informers.LoadConfigFromFile error"))
 			}
+
 			c, err := controller.Setup(controller.Options{
 				DBDialect:       o.DatabaseOptions.DBDialect,
 				DBArgs:          o.DatabaseOptions.DBDialect,

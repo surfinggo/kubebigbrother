@@ -31,10 +31,12 @@ func NewHistoryCommand() *cobra.Command {
 		Short: "Query event history",
 		Run: func(cmd *cobra.Command, args []string) {
 			o := GetHistoryOptions()
+
 			db, err := gormdb.New(o.DatabaseOptions.DBDialect, o.DatabaseOptions.DBArgs)
 			if err != nil {
 				klog.Fatal(errors.Wrap(err, "connect to db error"))
 			}
+
 			store := event_store.New(db)
 			events, err := store.List()
 			if err != nil {
