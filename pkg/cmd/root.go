@@ -5,8 +5,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
-	"github.com/spongeprojects/kubebigbrother/pkg/fileorcreate"
 	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
+	"github.com/spongeprojects/kubebigbrother/staging/fileorcreate"
 	"github.com/spongeprojects/magicconch"
 	"k8s.io/klog/v2"
 )
