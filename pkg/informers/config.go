@@ -73,11 +73,11 @@ type NamespaceConfig struct {
 	// Resources is the resources you want to watch
 	Resources []ResourceConfig `json:"resources" yaml:"resources"`
 
-	// DefaultWorkers is the default number of workers in this namespace
-	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
-
 	// DefaultChannelNames defines default channels in this namespace
 	DefaultChannelNames []ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
+
+	// DefaultWorkers is the default number of workers in this namespace
+	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
 
 	// MinResyncPeriod is the resync period in reflectors in this namespace;
 	// actual resync period will be random between MinResyncPeriod and 2*minResyncPeriod.
@@ -106,11 +106,11 @@ type Config struct {
 	// Channels defines channels that receive notifications
 	Channels map[ChannelName]ChannelConfig `json:"channels" yaml:"channels"`
 
-	// DefaultWorkers is the default number of workers
-	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
-
 	// DefaultChannelNames defines default channels
 	DefaultChannelNames []ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
+
+	// DefaultWorkers is the default number of workers
+	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
 
 	// MinResyncPeriod is the resync period in reflectors;
 	// actual resync period will be random between MinResyncPeriod and 2*minResyncPeriod.
