@@ -62,6 +62,7 @@ func NewWatchCommand() *cobra.Command {
 			if err := w.Start(stopCh); err != nil {
 				klog.Fatal(errors.Wrap(err, "start watcher error"))
 			}
+			defer w.Shutdown()
 
 			<-stopCh
 		},

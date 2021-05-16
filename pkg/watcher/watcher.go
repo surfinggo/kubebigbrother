@@ -19,6 +19,10 @@ func (w *Watcher) Start(stopCh <-chan struct{}) error {
 	return w.Informers.Start(stopCh)
 }
 
+func (w *Watcher) Shutdown() {
+	w.Informers.Shutdown()
+}
+
 func Setup(options Options) (*Watcher, error) {
 	watcher := &Watcher{}
 

@@ -66,6 +66,7 @@ func NewControllerCommand() *cobra.Command {
 			if err := c.Start(stopCh); err != nil {
 				klog.Fatal(errors.Wrap(err, "start controller error"))
 			}
+			defer c.Shutdown()
 
 			<-stopCh
 		},

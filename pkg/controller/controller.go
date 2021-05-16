@@ -19,8 +19,12 @@ type Controller struct {
 	Informers  informers.Interface
 }
 
-func (r *Controller) Start(stopCh <-chan struct{}) error {
-	return r.Informers.Start(stopCh)
+func (c *Controller) Start(stopCh <-chan struct{}) error {
+	return c.Informers.Start(stopCh)
+}
+
+func (c *Controller) Shutdown() {
+	c.Informers.Shutdown()
 }
 
 func Setup(options Options) (*Controller, error) {

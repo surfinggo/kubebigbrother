@@ -23,7 +23,12 @@ type Options struct {
 }
 
 type Interface interface {
+	// Start starts all informers registered,
+	// Start is non-blocking, you should always call Shutdown before exit.
 	Start(stopCh <-chan struct{}) error
+
+	// Shutdown should be called before exit.
+	Shutdown()
 }
 
 type InformerSet struct {
@@ -32,12 +37,6 @@ type InformerSet struct {
 }
 
 func (set *InformerSet) Start(stopCh <-chan struct{}) error {
-	defer func() {
-		for _, resource := range set.Resources {
-			resource.Queue.ShutDown()
-		}
-	}()
-
 	for i, factory := range set.Factories {
 		klog.Infof("starting factory %d/%d", i+1, len(set.Factories))
 		go factory.Start(stopCh)
@@ -61,6 +60,12 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 	<-stopCh
 
 	return nil
+}
+
+func (set *InformerSet) Shutdown() {
+	for _, resource := range set.Resources {
+		resource.Queue.ShutDown()
+	}
 }
 
 func Setup(options Options) (*InformerSet, error) {
