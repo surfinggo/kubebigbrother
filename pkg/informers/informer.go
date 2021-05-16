@@ -143,12 +143,20 @@ func Setup(options Options) (*InformerSet, error) {
 			klog.Infof("[n%d,r%d] setup resource %d/%d: %s",
 				i, j, j+1, len(namespaceConfig.Resources), resourceConfig.Resource)
 
-			if _, ok := duplicate[resourceConfig.Resource]; ok {
+			gvr, err := informerSet.ResourceBuilder.ParseGroupResource(resourceConfig.Resource)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"parse resource error, .Namespaces[%d].Resource[%d]: %s",
+					i, j, resourceConfig.Resource)
+			}
+			klog.V(1).Infof("[n%d,r%d] gvr: {%v}", i, j, gvr)
+
+			if _, ok := duplicate[gvr.String()]; ok {
 				return nil, errors.Errorf(
 					"duplicated resources in same namespace, .Namespaces[%d].Resources[%d]: %s",
 					i, j, resourceConfig.Resource)
 			}
-			duplicate[resourceConfig.Resource] = true
+			duplicate[gvr.String()] = true
 
 			resyncPeriodFunc, err := resourceConfig.BuildResyncPeriodFuncWithDefault(
 				namespaceDefaultResyncPeriodFunc)
@@ -171,13 +179,6 @@ func Setup(options Options) (*InformerSet, error) {
 			rateLimiter := workqueue.DefaultControllerRateLimiter()
 			queue := workqueue.NewRateLimitingQueue(rateLimiter)
 
-			gvr, err := informerSet.ResourceBuilder.ParseGroupResource(resourceConfig.Resource)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"parse resource error, .Namespaces[%d].Resource[%d]: %s",
-					i, j, resourceConfig.Resource)
-			}
-			klog.V(1).Infof("[n%d,r%d] gvr: {%v}", i, j, gvr)
 			informer := factory.ForResource(gvr).Informer()
 			handlerFuncs := cache.ResourceEventHandlerFuncs{}
 			if resourceConfig.NoticeWhenAdded {
