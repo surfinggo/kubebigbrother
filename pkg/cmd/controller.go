@@ -8,11 +8,10 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
+	"github.com/spongeprojects/kubebigbrother/pkg/signals"
 	"github.com/spongeprojects/kubebigbrother/staging/fileorcreate"
 	"github.com/spongeprojects/magicconch"
 	"k8s.io/klog/v2"
-	"os"
-	"os/signal"
 )
 
 type ControllerOptions struct {
@@ -62,18 +61,7 @@ func NewControllerCommand() *cobra.Command {
 				klog.Fatal(errors.Wrap(err, "setup controller error"))
 			}
 
-			stopCh := make(chan struct{})
-
-			// Ctrl+C
-			interrupted := make(chan os.Signal)
-			signal.Notify(interrupted, os.Interrupt)
-
-			go func() {
-				<-interrupted
-				close(stopCh)
-				<-interrupted // exit when interrupted again
-				os.Exit(1)
-			}()
+			stopCh := signals.SetupSignalHandler()
 
 			if err := c.Start(stopCh); err != nil {
 				klog.Fatal(errors.Wrap(err, "start controller error"))

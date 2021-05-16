@@ -7,12 +7,11 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
+	"github.com/spongeprojects/kubebigbrother/pkg/signals"
 	"github.com/spongeprojects/kubebigbrother/pkg/watcher"
 	"github.com/spongeprojects/kubebigbrother/staging/fileorcreate"
 	"github.com/spongeprojects/magicconch"
 	"k8s.io/klog/v2"
-	"os"
-	"os/signal"
 )
 
 type WatchOptions struct {
@@ -58,18 +57,7 @@ func NewWatchCommand() *cobra.Command {
 				klog.Fatal(errors.Wrap(err, "setup watcher error"))
 			}
 
-			stopCh := make(chan struct{})
-
-			// Ctrl+C
-			interrupted := make(chan os.Signal)
-			signal.Notify(interrupted, os.Interrupt)
-
-			go func() {
-				<-interrupted
-				close(stopCh)
-				<-interrupted // exit when interrupted again
-				os.Exit(1)
-			}()
+			stopCh := signals.SetupSignalHandler()
 
 			if err := w.Start(stopCh); err != nil {
 				klog.Fatal(errors.Wrap(err, "start watcher error"))
