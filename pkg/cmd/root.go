@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"github.com/spongeprojects/kubebigbrother/pkg/fileorcreate"
 	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
 	"github.com/spongeprojects/magicconch"
@@ -11,18 +12,6 @@ import (
 )
 
 var Version = "unknown"
-
-const (
-	EnvDebug = "debug"
-
-	DefaultConfigFile = "config/config.local.yaml"
-
-	ConfigFileTemplate = "config/config.tmpl.yaml"
-
-	DefaultInformersConfigFile = "config/informers-config.local.yaml"
-
-	InformersConfigFileTemplate = "config/informers-config.tmpl.yaml"
-)
 
 func NewKbbCommand() *cobra.Command {
 	var cmd = &cobra.Command{
@@ -37,7 +26,7 @@ func NewKbbCommand() *cobra.Command {
 	)
 
 	f := cmd.PersistentFlags()
-	genericoptions.AddGlobalFlags(f, EnvDebug, DefaultConfigFile)
+	genericoptions.AddGlobalFlags(f)
 	magicconch.Must(viper.BindPFlags(f))
 
 	cobra.OnInitialize(initConfig)
@@ -52,8 +41,8 @@ func initConfig() {
 
 	globalOptions := genericoptions.GetGlobalOptions()
 
-	if globalOptions.Env == EnvDebug {
-		err := fileorcreate.Ensure(globalOptions.Config, ConfigFileTemplate)
+	if globalOptions.Env == crumbs.EnvDebug {
+		err := fileorcreate.Ensure(globalOptions.Config, crumbs.ConfigFileTemplate)
 		if err != nil {
 			klog.Error(errors.Wrap(err, "apply config template error"))
 		}

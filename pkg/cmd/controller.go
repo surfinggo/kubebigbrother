@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/spongeprojects/kubebigbrother/pkg/controller"
+	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"github.com/spongeprojects/kubebigbrother/pkg/fileorcreate"
 	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
@@ -37,10 +38,14 @@ func NewControllerCommand() *cobra.Command {
 		Short: "Run controller, watch events and persistent into database (only one instance should be running)",
 		Run: func(cmd *cobra.Command, args []string) {
 			o := GetControllerOptions()
+
 			informersConfigPath := o.InformersOptions.InformersConfig
-			err := fileorcreate.Ensure(informersConfigPath, InformersConfigFileTemplate)
-			if err != nil {
-				klog.Error(errors.Wrap(err, "apply informers config template error"))
+
+			if o.GlobalOptions.IsDebugging() {
+				err := fileorcreate.Ensure(informersConfigPath, crumbs.InformersConfigFileTemplate)
+				if err != nil {
+					klog.Error(errors.Wrap(err, "apply informers config template error"))
+				}
 			}
 
 			informersConfig, err := informers.LoadConfigFromFile(informersConfigPath)
@@ -80,7 +85,7 @@ func NewControllerCommand() *cobra.Command {
 
 	f := cmd.PersistentFlags()
 	genericoptions.AddDatabaseFlags(f)
-	genericoptions.AddInformersFlags(f, DefaultInformersConfigFile)
+	genericoptions.AddInformersFlags(f)
 	genericoptions.AddKubeconfigFlags(f)
 	magicconch.Must(viper.BindPFlags(f))
 

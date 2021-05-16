@@ -3,6 +3,7 @@ package genericoptions
 import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 )
 
 type InformersOptions struct {
@@ -15,6 +16,6 @@ func GetInformersOptions() *InformersOptions {
 	}
 }
 
-func AddInformersFlags(fs *pflag.FlagSet, defaultInformersConfig string) {
-	fs.String("informers-config", defaultInformersConfig, "path to informers config file")
+func AddInformersFlags(fs *pflag.FlagSet) {
+	fs.String("informers-config", crumbs.DefaultInformersConfigFile, "path to informers config file")
 }

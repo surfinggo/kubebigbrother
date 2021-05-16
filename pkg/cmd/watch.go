@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"github.com/spongeprojects/kubebigbrother/pkg/fileorcreate"
 	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
@@ -16,15 +17,13 @@ import (
 
 type WatchOptions struct {
 	GlobalOptions     *genericoptions.GlobalOptions
-	DatabaseOptions   *genericoptions.DatabaseOptions
 	InformersOptions  *genericoptions.InformersOptions
 	KubeconfigOptions *genericoptions.KubeconfigOptions
 }
 
-func NewWatchOptions() *WatchOptions {
+func GetWatchOptions() *WatchOptions {
 	o := &WatchOptions{
 		GlobalOptions:     genericoptions.GetGlobalOptions(),
-		DatabaseOptions:   genericoptions.GetDatabaseOptions(),
 		InformersOptions:  genericoptions.GetInformersOptions(),
 		KubeconfigOptions: genericoptions.GetKubeconfigOptions(),
 	}
@@ -32,16 +31,19 @@ func NewWatchOptions() *WatchOptions {
 }
 
 func NewWatchCommand() *cobra.Command {
-	o := NewWatchOptions()
-
 	cmd := &cobra.Command{
 		Use:   "watch",
 		Short: "Run watch to watch specific resource's event",
 		Run: func(cmd *cobra.Command, args []string) {
+			o := GetWatchOptions()
+
 			informersConfigPath := o.InformersOptions.InformersConfig
-			err := fileorcreate.Ensure(informersConfigPath, InformersConfigFileTemplate)
-			if err != nil {
-				klog.Error(errors.Wrap(err, "apply informers config template error"))
+
+			if o.GlobalOptions.IsDebugging() {
+				err := fileorcreate.Ensure(informersConfigPath, crumbs.InformersConfigFileTemplate)
+				if err != nil {
+					klog.Error(errors.Wrap(err, "apply informers config template error"))
+				}
 			}
 
 			informersConfig, err := informers.LoadConfigFromFile(informersConfigPath)
@@ -78,8 +80,7 @@ func NewWatchCommand() *cobra.Command {
 	}
 
 	f := cmd.PersistentFlags()
-	genericoptions.AddDatabaseFlags(f)
-	genericoptions.AddInformersFlags(f, DefaultInformersConfigFile)
+	genericoptions.AddInformersFlags(f)
 	genericoptions.AddKubeconfigFlags(f)
 	magicconch.Must(viper.BindPFlags(f))
 

@@ -17,7 +17,7 @@ type ServeOptions struct {
 	Addr string
 }
 
-func NewServeOptions() *ServeOptions {
+func GetServeOptions() *ServeOptions {
 	o := &ServeOptions{
 		GlobalOptions:   genericoptions.GetGlobalOptions(),
 		DatabaseOptions: genericoptions.GetDatabaseOptions(),
@@ -31,7 +31,7 @@ func NewServeCommand() *cobra.Command {
 		Use:   "serve",
 		Short: "Run the server to serve backend APIs",
 		Run: func(cmd *cobra.Command, args []string) {
-			o := NewServeOptions()
+			o := GetServeOptions()
 			app, err := server.SetupApp(&server.Options{
 				Version: Version,
 				Env:     o.GlobalOptions.Env,

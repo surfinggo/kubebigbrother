@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"k8s.io/klog/v2"
 	"os"
 )
@@ -11,6 +12,10 @@ import (
 type GlobalOptions struct {
 	Env    string
 	Config string
+}
+
+func (o GlobalOptions) IsDebugging() bool {
+	return o.Env == crumbs.EnvDebug
 }
 
 func GetGlobalOptions() *GlobalOptions {
@@ -31,8 +36,8 @@ func addKlogFlags(fs *pflag.FlagSet) {
 	})
 }
 
-func AddGlobalFlags(f *pflag.FlagSet, defaultEnv, defaultConfigFile string) {
-	f.String("env", defaultEnv, "environment")
-	f.StringP("config", "c", defaultConfigFile, "path to config file (klog flags are not loaded from file, like -v)")
+func AddGlobalFlags(f *pflag.FlagSet) {
+	f.String("env", crumbs.EnvDebug, "environment")
+	f.StringP("config", "c", crumbs.DefaultConfigFile, "path to config file (klog flags are not loaded from file, like -v)")
 	addKlogFlags(f)
 }
