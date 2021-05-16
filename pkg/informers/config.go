@@ -15,9 +15,6 @@ type ResyncPeriodFunc func() time.Duration
 
 // ChannelConfig defines a channel to receive notifications
 type ChannelConfig struct {
-	// Name is the name of the channel
-	Name ChannelName `json:"name" yaml:"name"`
-
 	// Type is the type of the channel
 	Type ChannelType `json:"type" yaml:"type"`
 

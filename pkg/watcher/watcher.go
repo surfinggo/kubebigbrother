@@ -3,7 +3,10 @@ package watcher
 import (
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
-	"os"
+)
+
+const (
+	channelNamePrint = informers.ChannelName("print")
 )
 
 type Options struct {
@@ -28,19 +31,20 @@ func Setup(options Options) (*Watcher, error) {
 
 	config := options.InformersConfig
 
-	channelNamePrint := informers.ChannelName("print")
-
+	// watcher only prints event to stdout, all user defined channels will be
+	// dropped.
 	adapted := &informers.Config{
 		Channels: map[informers.ChannelName]informers.ChannelConfig{
 			channelNamePrint: {
-				Name: channelNamePrint,
 				Type: informers.ChannelTypePrint,
 				Print: &informers.ChannelPrintConfig{
-					Out: os.Stdout,
+					Writer: informers.PrintWriterStdout,
 				},
 			},
 		},
-		MinResyncPeriod: config.MinResyncPeriod,
+		DefaultWorkers:      config.DefaultWorkers,
+		DefaultChannelNames: config.DefaultChannelNames,
+		MinResyncPeriod:     config.MinResyncPeriod,
 	}
 	for _, namespace := range config.Namespaces {
 		var resources []informers.ResourceConfig
@@ -52,11 +56,16 @@ func Setup(options Options) (*Watcher, error) {
 				NoticeWhenUpdated: resource.NoticeWhenUpdated,
 				UpdateOn:          resource.UpdateOn,
 				ChannelNames:      []informers.ChannelName{channelNamePrint},
+				ResyncPeriod:      resource.ResyncPeriod,
+				Workers:           resource.Workers,
 			})
 		}
 		adapted.Namespaces = append(adapted.Namespaces, informers.NamespaceConfig{
-			Namespace: namespace.Namespace,
-			Resources: resources,
+			Namespace:           namespace.Namespace,
+			Resources:           resources,
+			DefaultWorkers:      namespace.DefaultWorkers,
+			DefaultChannelNames: namespace.DefaultChannelNames,
+			MinResyncPeriod:     namespace.MinResyncPeriod,
 		})
 	}
 
