@@ -7,7 +7,7 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
-	"github.com/spongeprojects/kubebigbrother/pkg/signals"
+	"github.com/spongeprojects/kubebigbrother/pkg/utils/signals"
 	"github.com/spongeprojects/kubebigbrother/pkg/watcher"
 	"github.com/spongeprojects/kubebigbrother/staging/fileorcreate"
 	"github.com/spongeprojects/magicconch"
