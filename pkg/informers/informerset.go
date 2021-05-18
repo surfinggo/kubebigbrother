@@ -33,7 +33,7 @@ type Interface interface {
 }
 
 type InformerSet struct {
-	ResourceBuilder   *resourcebuilder.ResourceBuilder
+	ResourceBuilder   resourcebuilder.Interface
 	Factories         []dynamicinformer.DynamicSharedInformerFactory
 	ResourceInformers []InformerInterface
 }
