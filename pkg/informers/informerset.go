@@ -34,7 +34,7 @@ type Interface interface {
 type InformerSet struct {
 	ResourceBuilder   *ResourceBuilder
 	Factories         []dynamicinformer.DynamicSharedInformerFactory
-	ResourceInformers []Resource
+	ResourceInformers []InformerInterface
 }
 
 func (set *InformerSet) Start(stopCh <-chan struct{}) error {
@@ -54,8 +54,8 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 
 	for i, resourceInformer := range set.ResourceInformers {
 		klog.Infof("starting resource informer %d/%d, workers: %d, resource: %s",
-			i+1, len(set.ResourceInformers), resourceInformer.Workers, resourceInformer.Resource)
-		for i := 0; i < resourceInformer.Workers; i++ {
+			i+1, len(set.ResourceInformers), resourceInformer.GetWorkers(), resourceInformer.GetResource())
+		for i := 0; i < resourceInformer.GetWorkers(); i++ {
 			go wait.Until(resourceInformer.RunWorker, time.Second, stopCh)
 		}
 	}
@@ -67,7 +67,7 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 
 func (set *InformerSet) Shutdown() {
 	for _, resourceInformer := range set.ResourceInformers {
-		resourceInformer.Queue.ShutDown()
+		resourceInformer.ShutDown()
 	}
 }
 
@@ -149,7 +149,7 @@ func Setup(options Options) (*InformerSet, error) {
 			gvr, err := informerSet.ResourceBuilder.ParseGroupResource(resourceConfig.Resource)
 			if err != nil {
 				return nil, errors.Wrapf(err,
-					"parse resource error, .Namespaces[%d].Resource[%d]: %s",
+					"parse resource error, .Namespaces[%d].Informer[%d]: %s",
 					i, j, resourceConfig.Resource)
 			}
 			klog.V(1).Infof("[n%d,r%d] gvr: {%v}", i, j, gvr)
@@ -244,7 +244,7 @@ func Setup(options Options) (*InformerSet, error) {
 			}
 			informer.AddEventHandlerWithResyncPeriod(handlerFuncs, resyncPeriodFunc())
 
-			informerSet.ResourceInformers = append(informerSet.ResourceInformers, Resource{
+			informerSet.ResourceInformers = append(informerSet.ResourceInformers, &Informer{
 				ID:              magicconch.StringRand(8),
 				Resource:        resourceConfig.Resource,
 				UpdateOn:        resourceConfig.UpdateOn,

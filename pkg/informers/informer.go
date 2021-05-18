@@ -9,7 +9,14 @@ import (
 	"sync"
 )
 
-type Resource struct {
+type InformerInterface interface {
+	RunWorker()
+	GetWorkers() int
+	GetResource() string
+	ShutDown()
+}
+
+type Informer struct {
 	// ID is an unique string to identify instances
 	ID string
 
@@ -31,40 +38,40 @@ type Resource struct {
 	Workers int
 }
 
-func (r *Resource) RunWorker() {
-	for r.processNextItem() {
+func (i *Informer) RunWorker() {
+	for i.processNextItem() {
 	}
 }
 
 // processNextItem waits and processes items in the queue
-func (r *Resource) processNextItem() bool {
+func (i *Informer) processNextItem() bool {
 	// block until an item arrives or queue shutdown
-	obj, shutdown := r.Queue.Get()
+	obj, shutdown := i.Queue.Get()
 	if shutdown {
 		return false
 	}
 	event := obj.(*Event)
 	klog.V(5).Infof("a new item from queue: [%s] %s", event.Type, NamespaceKey(event.Obj))
 
-	r.processingItems.Add(1)
+	i.processingItems.Add(1)
 
 	// we need to mark item as completed whether success or fail
-	defer r.Queue.Done(event)
+	defer i.Queue.Done(event)
 
-	result := r.processItem(event)
-	r.handleErr(event, result)
+	result := i.processItem(event)
+	i.handleErr(event, result)
 
-	r.processingItems.Done()
+	i.processingItems.Done()
 
 	return true
 }
 
 // processItem process an item synchronously
-func (r *Resource) processItem(event *Event) error {
+func (i *Informer) processItem(event *Event) error {
 	var channelNamesLeft []ChannelName
 	namedErrors := make(map[ChannelName]error)
 	for _, channelName := range event.ChannelNames {
-		if channel, ok := r.ChannelMap[channelName]; ok {
+		if channel, ok := i.ChannelMap[channelName]; ok {
 			if err := channel.Handle(event); err != nil {
 				channelNamesLeft = append(channelNamesLeft, channelName)
 				namedErrors[channelName] = err
@@ -86,23 +93,35 @@ func (r *Resource) processItem(event *Event) error {
 }
 
 // handleErr checks the result, schedules retry if needed
-func (r *Resource) handleErr(event *Event, result error) {
+func (i *Informer) handleErr(event *Event, result error) {
 	if result == nil {
 		klog.V(5).Infof("processed: %s", NamespaceKey(event.Obj))
 		// clear retry counter after success
-		r.Queue.Forget(event)
+		i.Queue.Forget(event)
 		return
 	}
 
-	if r.Queue.NumRequeues(event) < 3 {
+	if i.Queue.NumRequeues(event) < 3 {
 		klog.Warningf("error processing %s: %v", event, result)
 		// retrying
-		r.Queue.AddRateLimited(event)
+		i.Queue.AddRateLimited(event)
 		return
 	}
 
 	klog.Error(fmt.Errorf("max retries exceeded, "+
 		"dropping item %s out of the queue: %v", event, result))
 	// max retries exceeded, forget it
-	r.Queue.Forget(event)
+	i.Queue.Forget(event)
+}
+
+func (i *Informer) GetWorkers() int {
+	return i.Workers
+}
+
+func (i *Informer) GetResource() string {
+	return i.Resource
+}
+
+func (i *Informer) ShutDown() {
+	i.Queue.ShutDown()
 }
