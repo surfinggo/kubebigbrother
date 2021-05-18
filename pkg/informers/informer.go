@@ -3,6 +3,7 @@ package informers
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spongeprojects/magicconch"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
@@ -244,6 +245,7 @@ func Setup(options Options) (*InformerSet, error) {
 			informer.AddEventHandlerWithResyncPeriod(handlerFuncs, resyncPeriodFunc())
 
 			informerSet.ResourceInformers = append(informerSet.ResourceInformers, Resource{
+				ID:              magicconch.StringRand(8),
 				Resource:        resourceConfig.Resource,
 				UpdateOn:        resourceConfig.UpdateOn,
 				ChannelMap:      channelMap,

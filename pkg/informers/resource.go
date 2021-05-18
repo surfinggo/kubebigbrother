@@ -10,6 +10,9 @@ import (
 )
 
 type Resource struct {
+	// ID is an unique string to identify instances
+	ID string
+
 	// Resource is the resource to watch, e.g. "deployments.v1.apps"
 	Resource string
 
