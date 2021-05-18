@@ -3,6 +3,7 @@ package informers
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spongeprojects/kubebigbrother/pkg/utils/resourcebuilder"
 	"github.com/spongeprojects/magicconch"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -32,7 +33,7 @@ type Interface interface {
 }
 
 type InformerSet struct {
-	ResourceBuilder   *ResourceBuilder
+	ResourceBuilder   *resourcebuilder.ResourceBuilder
 	Factories         []dynamicinformer.DynamicSharedInformerFactory
 	ResourceInformers []InformerInterface
 }
@@ -76,9 +77,9 @@ func Setup(options Options) (*InformerSet, error) {
 
 	informerSet := &InformerSet{}
 
-	resourceBuilder, err := NewResourceBuilder(options.KubeConfig)
+	resourceBuilder, err := resourcebuilder.New(options.KubeConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "NewResourceBuilder error")
+		return nil, errors.Wrap(err, "resourcebuilder.New error")
 	}
 	informerSet.ResourceBuilder = resourceBuilder
 

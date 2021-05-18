@@ -1,4 +1,4 @@
-package informers
+package resourcebuilder
 
 import (
 	"github.com/pkg/errors"
@@ -89,16 +89,16 @@ func (b *ResourceBuilder) ParseGroupResource(resourceArg string) (schema.GroupVe
 	return infos[0].Mapping.Resource, nil
 }
 
-func NewResourceBuilderFromClientGetter(clientGetter resource.RESTClientGetter) (*ResourceBuilder, error) {
+func NewFromClientGetter(clientGetter resource.RESTClientGetter) (*ResourceBuilder, error) {
 	return &ResourceBuilder{
 		ClientGetter: clientGetter,
 	}, nil
 }
 
-func NewResourceBuilder(kubeconfig string) (*ResourceBuilder, error) {
+func New(kubeconfig string) (*ResourceBuilder, error) {
 	clientGetter, err := NewPersistentRESTClientGetter(kubeconfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "NewPersistentRESTClientGetter error")
 	}
-	return NewResourceBuilderFromClientGetter(clientGetter)
+	return NewFromClientGetter(clientGetter)
 }
