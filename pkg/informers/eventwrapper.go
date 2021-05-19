@@ -6,7 +6,7 @@ import (
 )
 
 type EventWrapper struct {
-	Event *event.Event
+	*event.Event
 
 	// ChannelNames is channels to process,
 	// name will be removed from slice after processed successfully

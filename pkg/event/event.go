@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -21,6 +22,10 @@ type Event struct {
 
 	// OldObj is only set for EventTypeUpdated
 	OldObj *unstructured.Unstructured
+}
+
+func (e *Event) NamespaceKey() string {
+	return utils.NamespaceKey(e.Obj)
 }
 
 func NewAdded(obj *unstructured.Unstructured) *Event {
