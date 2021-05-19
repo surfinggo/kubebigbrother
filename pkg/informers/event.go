@@ -21,8 +21,4 @@ type Event struct {
 
 	// OldObj is only set for EventTypeUpdated
 	OldObj *unstructured.Unstructured
-
-	// ChannelNames is channels to process,
-	// name will be removed from slice after processed successfully
-	ChannelNames []ChannelName
 }

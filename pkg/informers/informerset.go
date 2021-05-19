@@ -201,12 +201,14 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := &Event{
-						Type:         EventTypeAdded,
-						Obj:          s,
-						ChannelNames: channelNames,
+						Type: EventTypeAdded,
+						Obj:  s,
 					}
 					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
-					queue.Add(e)
+					queue.Add(&EventWrapper{
+						Event:        e,
+						ChannelNames: channelNames,
+					})
 				}
 			}
 			if resourceConfig.NoticeWhenDeleted {
@@ -217,12 +219,14 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := &Event{
-						Type:         EventTypeDeleted,
-						Obj:          s,
-						ChannelNames: channelNames,
+						Type: EventTypeDeleted,
+						Obj:  s,
 					}
 					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
-					queue.Add(e)
+					queue.Add(&EventWrapper{
+						Event:        e,
+						ChannelNames: channelNames,
+					})
 				}
 			}
 			if resourceConfig.NoticeWhenUpdated {
@@ -234,13 +238,15 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := &Event{
-						Type:         EventTypeUpdated,
-						Obj:          s,
-						OldObj:       oldS,
-						ChannelNames: channelNames,
+						Type:   EventTypeUpdated,
+						Obj:    s,
+						OldObj: oldS,
 					}
 					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
-					queue.Add(e)
+					queue.Add(&EventWrapper{
+						Event:        e,
+						ChannelNames: channelNames,
+					})
 				}
 			}
 			informer.AddEventHandlerWithResyncPeriod(handlerFuncs, resyncPeriodFunc())

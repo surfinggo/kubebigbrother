@@ -50,16 +50,16 @@ func (i *Informer) processNextItem() bool {
 	if shutdown {
 		return false
 	}
-	event := obj.(*Event)
-	klog.V(5).Infof("a new item from queue: [%s] %s", event.Type, NamespaceKey(event.Obj))
+	item := obj.(*EventWrapper)
+	klog.V(5).Infof("a new item from queue: [%s] %s", item.Event.Type, NamespaceKey(item.Event.Obj))
 
 	i.processingItems.Add(1)
 
 	// we need to mark item as completed whether success or fail
-	defer i.Queue.Done(event)
+	defer i.Queue.Done(item)
 
-	result := i.processItem(event)
-	i.handleErr(event, result)
+	result := i.processItem(item)
+	i.handleErr(item, result)
 
 	i.processingItems.Done()
 
@@ -67,19 +67,19 @@ func (i *Informer) processNextItem() bool {
 }
 
 // processItem process an item synchronously
-func (i *Informer) processItem(event *Event) error {
+func (i *Informer) processItem(item *EventWrapper) error {
 	var channelNamesLeft []ChannelName
 	namedErrors := make(map[ChannelName]error)
-	for _, channelName := range event.ChannelNames {
+	for _, channelName := range item.ChannelNames {
 		if channel, ok := i.ChannelMap[channelName]; ok {
-			if err := channel.Handle(event); err != nil {
+			if err := channel.Handle(item.Event); err != nil {
 				channelNamesLeft = append(channelNamesLeft, channelName)
 				namedErrors[channelName] = err
 			}
 		}
 	}
 
-	event.ChannelNames = channelNamesLeft
+	item.ChannelNames = channelNamesLeft
 
 	// no channels left means process succeeded!
 	if len(channelNamesLeft) == 0 {
@@ -93,25 +93,25 @@ func (i *Informer) processItem(event *Event) error {
 }
 
 // handleErr checks the result, schedules retry if needed
-func (i *Informer) handleErr(event *Event, result error) {
+func (i *Informer) handleErr(item *EventWrapper, result error) {
 	if result == nil {
-		klog.V(5).Infof("processed: %s", NamespaceKey(event.Obj))
+		klog.V(5).Infof("processed: %s", NamespaceKey(item.Event.Obj))
 		// clear retry counter after success
-		i.Queue.Forget(event)
+		i.Queue.Forget(item)
 		return
 	}
 
-	if i.Queue.NumRequeues(event) < 3 {
-		klog.Warningf("error processing %s: %v", event, result)
+	if i.Queue.NumRequeues(item) < 3 {
+		klog.Warningf("error processing %s: %v", item, result)
 		// retrying
-		i.Queue.AddRateLimited(event)
+		i.Queue.AddRateLimited(item)
 		return
 	}
 
 	klog.Error(fmt.Errorf("max retries exceeded, "+
-		"dropping item %s out of the queue: %v", event, result))
+		"dropping item %s out of the queue: %v", item, result))
 	// max retries exceeded, forget it
-	i.Queue.Forget(event)
+	i.Queue.Forget(item)
 }
 
 func (i *Informer) GetWorkers() int {
