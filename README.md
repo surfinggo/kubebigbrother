@@ -6,38 +6,52 @@ Kube Big Brother is a platform that monitors and records everything happens in a
 
 ## Usage
 
-Start watching events lively without interacting with the backend:
+### Watch
+
+You can start watching events lively without interacting with the backend:
 
 ```shell
-./kbb watch --config=/path/to/config.yaml
+./kbb watch
 ```
 
-Start the server:
+### Controller
+
+Start the controller (only 1 controller should be running simultaneously):
 
 ```shell
-./kbb serve --config=/path/to/config.yaml
+./kbb controller
 ```
 
-Start recording events:
+The controller is responsible for handling all events, including sending notifications and recording them into the
+database.
+
+### Serve
+
+Start the frontend server:
 
 ```shell
-./kbb record --config=/path/to/config.yaml
+./kbb serve
 ```
+
+Instead of connecting to Kubernetes API server directly, the server is connected to the database.
+
+### Query
+
+You can query the database with query command:
+
+```shell
+./kbb query
+```
+
+## Config
+
+### Channels
+
+Currently, kbb supports these channel types:
 
 ## Development
 
-### Backend (Golang, Gin)
-
-```shell
-go run . serve
-```
-
-### Frontend (Vite, Vue)
-
-```shell
-npm i
-vite
-```
+[Development](./development.md)
 
 ## ToDo (PRs are welcomed)
 

@@ -1,5 +1,18 @@
 # Development FYI
 
+## Backend (Golang, Gin)
+
+```shell
+go run . serve
+```
+
+## Frontend (Vite, Vue)
+
+```shell
+npm i
+vite
+```
+
 ## Log Verbosity Conventions
 
 - Exit: exceptions that cause the application unable to continue running;

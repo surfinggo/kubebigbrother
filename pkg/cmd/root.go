@@ -20,7 +20,7 @@ func NewKbbCommand() *cobra.Command {
 
 	cmd.AddCommand(
 		NewControllerCommand(),
-		NewHistoryCommand(),
+		NewQueryCommand(),
 		NewServeCommand(),
 		NewWatchCommand(),
 	)
