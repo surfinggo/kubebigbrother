@@ -2,11 +2,12 @@ package watcher
 
 import (
 	"github.com/pkg/errors"
+	"github.com/spongeprojects/kubebigbrother/pkg/channels"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
 )
 
 const (
-	channelNamePrint = informers.ChannelName("print")
+	channelNamePrint = channels.ChannelName("print")
 )
 
 type Options struct {
@@ -34,9 +35,9 @@ func Setup(options Options) (*Watcher, error) {
 	// watcher only prints event to stdout, all user defined channels will be
 	// dropped.
 	adapted := &informers.Config{
-		Channels: map[informers.ChannelName]informers.ChannelConfig{
+		Channels: map[channels.ChannelName]informers.ChannelConfig{
 			channelNamePrint: {
-				Type: informers.ChannelTypePrint,
+				Type: channels.ChannelTypePrint,
 				Print: &informers.ChannelPrintConfig{
 					Writer: informers.PrintWriterStdout,
 				},
@@ -55,7 +56,7 @@ func Setup(options Options) (*Watcher, error) {
 				NoticeWhenDeleted: resource.NoticeWhenDeleted,
 				NoticeWhenUpdated: resource.NoticeWhenUpdated,
 				UpdateOn:          resource.UpdateOn,
-				ChannelNames:      []informers.ChannelName{channelNamePrint},
+				ChannelNames:      []channels.ChannelName{channelNamePrint},
 				ResyncPeriod:      resource.ResyncPeriod,
 				Workers:           resource.Workers,
 			})

@@ -3,6 +3,8 @@ package informers
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spongeprojects/kubebigbrother/pkg/channels"
+	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils/resourcebuilder"
 	"github.com/spongeprojects/magicconch"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -93,7 +95,7 @@ func Setup(options Options) (*InformerSet, error) {
 		return nil, errors.Wrap(err, "dynamic.NewForConfig error")
 	}
 
-	channelMap := make(ChannelMap)
+	channelMap := make(channels.ChannelMap)
 	for name, channelConfig := range config.Channels {
 		channel, err := BuildChannelFromConfig(&channelConfig)
 		if err != nil {
@@ -200,10 +202,7 @@ func Setup(options Options) (*InformerSet, error) {
 					if !ok {
 						return
 					}
-					e := &Event{
-						Type: EventTypeAdded,
-						Obj:  s,
-					}
+					e := event.NewAdded(s)
 					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
 					queue.Add(&EventWrapper{
 						Event:        e,
@@ -218,10 +217,7 @@ func Setup(options Options) (*InformerSet, error) {
 					if !ok {
 						return
 					}
-					e := &Event{
-						Type: EventTypeDeleted,
-						Obj:  s,
-					}
+					e := event.NewDeleted(s)
 					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
 					queue.Add(&EventWrapper{
 						Event:        e,
@@ -237,11 +233,7 @@ func Setup(options Options) (*InformerSet, error) {
 					if !ok1 || !ok2 {
 						return
 					}
-					e := &Event{
-						Type:   EventTypeUpdated,
-						Obj:    s,
-						OldObj: oldS,
-					}
+					e := event.NewUpdated(s, oldS)
 					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
 					queue.Add(&EventWrapper{
 						Event:        e,

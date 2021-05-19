@@ -3,6 +3,7 @@ package informers
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spongeprojects/kubebigbrother/pkg/channels"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
 	"strings"
@@ -27,7 +28,7 @@ type Informer struct {
 	UpdateOn []string
 
 	// ChannelMap defines channels to send notification
-	ChannelMap ChannelMap
+	ChannelMap channels.ChannelMap
 
 	// Queue is a rate limiting queue
 	Queue workqueue.RateLimitingInterface
@@ -68,8 +69,8 @@ func (i *Informer) processNextItem() bool {
 
 // processItem process an item synchronously
 func (i *Informer) processItem(item *EventWrapper) error {
-	var channelNamesLeft []ChannelName
-	namedErrors := make(map[ChannelName]error)
+	var channelNamesLeft []channels.ChannelName
+	namedErrors := make(map[channels.ChannelName]error)
 	for _, channelName := range item.ChannelNames {
 		if channel, ok := i.ChannelMap[channelName]; ok {
 			if err := channel.Handle(item.Event); err != nil {

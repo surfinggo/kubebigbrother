@@ -2,21 +2,46 @@ package informers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spongeprojects/kubebigbrother/pkg/channels"
+	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"gopkg.in/yaml.v3"
+	"io"
 	"math/rand"
+	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
 )
 
-type ResyncPeriodFunc func() time.Duration
+// ChannelGroupConfig is config for ChannelGroup, read from config file
+type ChannelGroupConfig []channels.ChannelName
+
+// ChannelTelegramConfig is config for ChannelTelegram, read from config file
+type ChannelTelegramConfig struct {
+	Token string `json:"token" yaml:"token"`
+}
+
+// ChannelCallbackConfig is config for ChannelCallback, read from config file
+type ChannelCallbackConfig struct {
+	URL string `json:"url" yaml:"url"`
+}
+
+const (
+	PrintWriterStdout = "stdout"
+)
+
+// ChannelPrintConfig is config for ChannelPrint, read from config file
+type ChannelPrintConfig struct {
+	Writer string
+}
 
 // ChannelConfig defines a channel to receive notifications
 type ChannelConfig struct {
 	// Type is the type of the channel
-	Type ChannelType `json:"type" yaml:"type"`
+	Type channels.ChannelType `json:"type" yaml:"type"`
 
 	Callback *ChannelCallbackConfig `json:"callback" yaml:"callback"`
 	Group    *ChannelGroupConfig    `json:"group" yaml:"group"`
@@ -42,7 +67,7 @@ type ResourceConfig struct {
 	UpdateOn []string `json:"updateOn" yaml:"updateOn"`
 
 	// ChannelNames defines channels to send notification
-	ChannelNames []ChannelName `json:"channelNames" yaml:"channelNames"`
+	ChannelNames []channels.ChannelName `json:"channelNames" yaml:"channelNames"`
 
 	// ResyncPeriod is the resync period in reflectors for this resource
 	ResyncPeriod string `json:"resyncPeriod" yaml:"resyncPeriod"`
@@ -74,7 +99,7 @@ type NamespaceConfig struct {
 	Resources []ResourceConfig `json:"resources" yaml:"resources"`
 
 	// DefaultChannelNames defines default channels in this namespace
-	DefaultChannelNames []ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
+	DefaultChannelNames []channels.ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
 
 	// DefaultWorkers is the default number of workers in this namespace
 	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
@@ -104,10 +129,10 @@ type Config struct {
 	Namespaces []NamespaceConfig `json:"namespaces" yaml:"namespaces"`
 
 	// Channels defines channels that receive notifications
-	Channels map[ChannelName]ChannelConfig `json:"channels" yaml:"channels"`
+	Channels map[channels.ChannelName]ChannelConfig `json:"channels" yaml:"channels"`
 
 	// DefaultChannelNames defines default channels
-	DefaultChannelNames []ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
+	DefaultChannelNames []channels.ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
 
 	// DefaultWorkers is the default number of workers
 	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
@@ -124,6 +149,8 @@ func (c *Config) BuildResyncPeriodFunc() (f ResyncPeriodFunc, err error) {
 	f, _, err = BuildResyncPeriodFunc(c.MinResyncPeriod)
 	return f, err
 }
+
+type ResyncPeriodFunc func() time.Duration
 
 func BuildResyncPeriodFunc(resyncPeriod string) (f ResyncPeriodFunc, set bool, err error) {
 	duration, set, err := ParseResyncPeriod(resyncPeriod)
@@ -174,4 +201,39 @@ func LoadConfigFromFile(file string) (*Config, error) {
 		return nil, errors.Errorf("unsupported file type: %s", t)
 	}
 	return &config, nil
+}
+
+func BuildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
+	switch config.Type {
+	case channels.ChannelTypeCallback:
+		return &channels.ChannelCallback{
+			Client: http.DefaultClient,
+			URL:    config.Callback.URL,
+		}, nil
+	case channels.ChannelTypeGroup:
+		return &channels.ChannelGroup{
+			Channels: nil, // TODO: set channels
+		}, nil
+	case channels.ChannelTypePrint:
+		var writer io.Writer
+		switch config.Print.Writer {
+		case PrintWriterStdout, "":
+			writer = os.Stdout
+		default:
+			return nil, errors.Errorf("unsupported writer: %s", config.Print.Writer)
+		}
+		return &channels.ChannelPrint{
+			Writer: writer,
+			// TODO: make WriteFunc configurable
+			WriteFunc: func(e *event.Event, w io.Writer) error {
+				t := fmt.Sprintf("[%s] %s\n", e.Type, NamespaceKey(e.Obj))
+				_, err := w.Write([]byte(t))
+				return err
+			},
+		}, nil
+	case channels.ChannelTypeTelegram:
+		return &channels.ChannelTelegram{}, nil
+	default:
+		return nil, errors.Errorf("unsupported channel type: %s", config.Type)
+	}
 }
