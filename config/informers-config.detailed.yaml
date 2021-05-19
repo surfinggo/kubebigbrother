@@ -17,7 +17,6 @@ namespaces:
   minResyncPeriod: 12h
 - resources: # all namespaces demonstration (namespace="")
   - resource: "secrets.v1."
-    noticeWhenAdded: true
     noticeWhenDeleted: true
 - resources: # resource name demonstration 1
   - resource: "cm"

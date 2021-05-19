@@ -22,3 +22,9 @@ func (c *ChannelGroup) Handle(e *event.Event) error {
 	// need to find a way to handle error but only retry failed channels.
 	return nil
 }
+
+func NewChannelGroup() (*ChannelGroup, error) {
+	return &ChannelGroup{
+		Channels: nil, // TODO: set channels
+	}, nil
+}

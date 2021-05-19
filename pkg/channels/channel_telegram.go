@@ -11,3 +11,7 @@ type ChannelTelegram struct {
 func (c *ChannelTelegram) Handle(_ *event.Event) error {
 	panic("wip")
 }
+
+func NewChannelTelegram() (*ChannelTelegram, error) {
+	return &ChannelTelegram{}, nil
+}

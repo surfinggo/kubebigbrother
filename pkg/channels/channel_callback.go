@@ -29,3 +29,10 @@ func (c *ChannelCallback) Handle(e *event.Event) error {
 	}
 	return nil
 }
+
+func NewChannelCallback(url string) (*ChannelCallback, error) {
+	return &ChannelCallback{
+		Client: http.DefaultClient,
+		URL:    url,
+	}, nil
+}

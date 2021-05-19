@@ -2,15 +2,10 @@ package informers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
-	"github.com/spongeprojects/kubebigbrother/pkg/event"
-	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"gopkg.in/yaml.v3"
-	"io"
 	"math/rand"
-	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -29,10 +24,6 @@ type ChannelTelegramConfig struct {
 type ChannelCallbackConfig struct {
 	URL string `json:"url" yaml:"url"`
 }
-
-const (
-	PrintWriterStdout = "stdout"
-)
 
 // ChannelPrintConfig is config for ChannelPrint, read from config file
 type ChannelPrintConfig struct {
@@ -207,33 +198,13 @@ func LoadConfigFromFile(file string) (*Config, error) {
 func BuildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	switch config.Type {
 	case channels.ChannelTypeCallback:
-		return &channels.ChannelCallback{
-			Client: http.DefaultClient,
-			URL:    config.Callback.URL,
-		}, nil
+		return channels.NewChannelCallback(config.Callback.URL)
 	case channels.ChannelTypeGroup:
-		return &channels.ChannelGroup{
-			Channels: nil, // TODO: set channels
-		}, nil
+		return channels.NewChannelGroup()
 	case channels.ChannelTypePrint:
-		var writer io.Writer
-		switch config.Print.Writer {
-		case PrintWriterStdout, "":
-			writer = os.Stdout
-		default:
-			return nil, errors.Errorf("unsupported writer: %s", config.Print.Writer)
-		}
-		return &channels.ChannelPrint{
-			Writer: writer,
-			// TODO: make WriteFunc configurable
-			WriteFunc: func(e *event.Event, w io.Writer) error {
-				t := fmt.Sprintf("[%s] %s\n", e.Type, utils.NamespaceKey(e.Obj))
-				_, err := w.Write([]byte(t))
-				return err
-			},
-		}, nil
+		return channels.NewChannelPrint(config.Print.Writer)
 	case channels.ChannelTypeTelegram:
-		return &channels.ChannelTelegram{}, nil
+		return channels.NewChannelTelegram()
 	default:
 		return nil, errors.Errorf("unsupported channel type: %s", config.Type)
 	}

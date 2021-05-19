@@ -1,13 +1,15 @@
 package watcher
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
+	"k8s.io/klog/v2"
 )
 
 const (
-	channelNamePrint = channels.ChannelName("print")
+	channelNamePrintToStdout = channels.ChannelName("print-to-stdout")
 )
 
 type Options struct {
@@ -28,6 +30,16 @@ func (w *Watcher) Shutdown() {
 }
 
 func Setup(options Options) (*Watcher, error) {
+	if len(options.InformersConfig.Channels) != 0 {
+		var p string
+		if len(options.InformersConfig.Channels) == 1 {
+			p = "the channel has"
+		} else {
+			p = fmt.Sprintf("%d channels have", len(options.InformersConfig.Channels))
+		}
+		klog.Warningf("watch: %s been replaced by a single channel: %s", p, channelNamePrintToStdout)
+	}
+
 	watcher := &Watcher{}
 
 	config := options.InformersConfig
@@ -36,10 +48,10 @@ func Setup(options Options) (*Watcher, error) {
 	// dropped.
 	adapted := &informers.Config{
 		Channels: map[channels.ChannelName]informers.ChannelConfig{
-			channelNamePrint: {
+			channelNamePrintToStdout: {
 				Type: channels.ChannelTypePrint,
 				Print: &informers.ChannelPrintConfig{
-					Writer: informers.PrintWriterStdout,
+					Writer: channels.PrintWriterStdout,
 				},
 			},
 		},
@@ -56,7 +68,7 @@ func Setup(options Options) (*Watcher, error) {
 				NoticeWhenDeleted: resource.NoticeWhenDeleted,
 				NoticeWhenUpdated: resource.NoticeWhenUpdated,
 				UpdateOn:          resource.UpdateOn,
-				ChannelNames:      []channels.ChannelName{channelNamePrint},
+				ChannelNames:      []channels.ChannelName{channelNamePrintToStdout},
 				ResyncPeriod:      resource.ResyncPeriod,
 				Workers:           resource.Workers,
 			})
