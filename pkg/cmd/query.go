@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/spongeprojects/kubebigbrother/pkg/genericoptions"
+	"github.com/spongeprojects/kubebigbrother/pkg/cmd/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/gormdb"
 	"github.com/spongeprojects/kubebigbrother/pkg/stores/event_store"
 	"github.com/spongeprojects/magicconch"
