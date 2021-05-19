@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
+	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
 	"strings"
@@ -52,7 +53,7 @@ func (i *Informer) processNextItem() bool {
 		return false
 	}
 	item := obj.(*EventWrapper)
-	klog.V(5).Infof("a new item from queue: [%s] %s", item.Event.Type, NamespaceKey(item.Event.Obj))
+	klog.V(5).Infof("a new item from queue: [%s] %s", item.Event.Type, utils.NamespaceKey(item.Event.Obj))
 
 	i.processingItems.Add(1)
 
@@ -96,7 +97,7 @@ func (i *Informer) processItem(item *EventWrapper) error {
 // handleErr checks the result, schedules retry if needed
 func (i *Informer) handleErr(item *EventWrapper, result error) {
 	if result == nil {
-		klog.V(5).Infof("processed: %s", NamespaceKey(item.Event.Obj))
+		klog.V(5).Infof("processed: %s", utils.NamespaceKey(item.Event.Obj))
 		// clear retry counter after success
 		i.Queue.Forget(item)
 		return

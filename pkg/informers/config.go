@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
+	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"gopkg.in/yaml.v3"
 	"io"
 	"math/rand"
@@ -226,7 +227,7 @@ func BuildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 			Writer: writer,
 			// TODO: make WriteFunc configurable
 			WriteFunc: func(e *event.Event, w io.Writer) error {
-				t := fmt.Sprintf("[%s] %s\n", e.Type, NamespaceKey(e.Obj))
+				t := fmt.Sprintf("[%s] %s\n", e.Type, utils.NamespaceKey(e.Obj))
 				_, err := w.Write([]byte(t))
 				return err
 			},

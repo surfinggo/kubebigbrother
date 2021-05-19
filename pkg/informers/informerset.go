@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
+	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils/resourcebuilder"
 	"github.com/spongeprojects/magicconch"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -203,7 +204,7 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := event.NewAdded(s)
-					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
+					klog.V(5).Infof("received: [%s] %s", e.Type, utils.NamespaceKey(s))
 					queue.Add(&EventWrapper{
 						Event:        e,
 						ChannelNames: channelNames,
@@ -218,7 +219,7 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := event.NewDeleted(s)
-					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
+					klog.V(5).Infof("received: [%s] %s", e.Type, utils.NamespaceKey(s))
 					queue.Add(&EventWrapper{
 						Event:        e,
 						ChannelNames: channelNames,
@@ -234,7 +235,7 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := event.NewUpdated(s, oldS)
-					klog.V(5).Infof("received: [%s] %s", e.Type, NamespaceKey(s))
+					klog.V(5).Infof("received: [%s] %s", e.Type, utils.NamespaceKey(s))
 					queue.Add(&EventWrapper{
 						Event:        e,
 						ChannelNames: channelNames,
