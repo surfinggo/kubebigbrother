@@ -32,7 +32,7 @@ func GetWatchOptions() *WatchOptions {
 func NewWatchCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "watch",
-		Short: "Run watch to watch specific resource's event",
+		Short: "Watch event lively",
 		Run: func(cmd *cobra.Command, args []string) {
 			o := GetWatchOptions()
 
