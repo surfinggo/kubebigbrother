@@ -103,7 +103,7 @@ func (i *Informer) handleErr(item *EventWrapper, result error) {
 		return
 	}
 
-	if i.Queue.NumRequeues(item) < 3 {
+	if i.Queue.NumRequeues(item) <= 3 {
 		klog.Warningf("error processing %s: %v", item, result)
 		// retrying
 		i.Queue.AddRateLimited(item)
