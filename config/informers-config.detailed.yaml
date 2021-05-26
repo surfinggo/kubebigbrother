@@ -1,61 +1,90 @@
+# defines resources to watch
 namespaces:
-- namespace: "tmp"
+- namespace: "demo" # namespace in kubernetes, "" means all namespaces
+  resources: # defines resources in this namespace
+  - resource: "configmaps" # resource name in kubernetes
+    noticeWhenAdded: true # record event when resource added
+    noticeWhenDeleted: true # record event when resource deleted
+    noticeWhenUpdated: true # record event when resource updated
+    updateOn: # specify fields to watch modification
+    - ".spec.replicas"
+    channelNames: # channel names only for this resource, optional
+    - print-to-stdout
+    resyncPeriod: 12h # resync period only for this resource, optional
+    workers: 3 # workers only for this resource, optional
+  # default channels names for resources in this namespace,
+  # this value can be override by .resource.channelNames,
+  # optional
+  defaultChannelNames:
+  - print-to-stdout
+  # default workers for resources in this namespace,
+  # this value can be override by .resource.workers,
+  # optional
+  defaultWorkers: 3
+  # minimum resync period for resources in this namespace, actual resync period will between 12h to 24h,
+  # this value can be override by .resource.resyncPeriod,
+  # optional
+  minResyncPeriod: 12h
+- namespace: "demo" # another namespace with minimum configuration
   resources:
-  - resource: "configmaps.v1."
+  - resource: "deployments"
     noticeWhenAdded: true
     noticeWhenDeleted: true
     noticeWhenUpdated: true
     updateOn:
-    - ".data"
-    channelNames:
-    - print-to-stdout
-    resyncPeriod: 12h
-    workers: 3
-  defaultChannelNames:
-  - print-to-stdout
-  defaultWorkers: 3
-  minResyncPeriod: 12h
-- resources: # all namespaces demonstration (namespace="")
-  - resource: "secrets.v1."
-    noticeWhenDeleted: true
-- resources: # resource name demonstration 1
-  - resource: "cm"
-  - resource: "deploy"
-  channelNames:
-  - non-exist
-- resources: # resource name demonstration 2
-  - resource: "configmaps"
-  - resource: "deployments"
-  channelNames:
-  - non-exist
-- resources: # resource name demonstration 3
-  - resource: "configmaps."
-  - resource: "deployments.apps"
-  channelNames:
-  - non-exist
-- resources: # resource name demonstration 4
-  - resource: "configmaps.v1."
-  - resource: "deployments.v1.apps"
-  channelNames:
-  - non-exist
+    - ".spec.replicas"
+#- resources: # demonstration 1: namespace="" means all namespaces
+#  - resource: "secrets.v1."
+#    noticeWhenDeleted: true
+#- resources: # demonstration 2: resource name alias
+#  - resource: "cm"
+#    noticeWhenDeleted: true
+#  - resource: "deploy"
+#    noticeWhenDeleted: true
+#- resources: # demonstration 3: short resource name
+#  - resource: "configmaps"
+#    noticeWhenDeleted: true
+#  - resource: "deployments"
+#    noticeWhenDeleted: true
+#- resources: # demonstration 4: resource name without version
+#  - resource: "configmaps."
+#    noticeWhenDeleted: true
+#  - resource: "deployments.apps"
+#    noticeWhenDeleted: true
+#- resources: # demonstration 5: canonical resource name
+#  - resource: "configmaps.v1."
+#    noticeWhenDeleted: true
+#  - resource: "deployments.v1.apps"
+#    noticeWhenDeleted: true
+
+# define channels
 channels:
-  callback-demo:
-    type: callback
-    callback:
-      url: "http://localhost:8984/callback"
+  callback-demo: # channel name
+    type: callback # channel type
+    callback: # configuration for type: callback
+      url: "http://localhost:8984/callback" # send notification to this url
   group-demo:
     type: group
-    group:
+    group: # configuration for type: group
     - print
   print-to-stdout:
     type: print
-    print:
+    print: # configuration for type: print
       writer: stdout
   telegram-demo:
     type: telegram
-    telegram:
+    telegram: # configuration for type: telegram
       token: "xxx"
+
+# global default channels names
+# this value can be override by .namespace.defaultChannelNames and .resource.channelNames
 defaultChannelNames:
 - print-to-stdout
+
+# global default workers
+# this value can be override by .namespace.defaultWorkers and .resource.workers
 defaultWorkers: 3
+
+# global minimum resync period, actual resync period will between 12h to 24h,
+# this value can be override by .namespace.minResyncPeriod and .resource.resyncPeriod
 minResyncPeriod: 12h
