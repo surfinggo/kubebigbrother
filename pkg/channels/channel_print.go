@@ -29,12 +29,8 @@ func (c *ChannelPrint) Handle(e *event.Event) error {
 	return nil
 }
 
-func NewChannelPrintWithWriter(writer io.Writer, tmpl string) (*ChannelPrint, error) {
-	if tmpl == "" {
-		tmpl = "[{{.Obj.GroupVersionKind}} {{.Type}}] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
-		// example of using field:
-		//tmpl = "[{{.Obj.GroupVersionKind}} {{.Type}}] {{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
-	}
+func NewChannelPrintWithWriter(writer io.Writer,
+	addedTmpl, updatedTmpl, deletedTmpl string) (*ChannelPrint, error) {
 	funcMap := template.FuncMap{
 		"field": func(s *unstructured.Unstructured, path ...string) string {
 			// methods can be used in template:
@@ -50,22 +46,53 @@ func NewChannelPrintWithWriter(writer io.Writer, tmpl string) (*ChannelPrint, er
 			return str
 		},
 	}
-	t, err := template.New("").Funcs(funcMap).Parse(tmpl)
+	if addedTmpl == "" {
+		addedTmpl = "[{{.Obj.GroupVersionKind}} is created] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		// example of using field:
+		//tmpl = "[{{.Obj.GroupVersionKind}} is created] " +
+		// "{{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
+	}
+	if updatedTmpl == "" {
+		updatedTmpl = "[{{.Obj.GroupVersionKind}} is updated] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+	}
+	if deletedTmpl == "" {
+		deletedTmpl = "[{{.Obj.GroupVersionKind}} is deleted] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+	}
+	tmplAdded, err := template.New("").Funcs(funcMap).Parse(addedTmpl)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse template error")
+		return nil, errors.Wrap(err, "parse added template error")
+	}
+	tmplUpdated, err := template.New("").Funcs(funcMap).Parse(updatedTmpl)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse updated template error")
+	}
+	tmplDeleted, err := template.New("").Funcs(funcMap).Parse(deletedTmpl)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse deleted template error")
 	}
 
 	return &ChannelPrint{
 		Writer: writer,
 		WriteFunc: func(e *event.Event, w io.Writer) error {
-			err := t.Execute(w, e)
-			if err != nil {
+			var t *template.Template
+			switch e.Type {
+			case event.TypeAdded:
+				t = tmplAdded
+			case event.TypeUpdated:
+				t = tmplUpdated
+			case event.TypeDeleted:
+				t = tmplDeleted
+			default:
+				panic(fmt.Sprintf("unknown event type: %s", e.Type))
+			}
+			if err := t.Execute(w, e); err != nil {
 				// print an extra blank line when error occurs,
 				// because print may be interrupted
 				// without line feed at the end
 				_, _ = w.Write([]byte("\n"))
+				return err
 			}
-			return err
+			return nil
 		},
 	}, nil
 }
@@ -74,7 +101,8 @@ const (
 	PrintWriterStdout = "stdout"
 )
 
-func NewChannelPrint(writerType, tmpl string) (*ChannelPrint, error) {
+func NewChannelPrint(writerType,
+	addedTmpl, updatedTmpl, deletedTmpl string) (*ChannelPrint, error) {
 	var writer io.Writer
 	switch writerType {
 	case PrintWriterStdout, "":
@@ -82,5 +110,5 @@ func NewChannelPrint(writerType, tmpl string) (*ChannelPrint, error) {
 	default:
 		return nil, errors.Errorf("unsupported writer: %s", writerType)
 	}
-	return NewChannelPrintWithWriter(writer, tmpl)
+	return NewChannelPrintWithWriter(writer, addedTmpl, updatedTmpl, deletedTmpl)
 }

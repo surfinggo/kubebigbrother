@@ -27,8 +27,10 @@ type ChannelCallbackConfig struct {
 
 // ChannelPrintConfig is config for ChannelPrint, read from config file
 type ChannelPrintConfig struct {
-	Writer   string `json:"writer" yaml:"writer"`
-	Template string `json:"template" yaml:"template"`
+	Writer          string `json:"writer" yaml:"writer"`
+	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
+	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
 }
 
 // ChannelConfig defines a channel to receive notifications
@@ -203,7 +205,10 @@ func BuildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	case channels.ChannelTypeGroup:
 		return channels.NewChannelGroup()
 	case channels.ChannelTypePrint:
-		return channels.NewChannelPrint(config.Print.Writer, config.Print.Template)
+		return channels.NewChannelPrint(config.Print.Writer,
+			config.Print.AddedTemplate,
+			config.Print.UpdatedTemplate,
+			config.Print.DeletedTemplate)
 	case channels.ChannelTypeTelegram:
 		return channels.NewChannelTelegram()
 	default:
