@@ -7,7 +7,7 @@ namespaces:
     noticeWhenDeleted: true # record event when resource deleted
     noticeWhenUpdated: true # record event when resource updated
     updateOn: # specify fields to watch modification
-    - ".spec.replicas"
+    - ".data"
     channelNames: # channel names only for this resource, optional
     - print-to-stdout
     resyncPeriod: 12h # resync period only for this resource, optional

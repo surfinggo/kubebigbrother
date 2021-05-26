@@ -16,6 +16,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
+	"reflect"
+	"strings"
 	"sync"
 	"time"
 )
@@ -234,12 +236,29 @@ func Setup(options Options) (*InformerSet, error) {
 					if !ok1 || !ok2 {
 						return
 					}
-					e := event.NewUpdated(s, oldS)
-					klog.V(5).Infof("received: [%s] %s", e.Type, utils.NamespaceKey(s))
-					queue.Add(&EventWrapper{
-						Event:        e,
-						ChannelNames: channelNames,
-					})
+					updated := false
+					for _, field := range resourceConfig.UpdateOn {
+						f1, exist1, err := unstructured.NestedFieldNoCopy(s.Object, strings.Split(field, ".")...)
+						if err != nil {
+							panic(err) // TODO: handle this error
+						}
+						f2, exist2, err := unstructured.NestedFieldNoCopy(s.Object, strings.Split(field, ".")...)
+						if err != nil {
+							panic(err) // TODO: handle this error
+						}
+						if !exist1 || !exist2 || !reflect.DeepEqual(f1, f2) {
+							updated = true
+							break
+						}
+					}
+					if resourceConfig.UpdateOn == nil || updated {
+						e := event.NewUpdated(s, oldS)
+						klog.V(5).Infof("received: [%s] %s", e.Type, utils.NamespaceKey(s))
+						queue.Add(&EventWrapper{
+							Event:        e,
+							ChannelNames: channelNames,
+						})
+					}
 				}
 			}
 			informer.AddEventHandlerWithResyncPeriod(handlerFuncs, resyncPeriodFunc())
