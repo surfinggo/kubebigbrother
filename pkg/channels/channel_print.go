@@ -31,12 +31,15 @@ func (c *ChannelPrint) Handle(e *event.Event) error {
 
 func NewChannelPrintWithWriter(writer io.Writer, tmpl string) (*ChannelPrint, error) {
 	if tmpl == "" {
-		tmpl = "[{{.Type}}] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		tmpl = "[{{.Obj.GroupVersionKind}} {{.Type}}] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
 		// example of using field:
-		//tmpl = "[{{.Type}}] {{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
+		//tmpl = "[{{.Obj.GroupVersionKind}} {{.Type}}] {{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
 	}
 	funcMap := template.FuncMap{
 		"field": func(s *unstructured.Unstructured, path ...string) string {
+			// methods can be used in template:
+			// s.GetName()
+			// s.GetNamespace()
 			str, exist, err := unstructured.NestedString(s.Object, path...)
 			if err != nil {
 				return fmt.Sprintf("[Error reading field .%s: %s]", strings.Join(path, "."), err)
