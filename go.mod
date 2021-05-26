@@ -6,6 +6,7 @@ require (
 	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gophercloud/gophercloud v0.0.0-20190126172459-c818fa66e4c8 // indirect
+	github.com/muesli/termenv v0.8.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.1.3

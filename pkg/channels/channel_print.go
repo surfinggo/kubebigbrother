@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
+	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
 	"html/template"
 	"io"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -29,7 +30,7 @@ func (c *ChannelPrint) Handle(e *event.Event) error {
 	return nil
 }
 
-func NewChannelPrintWithWriter(writer io.Writer,
+func NewChannelPrintWithWriter(writer io.Writer, isStdout bool,
 	addedTmpl, updatedTmpl, deletedTmpl string) (*ChannelPrint, error) {
 	funcMap := template.FuncMap{
 		"field": func(s *unstructured.Unstructured, path ...string) string {
@@ -47,16 +48,21 @@ func NewChannelPrintWithWriter(writer io.Writer,
 		},
 	}
 	if addedTmpl == "" {
-		addedTmpl = "[{{.Obj.GroupVersionKind}} is created] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		addedTmpl = "[{{.Obj.GroupVersionKind}}] is created: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
 		// example of using field:
-		//tmpl = "[{{.Obj.GroupVersionKind}} is created] " +
+		//tmpl = "[{{.Obj.GroupVersionKind}}] is created: " +
 		// "{{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
 	}
 	if updatedTmpl == "" {
-		updatedTmpl = "[{{.Obj.GroupVersionKind}} is updated] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		updatedTmpl = "[{{.Obj.GroupVersionKind}}] is updated: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
 	}
 	if deletedTmpl == "" {
-		deletedTmpl = "[{{.Obj.GroupVersionKind}} is deleted] {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		deletedTmpl = "[{{.Obj.GroupVersionKind}}] is deleted: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+	}
+	if isStdout {
+		addedTmpl = style.Success(addedTmpl).String()
+		updatedTmpl = style.Info(updatedTmpl).String()
+		deletedTmpl = style.Warning(deletedTmpl).String()
 	}
 	tmplAdded, err := template.New("").Funcs(funcMap).Parse(addedTmpl)
 	if err != nil {
@@ -110,5 +116,5 @@ func NewChannelPrint(writerType,
 	default:
 		return nil, errors.Errorf("unsupported writer: %s", writerType)
 	}
-	return NewChannelPrintWithWriter(writer, addedTmpl, updatedTmpl, deletedTmpl)
+	return NewChannelPrintWithWriter(writer, writerType == PrintWriterStdout, addedTmpl, updatedTmpl, deletedTmpl)
 }
