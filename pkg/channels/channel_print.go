@@ -31,7 +31,7 @@ func (c *ChannelPrint) Handle(e *event.Event) error {
 }
 
 func NewChannelPrintWithWriter(writer io.Writer, isStdout bool,
-	addedTmpl, updatedTmpl, deletedTmpl string) (*ChannelPrint, error) {
+	addedTmpl, deletedTmpl, updatedTmpl string) (*ChannelPrint, error) {
 	funcMap := template.FuncMap{
 		"field": func(s *unstructured.Unstructured, path ...string) string {
 			// methods can be used in template:
@@ -53,28 +53,28 @@ func NewChannelPrintWithWriter(writer io.Writer, isStdout bool,
 		//tmpl = "[{{.Obj.GroupVersionKind}}] is created: " +
 		// "{{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
 	}
-	if updatedTmpl == "" {
-		updatedTmpl = "[{{.Obj.GroupVersionKind}}] is updated: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
-	}
 	if deletedTmpl == "" {
 		deletedTmpl = "[{{.Obj.GroupVersionKind}}] is deleted: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
 	}
+	if updatedTmpl == "" {
+		updatedTmpl = "[{{.Obj.GroupVersionKind}}] is updated: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+	}
 	if isStdout {
 		addedTmpl = style.Success(addedTmpl).String()
-		updatedTmpl = style.Info(updatedTmpl).String()
 		deletedTmpl = style.Warning(deletedTmpl).String()
+		updatedTmpl = style.Info(updatedTmpl).String()
 	}
 	tmplAdded, err := template.New("").Funcs(funcMap).Parse(addedTmpl)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse added template error")
 	}
-	tmplUpdated, err := template.New("").Funcs(funcMap).Parse(updatedTmpl)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse updated template error")
-	}
 	tmplDeleted, err := template.New("").Funcs(funcMap).Parse(deletedTmpl)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse deleted template error")
+	}
+	tmplUpdated, err := template.New("").Funcs(funcMap).Parse(updatedTmpl)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse updated template error")
 	}
 
 	return &ChannelPrint{
@@ -84,10 +84,10 @@ func NewChannelPrintWithWriter(writer io.Writer, isStdout bool,
 			switch e.Type {
 			case event.TypeAdded:
 				t = tmplAdded
-			case event.TypeUpdated:
-				t = tmplUpdated
 			case event.TypeDeleted:
 				t = tmplDeleted
+			case event.TypeUpdated:
+				t = tmplUpdated
 			default:
 				panic(fmt.Sprintf("unknown event type: %s", e.Type))
 			}
@@ -108,7 +108,7 @@ const (
 )
 
 func NewChannelPrint(writerType,
-	addedTmpl, updatedTmpl, deletedTmpl string) (*ChannelPrint, error) {
+	addedTmpl, deletedTmpl, updatedTmpl string) (*ChannelPrint, error) {
 	var writer io.Writer
 	switch writerType {
 	case PrintWriterStdout, "":
@@ -116,5 +116,5 @@ func NewChannelPrint(writerType,
 	default:
 		return nil, errors.Errorf("unsupported writer: %s", writerType)
 	}
-	return NewChannelPrintWithWriter(writer, writerType == PrintWriterStdout, addedTmpl, updatedTmpl, deletedTmpl)
+	return NewChannelPrintWithWriter(writer, writerType == PrintWriterStdout, addedTmpl, deletedTmpl, updatedTmpl)
 }
