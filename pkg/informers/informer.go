@@ -52,7 +52,7 @@ func (i *Informer) processNextItem() bool {
 		return false
 	}
 	item := obj.(*EventWrapper)
-	klog.V(5).Infof("a new item from queue: [%s] %s", item.Event.Type, item.NamespaceKey())
+	klog.V(5).Infof("new item from queue: [%s] %s", item.Event.Type, item.GroupVersionKindName())
 
 	i.processingItems.Add(1)
 
@@ -96,14 +96,15 @@ func (i *Informer) processItem(item *EventWrapper) error {
 // handleErr checks the result, schedules retry if needed
 func (i *Informer) handleErr(item *EventWrapper, result error) {
 	if result == nil {
-		klog.V(5).Infof("processed: %s", item.NamespaceKey())
+		klog.V(5).Infof("processed: [%s] %s", item.Event.Type, item.GroupVersionKindName())
 		// clear retry counter after success
 		i.Queue.Forget(item)
 		return
 	}
 
 	if i.Queue.NumRequeues(item) <= 3 {
-		klog.Warningf("error processing %s: %v", item.NamespaceKey(), result)
+		klog.Warningf("error processing [%s] %s: %v",
+			item.Event.Type, item.GroupVersionKindName(), result)
 		// retrying
 		i.Queue.AddRateLimited(item)
 		return

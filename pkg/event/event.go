@@ -22,8 +22,25 @@ type Event struct {
 
 	// OldObj is only set for EventTypeUpdated
 	OldObj *unstructured.Unstructured
+
+	// gvkNameCache is a cache for GroupVersionKindName
+	gvkNameCache string
 }
 
+// GroupVersionKindName returns group, version, kind, namespace and name string
+// for the affected resource
+//
+// examples:
+//   /v1, Kind=ConfigMap, demo/demo
+//   apps/v1, Kind=Deployment, demo/canary
+func (e *Event) GroupVersionKindName() string {
+	if e.gvkNameCache == "" {
+		e.gvkNameCache = utils.GroupVersionKindName(e.Obj)
+	}
+	return e.gvkNameCache
+}
+
+// NamespaceKey returns namespaced key for the affected resource
 func (e *Event) NamespaceKey() string {
 	return utils.NamespaceKey(e.Obj)
 }
