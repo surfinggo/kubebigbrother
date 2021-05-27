@@ -48,16 +48,16 @@ func NewChannelPrintWithWriter(writer io.Writer, isStdout bool,
 		},
 	}
 	if addedTmpl == "" {
-		addedTmpl = "[{{.Obj.GroupVersionKind}}] is created: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		addedTmpl = "Resource [{{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}] is added\n"
 		// example of using field:
 		//tmpl = "[{{.Obj.GroupVersionKind}}] is created: " +
 		// "{{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
 	}
 	if deletedTmpl == "" {
-		deletedTmpl = "[{{.Obj.GroupVersionKind}}] is deleted: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		deletedTmpl = "Resource [{{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}] is deleted\n"
 	}
 	if updatedTmpl == "" {
-		updatedTmpl = "[{{.Obj.GroupVersionKind}}] is updated: {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+		updatedTmpl = "Resource [{{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}] is updated\n"
 	}
 	if isStdout {
 		addedTmpl = style.Success(addedTmpl).String()
