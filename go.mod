@@ -10,6 +10,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/spongeprojects/magicconch v0.0.6
+	gopkg.in/tucnak/telebot.v2 v2.3.5 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 	gorm.io/driver/mysql v1.0.5
 	gorm.io/driver/postgres v1.0.8

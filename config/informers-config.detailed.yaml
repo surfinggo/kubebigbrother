@@ -15,7 +15,9 @@ channels:
   telegram-demo:
     type: telegram
     telegram: # configuration for type: telegram
-      token: "xxx"
+      token: "xxx" # telegram bot token
+      recipients: # list of chat ids
+      - 648014523
 
 # defines resources to watch
 namespaces:
@@ -80,13 +82,20 @@ namespaces:
 #    noticeWhenDeleted: true
 #  - resource: "deployments.v1.apps"
 #    noticeWhenDeleted: true
-#- namespace: "demo" # demonstration 6: callback
+#- namespace: "" # demonstration 6: callback
 #  resources:
 #  - resource: "configmaps"
 #    noticeWhenAdded: true
 #    noticeWhenDeleted: true
 #    channelNames:
 #    - callback-demo
+#- namespace: "" # demonstration 7: telegram
+#  resources:
+#  - resource: "configmaps"
+#    noticeWhenAdded: true
+#    noticeWhenDeleted: true
+#    channelNames:
+#    - telegram-demo
 
 # global default channels names
 # this value can be override by .namespace.defaultChannelNames and .resource.channelNames
