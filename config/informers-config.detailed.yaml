@@ -1,3 +1,22 @@
+# define channels
+channels:
+  callback-demo: # channel name
+    type: callback # channel type
+    callback: # configuration for type: callback
+      url: "http://localhost:8984/api/v1/callback-channel-test" # send notification to this url
+  group-demo:
+    type: group
+    group: # configuration for type: group
+    - print
+  print-to-stdout:
+    type: print
+    print: # configuration for type: print
+      writer: stdout
+  telegram-demo:
+    type: telegram
+    telegram: # configuration for type: telegram
+      token: "xxx"
+
 # defines resources to watch
 namespaces:
 - namespace: "demo" # namespace in kubernetes, "" means all namespaces
@@ -25,56 +44,49 @@ namespaces:
   # this value can be override by .resource.resyncPeriod,
   # optional
   minResyncPeriod: 12h
-- namespace: "demo" # another namespace with minimum configuration
-  resources:
-  - resource: "deployments"
-    noticeWhenAdded: true
-    noticeWhenDeleted: true
-    noticeWhenUpdated: true
-    updateOn:
-    - ".spec.replicas"
-#- resources: # demonstration 1: namespace="" means all namespaces
+#- namespace: "demo" # another namespace with minimum configuration
+#  resources:
+#  - resource: "deployments"
+#    noticeWhenAdded: true
+#    noticeWhenDeleted: true
+#    noticeWhenUpdated: true
+#    updateOn:
+#    - ".spec.replicas"
+#- namespace: "demo" # demonstration 1: namespace="" means all namespaces
+#  resources:
 #  - resource: "secrets.v1."
 #    noticeWhenDeleted: true
-#- resources: # demonstration 2: resource name alias
+#- namespace: "demo" # demonstration 2: resource name alias
+#  resources:
 #  - resource: "cm"
 #    noticeWhenDeleted: true
 #  - resource: "deploy"
 #    noticeWhenDeleted: true
-#- resources: # demonstration 3: short resource name
+#- namespace: "demo" # demonstration 3: short resource name
+#  resources:
 #  - resource: "configmaps"
 #    noticeWhenDeleted: true
 #  - resource: "deployments"
 #    noticeWhenDeleted: true
-#- resources: # demonstration 4: resource name without version
+#- namespace: "demo" # demonstration 4: resource name without version
+#  resources:
 #  - resource: "configmaps."
 #    noticeWhenDeleted: true
 #  - resource: "deployments.apps"
 #    noticeWhenDeleted: true
-#- resources: # demonstration 5: canonical resource name
+#- namespace: "demo" # demonstration 5: canonical resource name
+#  resources:
 #  - resource: "configmaps.v1."
 #    noticeWhenDeleted: true
 #  - resource: "deployments.v1.apps"
 #    noticeWhenDeleted: true
-
-# define channels
-channels:
-  callback-demo: # channel name
-    type: callback # channel type
-    callback: # configuration for type: callback
-      url: "http://localhost:8984/callback" # send notification to this url
-  group-demo:
-    type: group
-    group: # configuration for type: group
-    - print
-  print-to-stdout:
-    type: print
-    print: # configuration for type: print
-      writer: stdout
-  telegram-demo:
-    type: telegram
-    telegram: # configuration for type: telegram
-      token: "xxx"
+#- namespace: "demo" # demonstration 6: callback
+#  resources:
+#  - resource: "configmaps"
+#    noticeWhenAdded: true
+#    noticeWhenDeleted: true
+#    channelNames:
+#    - callback-demo
 
 # global default channels names
 # this value can be override by .namespace.defaultChannelNames and .resource.channelNames

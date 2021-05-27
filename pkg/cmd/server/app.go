@@ -49,6 +49,7 @@ func SetupApp(options *Options) (*App, error) {
 	r.GET("/", app.Index)
 	r.Any("/healthz", app.Healthz)
 	r.GET("/api/v1/healthz", app.Healthz)
+	r.POST("/api/v1/callback-channel-test", app.CallbackChannelTest)
 
 	r.HandleMethodNotAllowed = true
 
