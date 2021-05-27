@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"io"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/klog/v2"
 	"os"
 	"strings"
 )
@@ -91,14 +92,18 @@ func NewChannelPrintWithWriter(writer io.Writer, isStdout bool,
 			default:
 				panic(fmt.Sprintf("unknown event type: %s", e.Type))
 			}
-			if err := t.Execute(w, e); err != nil {
-				// print an extra blank line when error occurs,
-				// because print may be interrupted
-				// without line feed at the end
-				_, _ = w.Write([]byte("\n"))
-				return err
-			}
-			return nil
+
+			// https://stackoverflow.com/questions/14694088
+			return klog.WithLock(func() error {
+				if err := t.Execute(w, e); err != nil {
+					// print an extra blank line when error occurs,
+					// because print may be interrupted
+					// without line feed at the end
+					_, _ = w.Write([]byte("\n"))
+					return err
+				}
+				return nil
+			})
 		},
 	}, nil
 }
