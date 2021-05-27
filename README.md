@@ -154,5 +154,6 @@ Currently, kbb supports these channel types:
 ## ToDo (PRs are welcomed)
 
 - Avoid duplicated "ADDED" events and missed "DELETED" events, by storing the current state in database.
+- Register watchers as CRD, maybe keep compatibility of config file.
 - Better UI.
 - Tests.
