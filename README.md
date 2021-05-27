@@ -1,5 +1,7 @@
 # kubebigbrother
 
+![](https://img.shields.io/github/license/spongeprojects/kubebigbrother)
+
 Kube Big Brother (kubebigbrother) is a platform that monitors and records everything happens in a cluster.
 
 > Big brother is watching you.
