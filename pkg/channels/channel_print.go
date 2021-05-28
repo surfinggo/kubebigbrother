@@ -20,6 +20,7 @@ type ChannelPrint struct {
 	WriteFunc func(*event.Event, io.Writer) error
 }
 
+// Handle implements Channel
 func (c *ChannelPrint) Handle(e *event.Event) error {
 	if c.WriteFunc != nil {
 		return c.WriteFunc(e, c.Writer)

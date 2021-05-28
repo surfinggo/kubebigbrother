@@ -15,6 +15,7 @@ type ChannelTelegram struct {
 	Recipients []tb.Recipient
 }
 
+// Handle implements Channel
 func (c *ChannelTelegram) Handle(e *event.Event) error {
 	for _, recipient := range c.Recipients {
 		_, err := c.Bot.Send(recipient, fmt.Sprintf("%s", e))

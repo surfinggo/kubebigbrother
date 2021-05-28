@@ -14,6 +14,7 @@ type ChannelCallback struct {
 	URL    string
 }
 
+// Handle implements Channel
 func (c *ChannelCallback) Handle(e *event.Event) error {
 	body := &bytes.Buffer{}
 	err := json.NewEncoder(body).Encode(e)

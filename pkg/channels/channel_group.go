@@ -11,6 +11,7 @@ type ChannelGroup struct {
 	Channels []Channel
 }
 
+// Handle implements Channel
 func (c *ChannelGroup) Handle(e *event.Event) error {
 	for _, channel := range c.Channels {
 		err := channel.Handle(e)
