@@ -100,14 +100,14 @@ func Setup(options Options) (*InformerSet, error) {
 
 	channelMap := make(channels.ChannelMap)
 	for name, channelConfig := range config.Channels {
-		channel, err := BuildChannelFromConfig(&channelConfig)
+		channel, err := buildChannelFromConfig(&channelConfig)
 		if err != nil {
 			return nil, errors.Wrap(err, "build channel error")
 		}
 		channelMap[name] = channel
 	}
 
-	defaultResyncPeriodFunc, err := config.BuildResyncPeriodFunc()
+	defaultResyncPeriodFunc, err := config.buildResyncPeriodFunc()
 	if err != nil {
 		return nil, errors.Wrap(err, "config.BuildResyncPeriodFunc error")
 	}
@@ -123,7 +123,7 @@ func Setup(options Options) (*InformerSet, error) {
 		klog.Infof("[n%d] setup namespace %d/%d: %s",
 			i, i+1, len(config.Namespaces), namespaceConfig.Namespace)
 
-		namespaceDefaultResyncPeriodFunc, err := namespaceConfig.BuildResyncPeriodFuncWithDefault(
+		namespaceDefaultResyncPeriodFunc, err := namespaceConfig.buildResyncPeriodFuncWithDefault(
 			defaultResyncPeriodFunc)
 		if err != nil {
 			return nil, errors.Wrapf(err,
@@ -167,7 +167,7 @@ func Setup(options Options) (*InformerSet, error) {
 			}
 			duplicate[gvr.String()] = true
 
-			resyncPeriodFunc, err := resourceConfig.BuildResyncPeriodFuncWithDefault(
+			resyncPeriodFunc, err := resourceConfig.buildResyncPeriodFuncWithDefault(
 				namespaceDefaultResyncPeriodFunc)
 			if err != nil {
 				return nil, errors.Wrapf(err,

@@ -72,8 +72,8 @@ type ResourceConfig struct {
 	Workers int `json:"workers" yaml:"workers"`
 }
 
-func (c *ResourceConfig) BuildResyncPeriodFuncWithDefault(defaultFunc ResyncPeriodFunc) (ResyncPeriodFunc, error) {
-	f, set, err := c.BuildResyncPeriodFunc()
+func (c *ResourceConfig) buildResyncPeriodFuncWithDefault(defaultFunc resyncPeriodFunc) (resyncPeriodFunc, error) {
+	f, set, err := c.buildResyncPeriodFunc()
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +83,8 @@ func (c *ResourceConfig) BuildResyncPeriodFuncWithDefault(defaultFunc ResyncPeri
 	return f, nil
 }
 
-func (c *ResourceConfig) BuildResyncPeriodFunc() (f func() time.Duration, set bool, err error) {
-	return BuildResyncPeriodFunc(c.ResyncPeriod)
+func (c *ResourceConfig) buildResyncPeriodFunc() (f func() time.Duration, set bool, err error) {
+	return buildResyncPeriodFunc(c.ResyncPeriod)
 }
 
 type NamespaceConfig struct {
@@ -105,8 +105,8 @@ type NamespaceConfig struct {
 	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
 }
 
-func (c *NamespaceConfig) BuildResyncPeriodFuncWithDefault(defaultFunc ResyncPeriodFunc) (ResyncPeriodFunc, error) {
-	f, set, err := c.BuildResyncPeriodFunc()
+func (c *NamespaceConfig) buildResyncPeriodFuncWithDefault(defaultFunc resyncPeriodFunc) (resyncPeriodFunc, error) {
+	f, set, err := c.buildResyncPeriodFunc()
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +116,8 @@ func (c *NamespaceConfig) BuildResyncPeriodFuncWithDefault(defaultFunc ResyncPer
 	return f, nil
 }
 
-func (c *NamespaceConfig) BuildResyncPeriodFunc() (f ResyncPeriodFunc, set bool, err error) {
-	return BuildResyncPeriodFunc(c.MinResyncPeriod)
+func (c *NamespaceConfig) buildResyncPeriodFunc() (f resyncPeriodFunc, set bool, err error) {
+	return buildResyncPeriodFunc(c.MinResyncPeriod)
 }
 
 type Config struct {
@@ -138,18 +138,18 @@ type Config struct {
 	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
 }
 
-func (c *Config) BuildResyncPeriodFunc() (f ResyncPeriodFunc, err error) {
+func (c *Config) buildResyncPeriodFunc() (f resyncPeriodFunc, err error) {
 	if c.MinResyncPeriod == "" {
 		c.MinResyncPeriod = "12h"
 	}
-	f, _, err = BuildResyncPeriodFunc(c.MinResyncPeriod)
+	f, _, err = buildResyncPeriodFunc(c.MinResyncPeriod)
 	return f, err
 }
 
-type ResyncPeriodFunc func() time.Duration
+type resyncPeriodFunc func() time.Duration
 
-func BuildResyncPeriodFunc(resyncPeriod string) (f ResyncPeriodFunc, set bool, err error) {
-	duration, set, err := ParseResyncPeriod(resyncPeriod)
+func buildResyncPeriodFunc(resyncPeriod string) (f resyncPeriodFunc, set bool, err error) {
+	duration, set, err := parseResyncPeriod(resyncPeriod)
 	if err != nil {
 		return nil, false, err
 	}
@@ -164,7 +164,7 @@ func BuildResyncPeriodFunc(resyncPeriod string) (f ResyncPeriodFunc, set bool, e
 	}, true, nil
 }
 
-func ParseResyncPeriod(resyncPeriod string) (f time.Duration, set bool, err error) {
+func parseResyncPeriod(resyncPeriod string) (f time.Duration, set bool, err error) {
 	if resyncPeriod == "" {
 		return 0, false, nil
 	}
@@ -199,7 +199,7 @@ func LoadConfigFromFile(file string) (*Config, error) {
 	return &config, nil
 }
 
-func BuildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
+func buildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	switch config.Type {
 	case channels.ChannelTypeCallback:
 		return channels.NewChannelCallback(config.Callback.URL)
