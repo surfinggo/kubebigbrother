@@ -14,14 +14,14 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type WatchOptions struct {
+type watchOptions struct {
 	GlobalOptions     *genericoptions.GlobalOptions
 	InformersOptions  *genericoptions.InformersOptions
 	KubeconfigOptions *genericoptions.KubeconfigOptions
 }
 
-func GetWatchOptions() *WatchOptions {
-	o := &WatchOptions{
+func getWatchOptions() *watchOptions {
+	o := &watchOptions{
 		GlobalOptions:     genericoptions.GetGlobalOptions(),
 		InformersOptions:  genericoptions.GetInformersOptions(),
 		KubeconfigOptions: genericoptions.GetKubeconfigOptions(),
@@ -34,7 +34,7 @@ func NewWatchCommand() *cobra.Command {
 		Use:   "watch",
 		Short: "Watch events lively",
 		Run: func(cmd *cobra.Command, args []string) {
-			o := GetWatchOptions()
+			o := getWatchOptions()
 
 			informersConfigPath := o.InformersOptions.InformersConfig
 

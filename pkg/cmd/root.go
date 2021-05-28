@@ -11,8 +11,10 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// Version will be replaced by "-ldflags" during build
 var Version = "unknown"
 
+// NewKbbCommand create kbb command
 func NewKbbCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use: "kbb",

@@ -12,13 +12,13 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type QueryOptions struct {
+type queryOptions struct {
 	GlobalOptions   *genericoptions.GlobalOptions
 	DatabaseOptions *genericoptions.DatabaseOptions
 }
 
-func GetQueryOptions() *QueryOptions {
-	o := &QueryOptions{
+func getQueryOptions() *queryOptions {
+	o := &queryOptions{
 		GlobalOptions:   genericoptions.GetGlobalOptions(),
 		DatabaseOptions: genericoptions.GetDatabaseOptions(),
 	}
@@ -30,7 +30,7 @@ func NewQueryCommand() *cobra.Command {
 		Use:   "query",
 		Short: "Query event history",
 		Run: func(cmd *cobra.Command, args []string) {
-			o := GetQueryOptions()
+			o := getQueryOptions()
 
 			db, err := gormdb.New(o.DatabaseOptions.DBDialect, o.DatabaseOptions.DBArgs)
 			if err != nil {

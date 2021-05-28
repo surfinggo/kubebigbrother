@@ -10,15 +10,15 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type ServeOptions struct {
+type serveOptions struct {
 	GlobalOptions   *genericoptions.GlobalOptions
 	DatabaseOptions *genericoptions.DatabaseOptions
 
 	Addr string
 }
 
-func GetServeOptions() *ServeOptions {
-	o := &ServeOptions{
+func getServeOptions() *serveOptions {
+	o := &serveOptions{
 		GlobalOptions:   genericoptions.GetGlobalOptions(),
 		DatabaseOptions: genericoptions.GetDatabaseOptions(),
 		Addr:            viper.GetString("addr"),
@@ -31,7 +31,7 @@ func NewServeCommand() *cobra.Command {
 		Use:   "serve",
 		Short: "Run the server to serve backend APIs",
 		Run: func(cmd *cobra.Command, args []string) {
-			o := GetServeOptions()
+			o := getServeOptions()
 
 			app, err := server.SetupApp(&server.Options{
 				Version: Version,

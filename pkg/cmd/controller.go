@@ -14,15 +14,15 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type ControllerOptions struct {
+type controllerOptions struct {
 	GlobalOptions     *genericoptions.GlobalOptions
 	DatabaseOptions   *genericoptions.DatabaseOptions
 	InformersOptions  *genericoptions.InformersOptions
 	KubeconfigOptions *genericoptions.KubeconfigOptions
 }
 
-func GetControllerOptions() *ControllerOptions {
-	o := &ControllerOptions{
+func getControllerOptions() *controllerOptions {
+	o := &controllerOptions{
 		GlobalOptions:     genericoptions.GetGlobalOptions(),
 		DatabaseOptions:   genericoptions.GetDatabaseOptions(),
 		InformersOptions:  genericoptions.GetInformersOptions(),
@@ -36,7 +36,7 @@ func NewControllerCommand() *cobra.Command {
 		Use:   "controller",
 		Short: "Run controller, watch events and persistent into database (only one instance should be running)",
 		Run: func(cmd *cobra.Command, args []string) {
-			o := GetControllerOptions()
+			o := getControllerOptions()
 
 			informersConfigPath := o.InformersOptions.InformersConfig
 
