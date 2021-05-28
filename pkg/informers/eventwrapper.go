@@ -5,7 +5,7 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 )
 
-type EventWrapper struct {
+type eventWrapper struct {
 	*event.Event
 
 	// ChannelNames is channels to process,

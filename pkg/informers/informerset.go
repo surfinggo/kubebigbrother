@@ -207,7 +207,7 @@ func Setup(options Options) (*InformerSet, error) {
 					}
 					e := event.NewAdded(s)
 					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
-					queue.Add(&EventWrapper{
+					queue.Add(&eventWrapper{
 						Event:        e,
 						ChannelNames: channelNames,
 					})
@@ -222,7 +222,7 @@ func Setup(options Options) (*InformerSet, error) {
 					}
 					e := event.NewDeleted(s)
 					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
-					queue.Add(&EventWrapper{
+					queue.Add(&eventWrapper{
 						Event:        e,
 						ChannelNames: channelNames,
 					})
@@ -262,7 +262,7 @@ func Setup(options Options) (*InformerSet, error) {
 					if resourceConfig.UpdateOn == nil || updated {
 						e := event.NewUpdated(s, oldS)
 						klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
-						queue.Add(&EventWrapper{
+						queue.Add(&eventWrapper{
 							Event:        e,
 							ChannelNames: channelNames,
 						})

@@ -51,7 +51,7 @@ func (i *Informer) processNextItem() bool {
 	if shutdown {
 		return false
 	}
-	item := obj.(*EventWrapper)
+	item := obj.(*eventWrapper)
 	klog.V(5).Infof("new item from queue: [%s] %s", item.Event.Type, item.GroupVersionKindName())
 
 	i.processingItems.Add(1)
@@ -68,7 +68,7 @@ func (i *Informer) processNextItem() bool {
 }
 
 // processItem process an item synchronously
-func (i *Informer) processItem(item *EventWrapper) error {
+func (i *Informer) processItem(item *eventWrapper) error {
 	var channelNamesLeft []channels.ChannelName
 	namedErrors := make(map[channels.ChannelName]error)
 	for _, channelName := range item.ChannelNames {
@@ -94,7 +94,7 @@ func (i *Informer) processItem(item *EventWrapper) error {
 }
 
 // handleErr checks the result, schedules retry if needed
-func (i *Informer) handleErr(item *EventWrapper, result error) {
+func (i *Informer) handleErr(item *eventWrapper, result error) {
 	if result == nil {
 		klog.V(5).Infof("processed: [%s] %s", item.Event.Type, item.GroupVersionKindName())
 		// clear retry counter after success
