@@ -57,6 +57,9 @@ func NewPersistentRESTClientGetter(kubeconfig string) (*PersistentRESTClientGett
 
 	cachedDiscoveryClient, err := disk.NewCachedDiscoveryClientForConfig(
 		restConfig, discoveryCacheDir, httpCacheDir, 10*time.Minute)
+	if err != nil {
+		return nil, errors.Wrap(err, "disk.NewCachedDiscoveryClientForConfig error")
+	}
 
 	mapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedDiscoveryClient)
 	expander := restmapper.NewShortcutExpander(mapper, cachedDiscoveryClient)
