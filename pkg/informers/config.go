@@ -210,10 +210,12 @@ func buildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	case channels.ChannelTypeGroup:
 		return channels.NewChannelGroup()
 	case channels.ChannelTypePrint:
-		return channels.NewChannelPrint(config.Print.Writer,
-			config.Print.AddedTemplate,
-			config.Print.DeletedTemplate,
-			config.Print.UpdatedTemplate)
+		return channels.NewChannelPrint(&channels.ChannelPrintConfig{
+			Writer:          config.Print.Writer,
+			AddedTemplate:   config.Print.AddedTemplate,
+			DeletedTemplate: config.Print.DeletedTemplate,
+			UpdatedTemplate: config.Print.UpdatedTemplate,
+		})
 	case channels.ChannelTypeTelegram:
 		return channels.NewChannelTelegram(&channels.ChannelTelegramConfig{
 			Token:           config.Telegram.Token,
