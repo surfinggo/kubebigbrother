@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+// ChannelCallbackConfig is config for ChannelCallback
+type ChannelCallbackConfig struct {
+	URL string
+}
+
 // ChannelCallback is the callback channel
 type ChannelCallback struct {
 	Client *http.Client
@@ -31,9 +36,10 @@ func (c *ChannelCallback) Handle(e *event.Event) error {
 	return nil
 }
 
-func NewChannelCallback(url string) (*ChannelCallback, error) {
+// NewChannelCallback creates callback channel
+func NewChannelCallback(config *ChannelCallbackConfig) (*ChannelCallback, error) {
 	return &ChannelCallback{
 		Client: http.DefaultClient,
-		URL:    url,
+		URL:    config.URL,
 	}, nil
 }

@@ -206,7 +206,9 @@ func LoadConfigFromFile(file string) (*Config, error) {
 func buildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	switch config.Type {
 	case channels.ChannelTypeCallback:
-		return channels.NewChannelCallback(config.Callback.URL)
+		return channels.NewChannelCallback(&channels.ChannelCallbackConfig{
+			URL: config.Callback.URL,
+		})
 	case channels.ChannelTypeGroup:
 		return channels.NewChannelGroup()
 	case channels.ChannelTypePrint:
