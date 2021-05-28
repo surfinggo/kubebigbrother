@@ -28,8 +28,8 @@ func parseTemplates(addedTmpl, deletedTmpl, updatedTmpl string) (
 	}
 
 	// example of using field:
-	//tmpl = "[{{.Obj.GroupVersionKind}}] is created: " +
-	// "{{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
+	// tmpl = "[{{.Obj.GroupVersionKind}}] is created: " +
+	//  "{{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
 	if addedTmpl == "" {
 		addedTmpl = "Resource [{{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}] has been added\n"
 	}

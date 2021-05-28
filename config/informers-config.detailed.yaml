@@ -16,9 +16,9 @@ channels:
     type: print
     print: # configuration for type: print
       writer: stdout
-      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
-      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
-      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
+      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
+      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
   print-demo-minimun:
     type: print
   telegram-demo-full:
@@ -28,9 +28,9 @@ channels:
       recipients: # list of chat ids
       - 648014523
       proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
-      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
-      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
-      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n"
+      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
+      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
+      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
   telegram-demo-minimum:
     type: telegram
       token: "xxx"
