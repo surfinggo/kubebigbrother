@@ -5,14 +5,16 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// Type of event
 type Type string
 
 const (
-	TypeAdded   = "ADDED"
-	TypeDeleted = "DELETED"
-	TypeUpdated = "UPDATED"
+	TypeAdded   = "ADDED"   // resource created
+	TypeDeleted = "DELETED" // resource deleted
+	TypeUpdated = "UPDATED" // resource updated
 )
 
+// Event is representation of Kubernetes event
 type Event struct {
 	// Type is the type of the event
 	Type Type
@@ -45,6 +47,7 @@ func (e *Event) NamespaceKey() string {
 	return utils.NamespaceKey(e.Obj)
 }
 
+// NewAdded creates added event
 func NewAdded(obj *unstructured.Unstructured) *Event {
 	return &Event{
 		Type: TypeAdded,
@@ -52,6 +55,7 @@ func NewAdded(obj *unstructured.Unstructured) *Event {
 	}
 }
 
+// NewDeleted creates deleted event
 func NewDeleted(obj *unstructured.Unstructured) *Event {
 	return &Event{
 		Type: TypeDeleted,
@@ -59,6 +63,7 @@ func NewDeleted(obj *unstructured.Unstructured) *Event {
 	}
 }
 
+// NewUpdated creates updated event
 func NewUpdated(obj, oldObj *unstructured.Unstructured) *Event {
 	return &Event{
 		Type:   TypeUpdated,
