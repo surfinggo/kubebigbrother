@@ -17,8 +17,12 @@ type ChannelGroupConfig []channels.ChannelName
 
 // ChannelTelegramConfig is config for ChannelTelegram, read from config file
 type ChannelTelegramConfig struct {
-	Token      string  `json:"token" yaml:"token"`
-	Recipients []int64 `json:"recipients" yaml:"recipients"`
+	Token           string  `json:"token" yaml:"token"`
+	Recipients      []int64 `json:"recipients" yaml:"recipients"`
+	Proxy           string  `json:"proxy" yaml:"proxy"`
+	AddedTemplate   string  `json:"addedTemplate" yaml:"addedTemplate"`
+	DeletedTemplate string  `json:"deletedTemplate" yaml:"deletedTemplate"`
+	UpdatedTemplate string  `json:"updatedTemplate" yaml:"updatedTemplate"`
 }
 
 // ChannelCallbackConfig is config for ChannelCallback, read from config file
@@ -211,8 +215,14 @@ func buildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 			config.Print.DeletedTemplate,
 			config.Print.UpdatedTemplate)
 	case channels.ChannelTypeTelegram:
-		return channels.NewChannelTelegram(config.Telegram.Token,
-			config.Telegram.Recipients)
+		return channels.NewChannelTelegram(&channels.ChannelTelegramConfig{
+			Token:           config.Telegram.Token,
+			Recipients:      config.Telegram.Recipients,
+			Proxy:           config.Telegram.Proxy,
+			AddedTemplate:   config.Telegram.AddedTemplate,
+			DeletedTemplate: config.Telegram.DeletedTemplate,
+			UpdatedTemplate: config.Telegram.UpdatedTemplate,
+		})
 	default:
 		return nil, errors.Errorf("unsupported channel type: %s", config.Type)
 	}

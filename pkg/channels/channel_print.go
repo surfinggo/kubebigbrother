@@ -1,6 +1,7 @@
 package channels
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
@@ -8,10 +9,8 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
 	"html/template"
 	"io"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 	"os"
-	"strings"
 )
 
 // ChannelPrint is the channel to print event to writer
@@ -34,78 +33,76 @@ func (c *ChannelPrint) Handle(e *event.Event) error {
 
 func NewChannelPrintWithWriter(writer io.Writer, isStdout bool,
 	addedTmpl, deletedTmpl, updatedTmpl string) (*ChannelPrint, error) {
-	funcMap := template.FuncMap{
-		"field": func(s *unstructured.Unstructured, path ...string) string {
-			// methods can be used in template:
-			// s.GetName()
-			// s.GetNamespace()
-			str, exist, err := unstructured.NestedString(s.Object, path...)
-			if err != nil {
-				return fmt.Sprintf("[Error reading field .%s: %s]", strings.Join(path, "."), err)
-			}
-			if !exist {
-				return fmt.Sprintf("[Field .%s not exist]", strings.Join(path, "."))
-			}
-			return str
-		},
-	}
-	if addedTmpl == "" {
-		addedTmpl = "Resource [{{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}] is added\n"
-		// example of using field:
-		//tmpl = "[{{.Obj.GroupVersionKind}}] is created: " +
-		// "{{.Obj.GetNamespace}}/{{.Obj.GetName}} {{field .Obj \"kind\"}}\n"
-	}
-	if deletedTmpl == "" {
-		deletedTmpl = "Resource [{{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}] is deleted\n"
-	}
-	if updatedTmpl == "" {
-		updatedTmpl = "Resource [{{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}] is updated\n"
-	}
-	if isStdout {
-		addedTmpl = style.Success(addedTmpl).String()
-		deletedTmpl = style.Warning(deletedTmpl).String()
-		updatedTmpl = style.Info(updatedTmpl).String()
-	}
-	tmplAdded, err := template.New("").Funcs(funcMap).Parse(addedTmpl)
+	tmplAdded, tmplDeleted, tmplUpdated, err := parseTemplates(
+		addedTmpl, deletedTmpl, updatedTmpl)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse added template error")
-	}
-	tmplDeleted, err := template.New("").Funcs(funcMap).Parse(deletedTmpl)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse deleted template error")
-	}
-	tmplUpdated, err := template.New("").Funcs(funcMap).Parse(updatedTmpl)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse updated template error")
+		return nil, errors.Wrap(err, "parse template error")
 	}
 
-	return &ChannelPrint{
-		Writer: writer,
-		WriteFunc: func(e *event.Event, w io.Writer) error {
-			var t *template.Template
-			switch e.Type {
-			case event.TypeAdded:
-				t = tmplAdded
-			case event.TypeDeleted:
-				t = tmplDeleted
-			case event.TypeUpdated:
-				t = tmplUpdated
-			default:
-				panic(fmt.Sprintf("unknown event type: %s", e.Type))
-			}
+	writeFunc := func(e *event.Event, w io.Writer) error {
+		var t *template.Template
+		switch e.Type {
+		case event.TypeAdded:
+			t = tmplAdded
+		case event.TypeDeleted:
+			t = tmplDeleted
+		case event.TypeUpdated:
+			t = tmplUpdated
+		default:
+			panic(fmt.Sprintf("unknown event type: %s", e.Type))
+		}
 
-			// https://stackoverflow.com/questions/14694088
-			return klog.WithLock(func() error {
-				if err := t.Execute(w, e); err != nil {
+		if isStdout {
+			printFunc := func() error {
+				buf := &bytes.Buffer{}
+				if err := t.Execute(buf, e); err != nil {
 					// print an extra blank line when error occurs,
 					// because print may be interrupted
 					// without line feed at the end
 					_, _ = w.Write([]byte("\n"))
 					return err
 				}
+				var styled string
+				switch e.Type {
+				case event.TypeAdded:
+					styled = style.Success(buf.String()).String()
+				case event.TypeDeleted:
+					styled = style.Warning(buf.String()).String()
+				default:
+					styled = style.Info(buf.String()).String()
+				}
+
+				if _, err := w.Write([]byte(styled)); err != nil {
+					return errors.Wrap(err, "write to writer error")
+				}
+
+				if err := t.Execute(w, e); err != nil {
+					// print an extra blank line when error occurs,
+					// because print may be interrupted
+					// without line feed at the end
+					_, _ = w.Write([]byte("\n"))
+					return errors.Wrap(err, "execute template error")
+				}
 				return nil
-			})
-		},
+			}
+
+			// https://stackoverflow.com/questions/14694088
+			return klog.WithLock(printFunc)
+		} // end if isStdout
+
+		if err := t.Execute(w, e); err != nil {
+			// print an extra blank line when error occurs,
+			// because print may be interrupted
+			// without line feed at the end
+			_, _ = w.Write([]byte("\n"))
+			return errors.Wrap(err, "execute template error")
+		}
+		return nil
+	} // end writeFunc
+
+	return &ChannelPrint{
+		Writer:    writer,
+		WriteFunc: writeFunc,
 	}, nil
 }
 

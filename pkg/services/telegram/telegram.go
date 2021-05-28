@@ -4,28 +4,59 @@ import (
 	"github.com/pkg/errors"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"k8s.io/klog/v2"
+	"net/http"
+	"net/url"
 	"time"
 )
 
-func NewBot(token string) (*tb.Bot, error) {
-	var bot *tb.Bot
-	var err error
+// NewBot creates a new Telegram bot
+func NewBot(token, proxy string) (*tb.Bot, error) {
+	var httpClient *http.Client
+	if proxy != "" {
+		proxyUrl, err := url.Parse(proxy)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid proxy url: %s", proxy)
+		}
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyURL(proxyUrl),
+			},
+		}
+	} else {
+		httpClient = http.DefaultClient
+	}
+	setting := &tb.Settings{
+		Token:  token,
+		Client: httpClient,
+	}
+
 	count := 1
 	for {
-		klog.Infof("[%d times] trying to create telegram bot...", count)
-		bot, err = tb.NewBot(tb.Settings{
-			Token: token,
-		})
+		t := "time"
+		if count > 1 {
+			t = "times"
+		}
+
+		klog.V(1).Infof("[%d %s] trying to connect Telegram...", count, t)
+
+		bot, err := tb.NewBot(*setting)
 		if err == nil {
-			klog.Infof("[%d times] telegram bot created", count)
-			break
+			klog.V(1).Infof("[%d %s] Telegram connected", count, t)
+			return bot, nil
 		}
+
 		if count >= 10 {
-			return nil, errors.Wrapf(err, "[%d times] create telegram bot error, max retry exceeded", count)
+			return nil, errors.Wrapf(err,
+				"[%d %s] connect Telegram error, max retry exceeded",
+				count, t)
 		}
-		klog.Warning(errors.Wrapf(err, "[%d times] create telegram bot error, retrying...", count))
+
+		klog.V(1).Info(errors.Wrapf(err,
+			"[%d %s] connect Telegram error, retrying...",
+			count, t))
+
 		time.Sleep(2 * time.Second)
+
 		count++
 	}
-	return bot, nil
 }
