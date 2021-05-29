@@ -92,6 +92,7 @@ func NewChannelPrint(config *ChannelPrintConfig) (*ChannelPrint, error) {
 	var writer io.Writer
 	switch config.Writer {
 	case PrintWriterStdout, "":
+		klog.V(2).Info("print to stdout")
 		writer = os.Stdout
 	default:
 		return nil, errors.Errorf("unsupported writer: %s", config.Writer)
