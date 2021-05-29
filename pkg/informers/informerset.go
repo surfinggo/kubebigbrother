@@ -172,7 +172,7 @@ func Setup(options Options) (*InformerSet, error) {
 					"parse resource error, .Namespaces[%d].Informer[%d]: %s",
 					i, j, resourceConfig.Resource)
 			}
-			klog.V(1).Infof("[n%d,r%d] gvr: {%v}", i, j, gvr)
+			klog.V(1).Infof("[n%d,r%d] gvr: [%v]", i, j, gvr)
 
 			if _, ok := duplicate[gvr.String()]; ok {
 				return nil, errors.Errorf(
