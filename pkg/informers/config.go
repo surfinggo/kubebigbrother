@@ -12,9 +12,6 @@ import (
 	"time"
 )
 
-// ChannelGroupConfig is config for ChannelGroup, read from config file
-type ChannelGroupConfig []channels.ChannelName
-
 // ChannelTelegramConfig is config for ChannelTelegram, read from config file
 type ChannelTelegramConfig struct {
 	Token           string  `json:"token" yaml:"token"`
@@ -44,7 +41,6 @@ type ChannelConfig struct {
 	Type channels.ChannelType `json:"type" yaml:"type"`
 
 	Callback *ChannelCallbackConfig `json:"callback" yaml:"callback"`
-	Group    *ChannelGroupConfig    `json:"group" yaml:"group"`
 	Print    *ChannelPrintConfig    `json:"print" yaml:"print"`
 	Telegram *ChannelTelegramConfig `json:"telegram" yaml:"telegram"`
 }
@@ -210,8 +206,6 @@ func buildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 		return channels.NewChannelCallback(&channels.ChannelCallbackConfig{
 			URL: config.Callback.URL,
 		})
-	case channels.ChannelTypeGroup:
-		return channels.NewChannelGroup()
 	case channels.ChannelTypePrint:
 		return channels.NewChannelPrint(&channels.ChannelPrintConfig{
 			Writer:          config.Print.Writer,

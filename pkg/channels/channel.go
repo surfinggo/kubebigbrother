@@ -11,7 +11,6 @@ type ChannelName string
 type ChannelType string
 
 const (
-	ChannelTypeGroup    = "group"    // a group of other channels
 	ChannelTypeTelegram = "telegram" // send message to Telegram
 	ChannelTypeCallback = "callback" // send message to callback url
 	ChannelTypePrint    = "print"    // write message to writer

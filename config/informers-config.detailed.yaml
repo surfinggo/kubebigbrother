@@ -8,10 +8,6 @@ channels:
     type: callback # channel type
     callback: # configuration for type: callback
       url: "http://localhost:8984/api/v1/callback-channel-test" # send notification to this url
-  group-demo-full:
-    type: group
-    group: # configuration for type: group
-    - print
   print-demo-full:
     type: print
     print: # configuration for type: print
