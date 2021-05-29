@@ -11,15 +11,18 @@ type ChannelGroup struct {
 	Channels []Channel
 }
 
-// NewProcessData implements Channel
-func (c *ChannelGroup) NewProcessData() interface{} {
-	return nil
+// NewEventProcessContext implements Channel
+func (c *ChannelGroup) NewEventProcessContext(e *event.Event) *EventProcessContext {
+	return &EventProcessContext{
+		Event: e,
+		Data:  nil,
+	}
 }
 
 // Handle implements Channel
-func (c *ChannelGroup) Handle(e *event.Event, processData interface{}) error {
+func (c *ChannelGroup) Handle(ctx *EventProcessContext) error {
 	for _, channel := range c.Channels {
-		err := channel.Handle(e, processData)
+		err := channel.Handle(ctx)
 		if err != nil {
 			klog.Warning(errors.Wrap(err, "handle event error"))
 		}

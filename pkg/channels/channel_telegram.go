@@ -2,12 +2,13 @@ package channels
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"github.com/spongeprojects/kubebigbrother/pkg/services/telegram"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"html/template"
-	"k8s.io/klog/v2"
+	"strings"
 )
 
 // ChannelTelegramConfig is config for ChannelTelegram
@@ -29,15 +30,20 @@ type ChannelTelegram struct {
 	TmplUpdated *template.Template
 }
 
-// NewProcessData implements Channel
-func (c *ChannelTelegram) NewProcessData() interface{} {
-	return nil
+// NewEventProcessContext implements Channel
+func (c *ChannelTelegram) NewEventProcessContext(e *event.Event) *EventProcessContext {
+	return &EventProcessContext{
+		Event: e,
+		Data:  c.Recipients,
+	}
 }
 
 // Handle implements Channel
-func (c *ChannelTelegram) Handle(e *event.Event, _ interface{}) error {
+func (c *ChannelTelegram) Handle(ctx *EventProcessContext) error {
+	recipients := ctx.Data.([]tb.Recipient)
+
 	var t *template.Template
-	switch e.Type {
+	switch ctx.Event.Type {
 	case event.TypeAdded:
 		t = c.TmplAdded
 	case event.TypeDeleted:
@@ -45,22 +51,35 @@ func (c *ChannelTelegram) Handle(e *event.Event, _ interface{}) error {
 	case event.TypeUpdated:
 		t = c.TmplUpdated
 	default:
-		return errors.Errorf("unknown event type: %s", e.Type)
+		return errors.Errorf("unknown event type: %s", ctx.Event.Type)
 	}
 
 	buf := &bytes.Buffer{}
-	if err := t.Execute(buf, e); err != nil {
+	if err := t.Execute(buf, ctx.Event); err != nil {
 		return errors.Wrap(err, "execute template error")
 	}
 
-	for _, recipient := range c.Recipients {
+	errs := make(map[tb.Recipient]error)
+	for _, recipient := range recipients {
 		_, err := c.Bot.Send(recipient, buf.String())
 		if err != nil {
-			// TODO: retry on failed recipients
-			klog.Warningf("send Telegram message error: %s", err)
+			errs[recipient] = err
 		}
 	}
-	return nil
+
+	if len(errs) == 0 { // no error, no recipient left, everything works as expected
+		ctx.Data = nil
+		return nil
+	}
+
+	var recipientsLeft []tb.Recipient
+	var es []string
+	for recipient, err := range errs {
+		recipientsLeft = append(recipientsLeft, recipient)
+		es = append(es, fmt.Sprintf("send to %s error: %s", recipient, err))
+	}
+	ctx.Data = recipientsLeft
+	return errors.Errorf("send Telegram message error: %s", strings.Join(es, ","))
 }
 
 // NewChannelTelegram creates new Telegram channel

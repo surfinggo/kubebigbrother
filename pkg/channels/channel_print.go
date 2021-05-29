@@ -28,15 +28,18 @@ type ChannelPrint struct {
 	TmplUpdated *template.Template
 }
 
-// NewProcessData implements Channel
-func (c *ChannelPrint) NewProcessData() interface{} {
-	return nil
+// NewEventProcessContext implements Channel
+func (c *ChannelPrint) NewEventProcessContext(e *event.Event) *EventProcessContext {
+	return &EventProcessContext{
+		Event: e,
+		Data:  nil,
+	}
 }
 
 // Handle implements Channel
-func (c *ChannelPrint) Handle(e *event.Event, _ interface{}) error {
+func (c *ChannelPrint) Handle(ctx *EventProcessContext) error {
 	var t *template.Template
-	switch e.Type {
+	switch ctx.Event.Type {
 	case event.TypeAdded:
 		t = c.TmplAdded
 	case event.TypeDeleted:
@@ -44,13 +47,13 @@ func (c *ChannelPrint) Handle(e *event.Event, _ interface{}) error {
 	case event.TypeUpdated:
 		t = c.TmplUpdated
 	default:
-		return errors.Errorf("unknown event type: %s", e.Type)
+		return errors.Errorf("unknown event type: %s", ctx.Event.Type)
 	}
 
 	if c.IsStdout {
 		printFunc := func() error {
 			buf := &bytes.Buffer{}
-			if err := t.Execute(buf, e); err != nil {
+			if err := t.Execute(buf, ctx.Event); err != nil {
 				// print an extra blank line when error occurs,
 				// because print may be interrupted
 				// without line feed at the end
@@ -58,7 +61,7 @@ func (c *ChannelPrint) Handle(e *event.Event, _ interface{}) error {
 				return err
 			}
 			var styled string
-			switch e.Type {
+			switch ctx.Event.Type {
 			case event.TypeAdded:
 				styled = style.Success(buf.String()).String()
 			case event.TypeDeleted:
@@ -71,7 +74,7 @@ func (c *ChannelPrint) Handle(e *event.Event, _ interface{}) error {
 				return errors.Wrap(err, "write to writer error")
 			}
 
-			if err := t.Execute(c.Writer, e); err != nil {
+			if err := t.Execute(c.Writer, ctx.Event); err != nil {
 				// print an extra blank line when error occurs,
 				// because print may be interrupted
 				// without line feed at the end
@@ -85,7 +88,7 @@ func (c *ChannelPrint) Handle(e *event.Event, _ interface{}) error {
 		return klog.WithLock(printFunc)
 	} // end if isStdout
 
-	if err := t.Execute(c.Writer, e); err != nil {
+	if err := t.Execute(c.Writer, ctx.Event); err != nil {
 		// print an extra blank line when error occurs,
 		// because print may be interrupted
 		// without line feed at the end

@@ -22,12 +22,24 @@ type ChannelMap map[ChannelName]Channel
 
 // Channel is interface of a channel
 type Channel interface {
-	// NewProcessData builds a new copy of data to process,
-	// for example, NewProcessData returns []recipient in Telegram channel，
+	// NewEventProcessContext builds a new copy of data to process for an event,
+	// for example, NewEventProcessContext returns []recipient in Telegram channel，
 	// if any error occurs and the processing is retried,
 	// the channel can know which recipients have already been noticed successfully.
-	NewProcessData() interface{}
+	NewEventProcessContext(e *event.Event) *EventProcessContext
 
 	// Handle handles an event
-	Handle(e *event.Event, processData interface{}) error
+	Handle(ctx *EventProcessContext) error
+}
+
+// EventProcessContext is the context of an event processing within a channel
+type EventProcessContext struct {
+	Event *event.Event
+
+	// Data is the context data used by a channel during processing an event,
+	// for example, Telegram channel stores []recipient in Data,
+	// recipients are deleted from the slice once message send successfully,
+	// if any error occurs and the processing is retried,
+	// it can know which recipients have already been noticed successfully.
+	Data interface{}
 }

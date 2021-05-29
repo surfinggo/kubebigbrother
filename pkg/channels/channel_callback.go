@@ -19,15 +19,18 @@ type ChannelCallback struct {
 	URL    string
 }
 
-// NewProcessData implements Channel
-func (c *ChannelCallback) NewProcessData() interface{} {
-	return nil
+// NewEventProcessContext implements Channel
+func (c *ChannelCallback) NewEventProcessContext(e *event.Event) *EventProcessContext {
+	return &EventProcessContext{
+		Event: e,
+		Data:  nil,
+	}
 }
 
 // Handle implements Channel
-func (c *ChannelCallback) Handle(e *event.Event, _ interface{}) error {
+func (c *ChannelCallback) Handle(ctx *EventProcessContext) error {
 	body := &bytes.Buffer{}
-	err := json.NewEncoder(body).Encode(e)
+	err := json.NewEncoder(body).Encode(ctx.Event)
 	if err != nil {
 		return errors.Wrap(err, "json encode error")
 	}

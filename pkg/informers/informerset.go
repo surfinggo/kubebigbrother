@@ -107,14 +107,18 @@ func Setup(options Options) (*InformerSet, error) {
 		channelMap[name] = channel
 	}
 
-	buildChannelToProcess := func(names []channels.ChannelName) map[channels.ChannelName]interface{} {
-		m := make(map[channels.ChannelName]interface{})
+	// build []ChannelToProcess for an event
+	buildChannelsToProcess := func(e *event.Event, names []channels.ChannelName) []ChannelToProcess {
+		var channelsToProcess []ChannelToProcess
 		for _, name := range names {
 			if channel, ok := channelMap[name]; ok {
-				m[name] = channel.NewProcessData()
+				channelsToProcess = append(channelsToProcess, ChannelToProcess{
+					ChannelName:         name,
+					EventProcessContext: channel.NewEventProcessContext(e),
+				})
 			}
 		}
-		return m
+		return channelsToProcess
 	}
 
 	defaultResyncPeriodFunc, err := config.buildResyncPeriodFunc()
@@ -219,7 +223,7 @@ func Setup(options Options) (*InformerSet, error) {
 					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
 						Event:             e,
-						ChannelsToProcess: buildChannelToProcess(channelNames),
+						ChannelsToProcess: buildChannelsToProcess(e, channelNames),
 					})
 				}
 			}
@@ -234,7 +238,7 @@ func Setup(options Options) (*InformerSet, error) {
 					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
 						Event:             e,
-						ChannelsToProcess: buildChannelToProcess(channelNames),
+						ChannelsToProcess: buildChannelsToProcess(e, channelNames),
 					})
 				}
 			}
@@ -274,7 +278,7 @@ func Setup(options Options) (*InformerSet, error) {
 						klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
 						queue.Add(&eventWrapper{
 							Event:             e,
-							ChannelsToProcess: buildChannelToProcess(channelNames),
+							ChannelsToProcess: buildChannelsToProcess(e, channelNames),
 						})
 					}
 				}

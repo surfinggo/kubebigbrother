@@ -69,27 +69,28 @@ func (i *Informer) processNextItem() bool {
 
 // processItem process an item synchronously
 func (i *Informer) processItem(item *eventWrapper) error {
-	namedErrors := make(map[channels.ChannelName]error)
-	for channelName, data := range item.ChannelsToProcess {
-		if channel, ok := i.ChannelMap[channelName]; ok {
-			if err := channel.Handle(item.Event, data); err != nil {
-				namedErrors[channelName] = err
-			} else {
-				delete(item.ChannelsToProcess, channelName)
+	errs := make(map[ChannelToProcess]error)
+	for _, channelToProcess := range item.ChannelsToProcess {
+		if channel, ok := i.ChannelMap[channelToProcess.ChannelName]; ok {
+			if err := channel.Handle(channelToProcess.EventProcessContext); err != nil {
+				errs[channelToProcess] = err
 			}
 		}
 	}
 
-	// no channels left means process succeeded!
-	if len(item.ChannelsToProcess) == 0 {
+	if len(errs) == 0 { // no error, no channel left, everything works as expected
+		item.ChannelsToProcess = nil
 		return nil
 	}
 
-	var s []string
-	for channelName, err := range namedErrors {
-		s = append(s, fmt.Sprintf("%s: %s", channelName, err))
+	var channelToProcessLeft []ChannelToProcess
+	var es []string
+	for channelToProcess, err := range errs {
+		channelToProcessLeft = append(channelToProcessLeft, channelToProcess)
+		es = append(es, fmt.Sprintf("channel %s error: %s", channelToProcess.ChannelName, err))
 	}
-	return errors.Errorf(strings.Join(s, ","))
+	item.ChannelsToProcess = channelToProcessLeft
+	return errors.Errorf("process error: %s", strings.Join(es, ","))
 }
 
 // handleErr checks the result, schedules retry if needed
