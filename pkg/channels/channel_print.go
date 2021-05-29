@@ -60,6 +60,7 @@ func (c *ChannelPrint) Handle(ctx *EventProcessContext) error {
 				_, _ = c.Writer.Write([]byte("\n"))
 				return err
 			}
+
 			var styled string
 			switch ctx.Event.Type {
 			case event.TypeAdded:
@@ -71,15 +72,7 @@ func (c *ChannelPrint) Handle(ctx *EventProcessContext) error {
 			}
 
 			if _, err := c.Writer.Write([]byte(styled)); err != nil {
-				return errors.Wrap(err, "write to writer error")
-			}
-
-			if err := t.Execute(c.Writer, ctx.Event); err != nil {
-				// print an extra blank line when error occurs,
-				// because print may be interrupted
-				// without line feed at the end
-				_, _ = c.Writer.Write([]byte("\n"))
-				return errors.Wrap(err, "execute template error")
+				return errors.Wrap(err, "write error")
 			}
 			return nil
 		}
