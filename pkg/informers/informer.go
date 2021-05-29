@@ -96,14 +96,14 @@ func (i *Informer) processItem(item *eventWrapper) error {
 // handleErr checks the result, schedules retry if needed
 func (i *Informer) handleErr(item *eventWrapper, result error) {
 	if result == nil {
-		klog.V(5).Infof("processed: [%s] %s", item.Event.Type, item.GroupVersionKindName())
+		klog.V(5).Infof("processed: [%s] [%s]", item.Event.Type, item.GroupVersionKindName())
 		// clear retry counter after success
 		i.Queue.Forget(item)
 		return
 	}
 
 	if i.Queue.NumRequeues(item) <= 3 {
-		klog.Warningf("error processing [%s] %s: %v",
+		klog.Warningf("error processing [%s] [%s]: %v",
 			item.Event.Type, item.GroupVersionKindName(), result)
 		// retrying
 		i.Queue.AddRateLimited(item)
