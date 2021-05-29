@@ -13,20 +13,11 @@ import (
 	"time"
 )
 
-// ChannelTelegramConfig is config for ChannelTelegram, read from config file
-type ChannelTelegramConfig struct {
-	Token           string   `json:"token" yaml:"token"`
-	ChatIDs         []string `json:"chatIDs" yaml:"chatIDs"`
-	Proxy           string   `json:"proxy" yaml:"proxy"`
-	AddedTemplate   string   `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string   `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string   `json:"updatedTemplate" yaml:"updatedTemplate"`
-}
-
 // ChannelCallbackConfig is config for ChannelCallback, read from config file
 type ChannelCallbackConfig struct {
 	Method          string `json:"method" yaml:"method"`
 	URL             string `json:"url" yaml:"url"`
+	Proxy           string `json:"proxy" yaml:"proxy"`
 	UseTemplate     bool   `json:"useTemplate" yaml:"useTemplate"`
 	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
 	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
@@ -36,6 +27,7 @@ type ChannelCallbackConfig struct {
 // ChannelFlockConfig is config for ChannelFlock, read from config file
 type ChannelFlockConfig struct {
 	URL             string `json:"url" yaml:"url"`
+	Proxy           string `json:"proxy" yaml:"proxy"`
 	TitleTemplate   string `json:"titleTemplate" yaml:"titleTemplate"`
 	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
 	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
@@ -49,6 +41,16 @@ type ChannelPrintConfig struct {
 	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
 	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
 	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+}
+
+// ChannelTelegramConfig is config for ChannelTelegram, read from config file
+type ChannelTelegramConfig struct {
+	Token           string   `json:"token" yaml:"token"`
+	ChatIDs         []string `json:"chatIDs" yaml:"chatIDs"`
+	Proxy           string   `json:"proxy" yaml:"proxy"`
+	AddedTemplate   string   `json:"addedTemplate" yaml:"addedTemplate"`
+	DeletedTemplate string   `json:"deletedTemplate" yaml:"deletedTemplate"`
+	UpdatedTemplate string   `json:"updatedTemplate" yaml:"updatedTemplate"`
 }
 
 // ChannelConfig defines a channel to receive notifications
@@ -285,6 +287,7 @@ func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	case channels.ChannelTypeCallback:
 		return channels.NewChannelCallback(&channels.ChannelCallbackConfig{
 			Method:          config.Callback.Method,
+			Proxy:           config.Callback.Proxy,
 			URL:             config.Callback.URL,
 			UseTemplate:     config.Callback.UseTemplate,
 			AddedTemplate:   config.Callback.AddedTemplate,
@@ -294,6 +297,7 @@ func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	case channels.ChannelTypeFlock:
 		return channels.NewChannelFlock(&channels.ChannelFlockConfig{
 			URL:             config.Flock.URL,
+			Proxy:           config.Flock.Proxy,
 			TitleTemplate:   config.Flock.TitleTemplate,
 			AddedTemplate:   config.Flock.AddedTemplate,
 			DeletedTemplate: config.Flock.DeletedTemplate,

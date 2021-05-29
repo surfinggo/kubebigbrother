@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
+	"k8s.io/klog/v2"
 	"net/http"
+	"net/url"
 	"text/template"
 )
 
@@ -13,6 +15,7 @@ import (
 type ChannelCallbackConfig struct {
 	Method          string
 	URL             string
+	Proxy           string
 	UseTemplate     bool
 	AddedTemplate   string
 	DeletedTemplate string
@@ -78,6 +81,24 @@ func (c *ChannelCallback) Handle(ctx *EventProcessContext) error {
 
 // NewChannelCallback creates callback channel
 func NewChannelCallback(config *ChannelCallbackConfig) (*ChannelCallback, error) {
+	var httpClient *http.Client
+	if config.Proxy != "" {
+		proxyUrl, err := url.Parse(config.Proxy)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid proxy url: %s", config.Proxy)
+		}
+
+		klog.V(2).Infof("calling callback via proxy: %s", proxyUrl)
+
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyURL(proxyUrl),
+			},
+		}
+	} else {
+		httpClient = http.DefaultClient
+	}
+
 	if config.Method == "" {
 		config.Method = "POST"
 	}
@@ -89,7 +110,7 @@ func NewChannelCallback(config *ChannelCallbackConfig) (*ChannelCallback, error)
 	}
 
 	return &ChannelCallback{
-		Client:      http.DefaultClient,
+		Client:      httpClient,
 		Method:      config.Method,
 		URL:         config.URL,
 		UseTemplate: config.UseTemplate,

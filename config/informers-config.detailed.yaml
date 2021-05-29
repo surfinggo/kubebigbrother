@@ -9,6 +9,7 @@ channels:
     callback: # configuration for type: callback
       method: POST # callback HTTP method, default to POST
       url: "http://localhost:8984/api/v1/callback-channel-test" # send notification to this url
+      proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
       useTemplate: true # when set to false, callback channel sends raw JSON bytes to the url, default to false
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
@@ -21,6 +22,7 @@ channels:
     type: flock # channel type
     flock: # configuration for type: flock
       url: "https://api.flock.com/hooks/sendMessage/{your_webhook_id}" # send notification to this url
+      proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
       titleTemplate: "New Event!" # message title template, optional
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional

@@ -5,13 +5,16 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
+	"k8s.io/klog/v2"
 	"net/http"
+	"net/url"
 	"text/template"
 )
 
 // ChannelFlockConfig is config for ChannelFlock
 type ChannelFlockConfig struct {
 	URL             string
+	Proxy           string
 	TitleTemplate   string
 	AddedTemplate   string
 	DeletedTemplate string
@@ -104,6 +107,24 @@ func (c *ChannelFlock) Handle(ctx *EventProcessContext) error {
 
 // NewChannelFlock creates callback channel
 func NewChannelFlock(config *ChannelFlockConfig) (*ChannelFlock, error) {
+	var httpClient *http.Client
+	if config.Proxy != "" {
+		proxyUrl, err := url.Parse(config.Proxy)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid proxy url: %s", config.Proxy)
+		}
+
+		klog.V(2).Infof("connect to Flock via proxy: %s", proxyUrl)
+
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyURL(proxyUrl),
+			},
+		}
+	} else {
+		httpClient = http.DefaultClient
+	}
+
 	if config.TitleTemplate == "" {
 		config.TitleTemplate = "New Event:"
 		// context: event.Event
@@ -121,7 +142,7 @@ func NewChannelFlock(config *ChannelFlockConfig) (*ChannelFlock, error) {
 	}
 
 	return &ChannelFlock{
-		Client:      http.DefaultClient,
+		Client:      httpClient,
 		URL:         config.URL,
 		TmplTitle:   tmplTitle,
 		TmplAdded:   tmplAdded,
