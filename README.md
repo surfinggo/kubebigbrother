@@ -1,6 +1,6 @@
 # kubebigbrother
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/spongeprojects/kubebigbrother)](https://goreportcard.com/report/github.com/spongeprojects/kubebigbrother)
+[![Go Report Card](https://goreportcard.com/badge/github.com/spongeprojects/kubebigbrother?style=flat)](https://goreportcard.com/report/github.com/spongeprojects/kubebigbrother)
 [![License](https://img.shields.io/github/license/spongeprojects/kubebigbrother?color=blue)](https://github.com/spongeprojects/kubebigbrother/blob/main/LICENSE)
 
 Kubebigbrother is a platform that monitors and records everything happens in a cluster.
