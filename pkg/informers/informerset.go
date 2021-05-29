@@ -252,7 +252,8 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := event.NewAdded(s)
-					klog.V(5).Infof("received: [%s] [%s]", e.Type, utils.GroupVersionKindName(s))
+					klog.V(5).Infof("[%s] received: [%s] [%s]",
+						rID, e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
 						Event:             e,
 						ChannelsToProcess: buildChannelsToProcess(e, channelNames),
@@ -267,7 +268,8 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := event.NewDeleted(s)
-					klog.V(5).Infof("received: [%s] [%s]", e.Type, utils.GroupVersionKindName(s))
+					klog.V(5).Infof("[%s] received: [%s] [%s]",
+						rID, e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
 						Event:             e,
 						ChannelsToProcess: buildChannelsToProcess(e, channelNames),
@@ -289,16 +291,16 @@ func Setup(options Options) (*InformerSet, error) {
 						f2, exist2, err2 := unstructured.NestedFieldNoCopy(
 							oldS.Object, strings.Split(strings.TrimPrefix(field, "."), ".")...)
 						if !exist1 || !exist2 {
-							klog.Warningf("field not exist in resource: %s: %s",
-								utils.GroupVersionKindName(s), field)
+							klog.Warningf("[%s] field not exist in resource: %s: %s",
+								rID, utils.GroupVersionKindName(s), field)
 						}
 						if err1 != nil {
-							klog.Warningf("get field value error, resource: %s: %s",
-								utils.GroupVersionKindName(s), err1)
+							klog.Warningf("[%s] get field value error, resource: %s: %s",
+								rID, utils.GroupVersionKindName(s), err1)
 						}
 						if err2 != nil {
-							klog.Warningf("get field value error, resource: %s: %s",
-								utils.GroupVersionKindName(s), err2)
+							klog.Warningf("[%s] get field value error, resource: %s: %s",
+								rID, utils.GroupVersionKindName(s), err2)
 						}
 						if exist1 && exist2 && err1 == nil && err2 == nil && !reflect.DeepEqual(f1, f2) {
 							updated = true
@@ -307,7 +309,8 @@ func Setup(options Options) (*InformerSet, error) {
 					}
 					if resourceConfig.UpdateOn == nil || updated {
 						e := event.NewUpdated(s, oldS)
-						klog.V(5).Infof("received: [%s] [%s]", e.Type, utils.GroupVersionKindName(s))
+						klog.V(5).Infof("[%s] received: [%s] [%s]",
+							rID, e.Type, utils.GroupVersionKindName(s))
 						queue.Add(&eventWrapper{
 							Event:             e,
 							ChannelsToProcess: buildChannelsToProcess(e, channelNames),
