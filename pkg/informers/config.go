@@ -15,12 +15,12 @@ import (
 
 // ChannelTelegramConfig is config for ChannelTelegram, read from config file
 type ChannelTelegramConfig struct {
-	Token           string  `json:"token" yaml:"token"`
-	Recipients      []int64 `json:"recipients" yaml:"recipients"`
-	Proxy           string  `json:"proxy" yaml:"proxy"`
-	AddedTemplate   string  `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string  `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string  `json:"updatedTemplate" yaml:"updatedTemplate"`
+	Token           string   `json:"token" yaml:"token"`
+	ChatIDs         []string `json:"chatIDs" yaml:"chatIDs"`
+	Proxy           string   `json:"proxy" yaml:"proxy"`
+	AddedTemplate   string   `json:"addedTemplate" yaml:"addedTemplate"`
+	DeletedTemplate string   `json:"deletedTemplate" yaml:"deletedTemplate"`
+	UpdatedTemplate string   `json:"updatedTemplate" yaml:"updatedTemplate"`
 }
 
 // ChannelCallbackConfig is config for ChannelCallback, read from config file
@@ -310,7 +310,7 @@ func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	case channels.ChannelTypeTelegram:
 		return channels.NewChannelTelegram(&channels.ChannelTelegramConfig{
 			Token:           config.Telegram.Token,
-			Recipients:      config.Telegram.Recipients,
+			ChatIDs:         config.Telegram.ChatIDs,
 			Proxy:           config.Telegram.Proxy,
 			AddedTemplate:   config.Telegram.AddedTemplate,
 			DeletedTemplate: config.Telegram.DeletedTemplate,

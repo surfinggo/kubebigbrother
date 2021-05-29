@@ -3,7 +3,7 @@ module github.com/spongeprojects/kubebigbrother
 go 1.15
 
 require (
-	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/dustin/go-humanize v1.0.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/muesli/termenv v0.8.1
 	github.com/pkg/errors v0.9.1
@@ -11,7 +11,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/spongeprojects/magicconch v0.0.6
-	gopkg.in/tucnak/telebot.v2 v2.3.5 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 	gorm.io/driver/mysql v1.0.5
 	gorm.io/driver/postgres v1.0.8
