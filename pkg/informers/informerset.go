@@ -138,12 +138,17 @@ func Setup(options Options) (*InformerSet, error) {
 		return nil, errors.Wrap(err, "config.BuildResyncPeriodFunc error")
 	}
 	defaultChannelNames := config.DefaultChannelNames
-	klog.V(1).Infof("default channelNames: %v", defaultChannelNames)
 	defaultWorkers := config.DefaultWorkers
 	if defaultWorkers < 1 {
 		defaultWorkers = 3
 	}
-	klog.V(1).Infof("default workers: %d", defaultWorkers)
+	defaultMaxRetries := config.DefaultMaxRetries
+	if defaultMaxRetries < 1 {
+		defaultMaxRetries = 3
+	}
+	klog.V(1).Infof(
+		"global default: workers: %d, max retries: %d, channel names: %s",
+		defaultWorkers, defaultMaxRetries, defaultChannelNames)
 
 	for i, namespaceConfig := range config.Namespaces {
 		klog.Infof("[n%d] setup namespace %d/%d: %s",
@@ -160,17 +165,23 @@ func Setup(options Options) (*InformerSet, error) {
 		if len(namespaceDefaultChannelNames) == 0 {
 			namespaceDefaultChannelNames = defaultChannelNames
 		}
-		klog.V(1).Infof("[n%d] default channelNames: %v",
-			i, namespaceDefaultChannelNames)
 		namespaceDefaultWorkers := namespaceConfig.DefaultWorkers
 		if namespaceDefaultWorkers < 1 {
 			namespaceDefaultWorkers = defaultWorkers
 		}
-		klog.V(1).Infof("[n%d] default workers: %d",
-			i, namespaceDefaultWorkers)
+		namespaceDefaultMaxRetries := namespaceConfig.DefaultMaxRetries
+		if namespaceDefaultMaxRetries < 1 {
+			namespaceDefaultMaxRetries = defaultMaxRetries
+		}
+		klog.V(1).Infof(
+			"[n%d] namespace default: workers: %d, max retries: %d, channel names: %v",
+			i, namespaceDefaultWorkers,
+			namespaceDefaultMaxRetries,
+			namespaceDefaultChannelNames)
 
 		factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(
-			dynamicClient, namespaceDefaultResyncPeriodFunc(), namespaceConfig.Namespace, nil)
+			dynamicClient, namespaceDefaultResyncPeriodFunc(),
+			namespaceConfig.Namespace, nil)
 
 		duplicate := make(map[string]bool)
 
@@ -184,7 +195,6 @@ func Setup(options Options) (*InformerSet, error) {
 					"parse resource error, .Namespaces[%d].Informer[%d]: %s",
 					i, j, resourceConfig.Resource)
 			}
-			klog.V(1).Infof("[n%d,r%d] gvr: [%v]", i, j, gvr)
 
 			if _, ok := duplicate[gvr.String()]; ok {
 				return nil, errors.Errorf(
@@ -204,12 +214,17 @@ func Setup(options Options) (*InformerSet, error) {
 			if len(channelNames) == 0 {
 				channelNames = namespaceDefaultChannelNames
 			}
-			klog.V(1).Infof("[n%d,r%d] final channelNames: %v", i, j, channelNames)
 			workers := resourceConfig.Workers
 			if workers < 1 {
 				workers = namespaceDefaultWorkers
 			}
-			klog.V(1).Infof("[n%d,r%d] final workers: %d", i, j, workers)
+			maxRetries := resourceConfig.MaxRetries
+			if maxRetries < 1 {
+				maxRetries = namespaceDefaultMaxRetries
+			}
+			klog.V(1).Infof(
+				"[n%d,r%d] gvr: [%v], workers: %d, max retries: %d, channel names: %v",
+				i, j, gvr, workers, maxRetries, channelNames)
 
 			rateLimiter := workqueue.DefaultControllerRateLimiter()
 			queue := workqueue.NewRateLimitingQueue(rateLimiter)
@@ -304,6 +319,7 @@ func Setup(options Options) (*InformerSet, error) {
 				ChannelMap:      channelMap,
 				Queue:           queue,
 				Workers:         workers,
+				MaxRetries:      maxRetries,
 				processingItems: &sync.WaitGroup{}, // TODO: wait before exit
 			})
 		} // end resources loop

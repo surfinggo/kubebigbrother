@@ -57,6 +57,7 @@ namespaces:
     - print-to-stdout
     resyncPeriod: 12h # resync period only for this resource, optional
     workers: 3 # workers only for this resource, optional
+    maxRetries: 3 #  max retries for this resource, optional
   # default channels names for resources in this namespace,
   # this value can be override by .resource.channelNames,
   # optional
@@ -66,6 +67,9 @@ namespaces:
   # this value can be override by .resource.workers,
   # optional
   defaultWorkers: 3
+  # default max retries for resource in this namespace,
+  # this value can be override by .resource.maxRetries
+  defaultMaxRetries: 3
   # minimum resync period for resources in this namespace, actual resync period will between 12h to 24h,
   # this value can be override by .resource.resyncPeriod,
   # optional
@@ -126,9 +130,13 @@ namespaces:
 defaultChannelNames:
 - print-to-stdout
 
-# global default workers
+# global default workers,
 # this value can be override by .namespace.defaultWorkers and .resource.workers
 defaultWorkers: 3
+
+# global default max retries,
+# this value can be override by .namespace.defaultMaxRetries and .resource.maxRetries
+defaultMaxRetries: 3
 
 # global minimum resync period, actual resync period will between 12h to 24h,
 # this value can be override by .namespace.minResyncPeriod and .resource.resyncPeriod

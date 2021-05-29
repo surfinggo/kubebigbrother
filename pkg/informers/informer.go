@@ -38,6 +38,9 @@ type Informer struct {
 
 	// Workers is number of workers
 	Workers int
+
+	// MaxRetries defines max retry times
+	MaxRetries int
 }
 
 func (i *Informer) RunWorker() {
@@ -112,8 +115,7 @@ func (i *Informer) handleErr(item *eventWrapper, result error) {
 		return
 	}
 
-	// try 3 times
-	if i.Queue.NumRequeues(item) >= 2 {
+	if i.Queue.NumRequeues(item) >= i.MaxRetries-1 {
 		klog.Errorf(
 			"[%s try] error processing: [%s] [%s]: %s, max retries exceeded, dropping item out of the queue",
 			humanize.Ordinal(i.Queue.NumRequeues(item)+1),

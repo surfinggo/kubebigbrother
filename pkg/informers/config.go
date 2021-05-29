@@ -76,6 +76,9 @@ type ResourceConfig struct {
 
 	// Workers is the number of workers
 	Workers int `json:"workers" yaml:"workers"`
+
+	// MaxRetries is the max retry times
+	MaxRetries int `json:"maxRetries" yaml:"maxRetries"`
 }
 
 func (c *ResourceConfig) buildResyncPeriodFuncWithDefault(defaultFunc ResyncPeriodFunc) (ResyncPeriodFunc, error) {
@@ -105,6 +108,9 @@ type NamespaceConfig struct {
 
 	// DefaultWorkers is the default number of workers in this namespace
 	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
+
+	// DefaultMaxRetries is the default max retry times in this namespace
+	DefaultMaxRetries int `json:"defaultMaxRetries" yaml:"defaultMaxRetries"`
 
 	// MinResyncPeriod is the resync period in reflectors in this namespace;
 	// actual resync period will be random between MinResyncPeriod and 2*minResyncPeriod.
@@ -138,6 +144,9 @@ type Config struct {
 
 	// DefaultWorkers is the default number of workers
 	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
+
+	// DefaultMaxRetries is the default max retry times
+	DefaultMaxRetries int `json:"defaultMaxRetries" yaml:"defaultMaxRetries"`
 
 	// MinResyncPeriod is the resync period in reflectors;
 	// actual resync period will be random between MinResyncPeriod and 2*minResyncPeriod.
