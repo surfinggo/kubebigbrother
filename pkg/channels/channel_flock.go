@@ -99,6 +99,11 @@ func (c *ChannelFlock) Handle(ctx *EventProcessContext) error {
 	if err != nil {
 		return errors.Wrap(err, "send request error")
 	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			klog.Warning(errors.Wrap(err, "close body error"))
+		}
+	}()
 	if resp.StatusCode != 200 {
 		return errors.Errorf("non-200 code returned: %d", resp.StatusCode)
 	}
