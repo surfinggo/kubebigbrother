@@ -27,6 +27,8 @@ channels:
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
   print-demo-minimun:
     type: print
+    print:
+      writer: stdout
   telegram-demo-full:
     type: telegram
     telegram: # configuration for type: telegram
@@ -39,6 +41,7 @@ channels:
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
   telegram-demo-minimum:
     type: telegram
+    telegram:
       token: "xxx"
       recipients:
       - 648014523
@@ -110,14 +113,21 @@ namespaces:
 #    noticeWhenDeleted: true
 #  - resource: "deployments.v1.apps"
 #    noticeWhenDeleted: true
-#- namespace: "" # demonstration 6: callback
+#- namespace: "demo" # demonstration 6: callback
 #  resources:
 #  - resource: "configmaps"
 #    noticeWhenAdded: true
 #    noticeWhenDeleted: true
 #    channelNames:
 #    - callback-demo-full
-#- namespace: "" # demonstration 7: telegram
+#- namespace: "demo" # demonstration 7: print
+#  resources:
+#  - resource: "configmaps"
+#    noticeWhenAdded: true
+#    noticeWhenDeleted: true
+#    channelNames:
+#    - print-demo-full
+#- namespace: "demo" # demonstration 8: telegram
 #  resources:
 #  - resource: "configmaps"
 #    noticeWhenAdded: true

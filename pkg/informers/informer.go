@@ -11,13 +11,6 @@ import (
 	"sync"
 )
 
-type InformerInterface interface {
-	RunWorker()
-	GetWorkers() int
-	GetResource() string
-	ShutDown()
-}
-
 type Informer struct {
 	// ID is an unique string to identify instances
 	ID string
@@ -58,8 +51,8 @@ func (i *Informer) processNextItem() bool {
 	item := obj.(*eventWrapper)
 
 	if klog.V(5).Enabled() {
-		klog.V(5).Infof("[%s try] item pop from queue: [%s] [%s]",
-			humanize.Ordinal(i.Queue.NumRequeues(item)+1),
+		klog.Infof("[%s] [%s try] item pop from queue: [%s] [%s]",
+			i.ID, humanize.Ordinal(i.Queue.NumRequeues(item)+1),
 			item.Event.Type, item.GroupVersionKindName())
 	}
 
@@ -106,8 +99,8 @@ func (i *Informer) processItem(item *eventWrapper) error {
 func (i *Informer) handleErr(item *eventWrapper, result error) {
 	if result == nil {
 		if klog.V(5).Enabled() {
-			klog.Infof("[%s try] item processed: [%s] [%s]",
-				humanize.Ordinal(i.Queue.NumRequeues(item)+1),
+			klog.Infof("[%s] [%s try] item processed: [%s] [%s]",
+				i.ID, humanize.Ordinal(i.Queue.NumRequeues(item)+1),
 				item.Event.Type, item.GroupVersionKindName())
 		}
 		// clear retry counter after success
@@ -117,8 +110,9 @@ func (i *Informer) handleErr(item *eventWrapper, result error) {
 
 	if i.Queue.NumRequeues(item) >= i.MaxRetries-1 {
 		klog.Errorf(
-			"[%s try] error processing: [%s] [%s]: %s, max retries exceeded, dropping item out of the queue",
-			humanize.Ordinal(i.Queue.NumRequeues(item)+1),
+			"[%s] [%s try] error processing: "+
+				"[%s] [%s]: %s, max retries exceeded, dropping item out of the queue",
+			i.ID, humanize.Ordinal(i.Queue.NumRequeues(item)+1),
 			item.Event.Type, item.GroupVersionKindName(), result)
 
 		// max retries exceeded, forget it
@@ -127,20 +121,12 @@ func (i *Informer) handleErr(item *eventWrapper, result error) {
 	}
 
 	if klog.V(5).Enabled() {
-		klog.Warningf("[%s try] error processing: [%s] [%s]: %s, will be retried",
-			humanize.Ordinal(i.Queue.NumRequeues(item)+1),
+		klog.Warningf("[%s] [%s try] error processing: [%s] [%s]: %s, will be retried",
+			i.ID, humanize.Ordinal(i.Queue.NumRequeues(item)+1),
 			item.Event.Type, item.GroupVersionKindName(), result)
 	}
 	// retrying
 	i.Queue.AddRateLimited(item)
-}
-
-func (i *Informer) GetWorkers() int {
-	return i.Workers
-}
-
-func (i *Informer) GetResource() string {
-	return i.Resource
 }
 
 func (i *Informer) ShutDown() {

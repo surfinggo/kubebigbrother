@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
+	"github.com/spongeprojects/magicconch"
 	"gopkg.in/yaml.v3"
 	"math/rand"
 	"os"
@@ -155,7 +156,10 @@ type Config struct {
 
 // Validate validates Config values
 func (c *Config) Validate() error {
+	var channelNames []string
 	for name, channel := range c.Channels {
+		channelNames = append(channelNames, string(name))
+
 		switch channel.Type {
 		case channels.ChannelTypeCallback:
 			if channel.Callback == nil {
@@ -171,6 +175,28 @@ func (c *Config) Validate() error {
 			if channel.Telegram == nil {
 				return errors.Errorf(
 					"config missing for Telegram channel, name: %s", name)
+			}
+		}
+	}
+	for _, name := range c.DefaultChannelNames {
+		if !magicconch.StringInSlice(string(name), channelNames) {
+			return errors.Errorf("non-exist channel name: %s in default namespaces", name)
+		}
+	}
+	for i, namespace := range c.Namespaces {
+		for _, name := range namespace.DefaultChannelNames {
+			if !magicconch.StringInSlice(string(name), channelNames) {
+				return errors.Errorf(
+					"non-exist channel name: %s in .Namespaces[%d]", name, i)
+			}
+		}
+		for j, resource := range namespace.Resources {
+			for _, name := range resource.ChannelNames {
+				if !magicconch.StringInSlice(string(name), channelNames) {
+					return errors.Errorf(
+						"non-exist channel name: %s in .Namespaces[%d].Resources[%d]",
+						name, i, j)
+				}
 			}
 		}
 	}

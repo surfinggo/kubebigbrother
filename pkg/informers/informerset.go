@@ -7,7 +7,6 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils/resourcebuilder"
-	"github.com/spongeprojects/magicconch"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
@@ -47,7 +46,7 @@ type Interface interface {
 type InformerSet struct {
 	ResourceBuilder   resourcebuilder.Interface
 	Factories         []dynamicinformer.DynamicSharedInformerFactory
-	ResourceInformers []InformerInterface
+	ResourceInformers []*Informer
 }
 
 func (set *InformerSet) Start(stopCh <-chan struct{}) error {
@@ -66,9 +65,10 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 	}
 
 	for i, resourceInformer := range set.ResourceInformers {
-		klog.Infof("starting resource informer %d/%d, workers: %d, resource: %s",
-			i+1, len(set.ResourceInformers), resourceInformer.GetWorkers(), resourceInformer.GetResource())
-		for i := 0; i < resourceInformer.GetWorkers(); i++ {
+		klog.Infof("starting informer %d/%d: %s, workers: %d, resource: %s",
+			i+1, len(set.ResourceInformers), resourceInformer.ID,
+			resourceInformer.Workers, resourceInformer.Resource)
+		for i := 0; i < resourceInformer.Workers; i++ {
 			go wait.Until(resourceInformer.RunWorker, time.Second, stopCh)
 		}
 	}
@@ -151,15 +151,17 @@ func Setup(options Options) (*InformerSet, error) {
 		defaultWorkers, defaultMaxRetries, defaultChannelNames)
 
 	for i, namespaceConfig := range config.Namespaces {
-		klog.Infof("[n%d] setup namespace %d/%d: %s",
-			i, i+1, len(config.Namespaces), namespaceConfig.Namespace)
+		nID := fmt.Sprintf("n%d", i) // unique id
+		nDesc := fmt.Sprintf(".Namespaces[%d]", i)
+
+		klog.Infof("[%s] setup namespace %d/%d: %s",
+			nID, i+1, len(config.Namespaces), namespaceConfig.Namespace)
 
 		namespaceDefaultResyncPeriodFunc, err := namespaceConfig.buildResyncPeriodFuncWithDefault(
 			defaultResyncPeriodFunc)
 		if err != nil {
 			return nil, errors.Wrapf(err,
-				"namespace.BuildResyncPeriodFuncWithDefault error, .Namespaces[%d]: %s",
-				i, namespaceConfig.MinResyncPeriod)
+				"invalid resync period in %s: %s", nDesc, namespaceConfig.MinResyncPeriod)
 		}
 		namespaceDefaultChannelNames := namespaceConfig.DefaultChannelNames
 		if len(namespaceDefaultChannelNames) == 0 {
@@ -174,8 +176,8 @@ func Setup(options Options) (*InformerSet, error) {
 			namespaceDefaultMaxRetries = defaultMaxRetries
 		}
 		klog.V(1).Infof(
-			"[n%d] namespace default: workers: %d, max retries: %d, channel names: %v",
-			i, namespaceDefaultWorkers,
+			"[%s] namespace default: workers: %d, max retries: %d, channel names: %v",
+			nID, namespaceDefaultWorkers,
 			namespaceDefaultMaxRetries,
 			namespaceDefaultChannelNames)
 
@@ -186,20 +188,22 @@ func Setup(options Options) (*InformerSet, error) {
 		duplicate := make(map[string]bool)
 
 		for j, resourceConfig := range namespaceConfig.Resources {
-			klog.Infof("[n%d,r%d] setup resource %d/%d: %s",
-				i, j, j+1, len(namespaceConfig.Resources), resourceConfig.Resource)
+			rID := fmt.Sprintf("%sr%d", nID, j) // unique rID
+			rDesc := fmt.Sprintf("%s.Resources[%d]", nDesc, i)
+
+			klog.Infof("[%s] setup resource %d/%d: %s",
+				rID, j+1, len(namespaceConfig.Resources), resourceConfig.Resource)
 
 			gvr, err := informerSet.ResourceBuilder.ParseGroupResource(resourceConfig.Resource)
 			if err != nil {
 				return nil, errors.Wrapf(err,
-					"parse resource error, .Namespaces[%d].Informer[%d]: %s",
-					i, j, resourceConfig.Resource)
+					"invalid resource in %s: %s", rDesc, resourceConfig.Resource)
 			}
 
 			if _, ok := duplicate[gvr.String()]; ok {
 				return nil, errors.Errorf(
-					"duplicated resources in same namespace, .Namespaces[%d].Resources[%d]: %s",
-					i, j, resourceConfig.Resource)
+					"duplicated resources in same namespace %s: %s",
+					rDesc, resourceConfig.Resource)
 			}
 			duplicate[gvr.String()] = true
 
@@ -207,8 +211,8 @@ func Setup(options Options) (*InformerSet, error) {
 				namespaceDefaultResyncPeriodFunc)
 			if err != nil {
 				return nil, errors.Wrapf(err,
-					"resource.BuildResyncPeriodFuncWithDefault error, .Namespaces[%d].Resources[%d]: %s",
-					i, j, resourceConfig.ResyncPeriod)
+					"invalid resync period in %s: %s",
+					rDesc, resourceConfig.ResyncPeriod)
 			}
 			channelNames := resourceConfig.ChannelNames
 			if len(channelNames) == 0 {
@@ -223,8 +227,8 @@ func Setup(options Options) (*InformerSet, error) {
 				maxRetries = namespaceDefaultMaxRetries
 			}
 			klog.V(1).Infof(
-				"[n%d,r%d] gvr: [%v], workers: %d, max retries: %d, channel names: %v",
-				i, j, gvr, workers, maxRetries, channelNames)
+				"[%s] gvr: [%v], workers: %d, max retries: %d, channel names: %v",
+				rID, gvr, workers, maxRetries, channelNames)
 
 			rateLimiter := workqueue.DefaultControllerRateLimiter()
 			queue := workqueue.NewRateLimitingQueue(rateLimiter)
@@ -236,11 +240,12 @@ func Setup(options Options) (*InformerSet, error) {
 				!resourceConfig.NoticeWhenUpdated {
 				// for some reason, informer won't start if they are all false,
 				// maybe someday someone can clarify why this happen.
-				return nil, errors.New(
-					"NoticeWhenAdded, NoticeWhenDeleted and NoticeWhenUpdated cannot be false simultaneously")
+				return nil, errors.Errorf(
+					"NoticeWhenAdded, NoticeWhenDeleted and NoticeWhenUpdated "+
+						"cannot be false simultaneously in %s", rDesc)
 			}
 			if resourceConfig.NoticeWhenAdded {
-				klog.V(1).Infof("[n%d,r%d] set AddFunc", i, j)
+				klog.V(1).Infof("[%s] set AddFunc", rID)
 				handlerFuncs.AddFunc = func(obj interface{}) {
 					s, ok := obj.(*unstructured.Unstructured)
 					if !ok {
@@ -255,7 +260,7 @@ func Setup(options Options) (*InformerSet, error) {
 				}
 			}
 			if resourceConfig.NoticeWhenDeleted {
-				klog.V(1).Infof("[n%d,r%d] set DeleteFunc", i, j)
+				klog.V(1).Infof("[%s] set DeleteFunc", rID)
 				handlerFuncs.DeleteFunc = func(obj interface{}) {
 					s, ok := obj.(*unstructured.Unstructured)
 					if !ok {
@@ -270,7 +275,7 @@ func Setup(options Options) (*InformerSet, error) {
 				}
 			}
 			if resourceConfig.NoticeWhenUpdated {
-				klog.V(1).Infof("[n%d,r%d] set UpdateFunc", i, j)
+				klog.V(1).Infof("[%s] set UpdateFunc", rID)
 				handlerFuncs.UpdateFunc = func(oldObj, obj interface{}) {
 					oldS, ok1 := oldObj.(*unstructured.Unstructured)
 					s, ok2 := obj.(*unstructured.Unstructured)
@@ -313,7 +318,7 @@ func Setup(options Options) (*InformerSet, error) {
 			informer.AddEventHandlerWithResyncPeriod(handlerFuncs, resyncPeriodFunc())
 
 			informerSet.ResourceInformers = append(informerSet.ResourceInformers, &Informer{
-				ID:              magicconch.StringRand(8),
+				ID:              rID,
 				Resource:        resourceConfig.Resource,
 				UpdateOn:        resourceConfig.UpdateOn,
 				ChannelMap:      channelMap,
