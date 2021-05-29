@@ -9,7 +9,7 @@ channels:
     callback: # configuration for type: callback
       method: POST # callback HTTP method, default to POST
       url: "http://localhost:8984/api/v1/callback-channel-test" # send notification to this url
-      useTemplate: true # when set to false, callback channel sends raw JSON data to the url
+      useTemplate: true # when set to false, callback channel sends raw JSON bytes to the url, default to false
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
@@ -21,6 +21,7 @@ channels:
     type: print
     print: # configuration for type: print
       writer: stdout
+      useTemplate: true # when set to false, print channel writes raw JSON bytes to the writer, default to false
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional

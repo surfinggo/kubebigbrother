@@ -35,6 +35,7 @@ type ChannelCallbackConfig struct {
 // ChannelPrintConfig is config for ChannelPrint, read from config file
 type ChannelPrintConfig struct {
 	Writer          string `json:"writer" yaml:"writer"`
+	UseTemplate     bool   `json:"useTemplate" yaml:"useTemplate"`
 	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
 	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
 	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
@@ -243,6 +244,7 @@ func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	case channels.ChannelTypePrint:
 		return channels.NewChannelPrint(&channels.ChannelPrintConfig{
 			Writer:          config.Print.Writer,
+			UseTemplate:     config.Print.UseTemplate,
 			AddedTemplate:   config.Print.AddedTemplate,
 			DeletedTemplate: config.Print.DeletedTemplate,
 			UpdatedTemplate: config.Print.UpdatedTemplate,

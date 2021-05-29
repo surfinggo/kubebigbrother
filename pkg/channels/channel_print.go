@@ -2,6 +2,7 @@ package channels
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
@@ -14,6 +15,7 @@ import (
 // ChannelPrintConfig is config for ChannelPrint
 type ChannelPrintConfig struct {
 	Writer          string
+	UseTemplate     bool
 	AddedTemplate   string
 	DeletedTemplate string
 	UpdatedTemplate string
@@ -23,6 +25,7 @@ type ChannelPrintConfig struct {
 type ChannelPrint struct {
 	Writer      io.Writer
 	IsStdout    bool
+	UseTemplate bool
 	TmplAdded   *template.Template
 	TmplDeleted *template.Template
 	TmplUpdated *template.Template
@@ -38,29 +41,30 @@ func (c *ChannelPrint) NewEventProcessContext(e *event.Event) *EventProcessConte
 
 // Handle implements Channel
 func (c *ChannelPrint) Handle(ctx *EventProcessContext) error {
-	var t *template.Template
-	switch ctx.Event.Type {
-	case event.TypeAdded:
-		t = c.TmplAdded
-	case event.TypeDeleted:
-		t = c.TmplDeleted
-	case event.TypeUpdated:
-		t = c.TmplUpdated
-	default:
-		return errors.Errorf("unknown event type: %s", ctx.Event.Type)
+	buf := &bytes.Buffer{}
+	if c.UseTemplate {
+		var t *template.Template
+		switch ctx.Event.Type {
+		case event.TypeAdded:
+			t = c.TmplAdded
+		case event.TypeDeleted:
+			t = c.TmplDeleted
+		case event.TypeUpdated:
+			t = c.TmplUpdated
+		default:
+			return errors.Errorf("unknown event type: %s", ctx.Event.Type)
+		}
+		if err := t.Execute(buf, ctx.Event); err != nil {
+			return errors.Wrap(err, "execute template error")
+		}
+	} else {
+		if err := json.NewEncoder(buf).Encode(ctx.Event); err != nil {
+			return errors.Wrap(err, "json encode error")
+		}
 	}
 
 	if c.IsStdout {
 		printFunc := func() error {
-			buf := &bytes.Buffer{}
-			if err := t.Execute(buf, ctx.Event); err != nil {
-				// print an extra blank line when error occurs,
-				// because print may be interrupted
-				// without line feed at the end
-				_, _ = c.Writer.Write([]byte("\n"))
-				return err
-			}
-
 			var styled string
 			switch ctx.Event.Type {
 			case event.TypeAdded:
@@ -81,12 +85,8 @@ func (c *ChannelPrint) Handle(ctx *EventProcessContext) error {
 		return klog.WithLock(printFunc)
 	} // end if isStdout
 
-	if err := t.Execute(c.Writer, ctx.Event); err != nil {
-		// print an extra blank line when error occurs,
-		// because print may be interrupted
-		// without line feed at the end
-		_, _ = c.Writer.Write([]byte("\n"))
-		return errors.Wrap(err, "execute template error")
+	if _, err := io.Copy(c.Writer, buf); err != nil {
+		return errors.Wrap(err, "write error")
 	}
 	return nil
 }
@@ -115,6 +115,7 @@ func NewChannelPrint(config *ChannelPrintConfig) (*ChannelPrint, error) {
 	return &ChannelPrint{
 		Writer:      writer,
 		IsStdout:    config.Writer == PrintWriterStdout,
+		UseTemplate: config.UseTemplate,
 		TmplAdded:   tmplAdded,
 		TmplDeleted: tmplDeleted,
 		TmplUpdated: tmplUpdated,
