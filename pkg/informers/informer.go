@@ -110,8 +110,9 @@ func (i *Informer) handleErr(item *eventWrapper, result error) {
 		return
 	}
 
-	klog.Error(fmt.Errorf("max retries exceeded, "+
-		"dropping item %s out of the queue: %v", item.GroupVersionKindName(), result))
+	klog.Error(fmt.Errorf(
+		"max retries exceeded, dropping item [%s] out of the queue: %v",
+		item.GroupVersionKindName(), result))
 	// max retries exceeded, forget it
 	i.Queue.Forget(item)
 }
