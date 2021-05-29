@@ -243,7 +243,7 @@ func Setup(options Options) (*InformerSet, error) {
 				}
 			}
 			if resourceConfig.NoticeWhenUpdated {
-				klog.V(1).Infof("[%d,%d] set UpdateFunc", i, j)
+				klog.V(1).Infof("[n%d,r%d] set UpdateFunc", i, j)
 				handlerFuncs.UpdateFunc = func(oldObj, obj interface{}) {
 					oldS, ok1 := oldObj.(*unstructured.Unstructured)
 					s, ok2 := obj.(*unstructured.Unstructured)
