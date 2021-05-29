@@ -2,6 +2,7 @@ package informers
 
 import (
 	"fmt"
+	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
 	"k8s.io/client-go/util/workqueue"
@@ -52,7 +53,12 @@ func (i *Informer) processNextItem() bool {
 		return false
 	}
 	item := obj.(*eventWrapper)
-	klog.V(5).Infof("new item from queue: [%s] [%s]", item.Event.Type, item.GroupVersionKindName())
+
+	if klog.V(5).Enabled() {
+		klog.V(5).Infof("[%s try] item pop from queue: [%s] [%s]",
+			humanize.Ordinal(i.Queue.NumRequeues(item)+1),
+			item.Event.Type, item.GroupVersionKindName())
+	}
 
 	i.processingItems.Add(1)
 
@@ -96,25 +102,35 @@ func (i *Informer) processItem(item *eventWrapper) error {
 // handleErr checks the result, schedules retry if needed
 func (i *Informer) handleErr(item *eventWrapper, result error) {
 	if result == nil {
-		klog.V(5).Infof("processed: [%s] [%s]", item.Event.Type, item.GroupVersionKindName())
+		if klog.V(5).Enabled() {
+			klog.Infof("[%s try] item processed: [%s] [%s]",
+				humanize.Ordinal(i.Queue.NumRequeues(item)+1),
+				item.Event.Type, item.GroupVersionKindName())
+		}
 		// clear retry counter after success
 		i.Queue.Forget(item)
 		return
 	}
 
-	if i.Queue.NumRequeues(item) <= 3 {
-		klog.Warningf("error processing [%s] [%s]: %v",
+	// try 3 times
+	if i.Queue.NumRequeues(item) >= 2 {
+		klog.Errorf(
+			"[%s try] error processing: [%s] [%s]: %s, max retries exceeded, dropping item out of the queue",
+			humanize.Ordinal(i.Queue.NumRequeues(item)+1),
 			item.Event.Type, item.GroupVersionKindName(), result)
-		// retrying
-		i.Queue.AddRateLimited(item)
+
+		// max retries exceeded, forget it
+		i.Queue.Forget(item)
 		return
 	}
 
-	klog.Error(fmt.Errorf(
-		"max retries exceeded, dropping item [%s] out of the queue: %v",
-		item.GroupVersionKindName(), result))
-	// max retries exceeded, forget it
-	i.Queue.Forget(item)
+	if klog.V(5).Enabled() {
+		klog.Warningf("[%s try] error processing: [%s] [%s]: %s, will be retried",
+			humanize.Ordinal(i.Queue.NumRequeues(item)+1),
+			item.Event.Type, item.GroupVersionKindName(), result)
+	}
+	// retrying
+	i.Queue.AddRateLimited(item)
 }
 
 func (i *Informer) GetWorkers() int {
