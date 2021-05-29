@@ -18,13 +18,13 @@ const (
 // Event is representation of Kubernetes event
 type Event struct {
 	// Type is the type of the event
-	Type Type
+	Type Type `json:"type"`
 
 	// Obj is the resource affected
-	Obj *unstructured.Unstructured
+	Obj *unstructured.Unstructured `json:"obj"`
 
 	// OldObj is only set for EventTypeUpdated
-	OldObj *unstructured.Unstructured
+	OldObj *unstructured.Unstructured `json:"oldObj"`
 
 	// gvkNameCache is a cache for GroupVersionKindName
 	gvkNameCache string
