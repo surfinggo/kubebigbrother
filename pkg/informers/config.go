@@ -145,7 +145,8 @@ func (c *NamespaceConfig) buildResyncPeriodFunc() (f ResyncPeriodFunc, set bool,
 	return buildResyncPeriodFunc(c.MinResyncPeriod)
 }
 
-type Config struct {
+// ConfigFile is struct of informers config file
+type ConfigFile struct {
 	// Namespaces defines namespaces and resources to watch
 	Namespaces []NamespaceConfig `json:"namespaces" yaml:"namespaces"`
 
@@ -166,8 +167,8 @@ type Config struct {
 	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
 }
 
-// Validate validates Config values
-func (c *Config) Validate() error {
+// Validate validates ConfigFile values
+func (c *ConfigFile) Validate() error {
 	var channelNames []string
 	for name, channel := range c.Channels {
 		channelNames = append(channelNames, string(name))
@@ -220,7 +221,7 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-func (c *Config) buildResyncPeriodFunc() (f ResyncPeriodFunc, err error) {
+func (c *ConfigFile) buildResyncPeriodFunc() (f ResyncPeriodFunc, err error) {
 	if c.MinResyncPeriod == "" {
 		c.MinResyncPeriod = "12h"
 	}
@@ -259,12 +260,12 @@ func parseResyncPeriod(resyncPeriod string) (f time.Duration, set bool, err erro
 }
 
 // LoadConfigFromFile loads config from file
-func LoadConfigFromFile(file string) (*Config, error) {
+func LoadConfigFromFile(file string) (*ConfigFile, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, errors.Wrap(err, "os.Open error")
 	}
-	var config Config
+	var config ConfigFile
 	switch t := strings.ToLower(path.Ext(file)); t {
 	case ".json":
 		err = json.NewDecoder(f).Decode(&config)

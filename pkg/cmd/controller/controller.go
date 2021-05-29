@@ -7,11 +7,11 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/stores/event_store"
 )
 
-type Options struct {
+type Config struct {
 	DBDialect       string
 	DBArgs          string
 	KubeConfig      string
-	InformersConfig *informers.Config
+	InformersConfig *informers.ConfigFile
 }
 
 type Controller struct {
@@ -27,19 +27,19 @@ func (c *Controller) Shutdown() {
 	c.Informers.Shutdown()
 }
 
-func Setup(options Options) (*Controller, error) {
+func Setup(config Config) (*Controller, error) {
 	recorder := &Controller{}
 
-	db, err := gormdb.New(options.DBDialect, options.DBArgs)
+	db, err := gormdb.New(config.DBDialect, config.DBArgs)
 	if err != nil {
 		return nil, errors.Wrap(err, "create db instance error")
 	}
 
 	recorder.EventStore = event_store.New(db)
 
-	informerInstance, err := informers.Setup(informers.Options{
-		KubeConfig: options.KubeConfig,
-		Config:     options.InformersConfig,
+	informerInstance, err := informers.Setup(informers.Config{
+		KubeConfig: config.KubeConfig,
+		ConfigFile: config.InformersConfig,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "setup informers error")

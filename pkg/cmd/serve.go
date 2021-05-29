@@ -33,7 +33,7 @@ func NewServeCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			o := getServeOptions()
 
-			app, err := server.SetupApp(&server.Options{
+			app, err := server.SetupApp(&server.Config{
 				Version: Version,
 				Env:     o.GlobalOptions.Env,
 				Addr:    o.Addr,

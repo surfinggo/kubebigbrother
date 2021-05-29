@@ -50,7 +50,7 @@ func NewWatchCommand() *cobra.Command {
 				klog.Exit(errors.Wrap(err, "informers.LoadConfigFromFile error"))
 			}
 
-			w, err := watcher.Setup(watcher.Options{
+			w, err := watcher.Setup(watcher.Config{
 				KubeConfig:      o.KubeconfigOptions.Kubeconfig,
 				InformersConfig: informersConfig,
 			})

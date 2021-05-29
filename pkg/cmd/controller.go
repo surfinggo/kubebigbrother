@@ -52,7 +52,7 @@ func NewControllerCommand() *cobra.Command {
 				klog.Exit(errors.Wrap(err, "informers.LoadConfigFromFile error"))
 			}
 
-			c, err := controller.Setup(controller.Options{
+			c, err := controller.Setup(controller.Config{
 				DBDialect:       o.DatabaseOptions.DBDialect,
 				DBArgs:          o.DatabaseOptions.DBDialect,
 				KubeConfig:      o.KubeconfigOptions.Kubeconfig,

@@ -12,9 +12,9 @@ const (
 	channelNamePrintToStdout = channels.ChannelName("print-to-stdout")
 )
 
-type Options struct {
+type Config struct {
 	KubeConfig      string
-	InformersConfig *informers.Config
+	InformersConfig *informers.ConfigFile
 }
 
 type Watcher struct {
@@ -29,24 +29,24 @@ func (w *Watcher) Shutdown() {
 	w.Informers.Shutdown()
 }
 
-func Setup(options Options) (*Watcher, error) {
-	if len(options.InformersConfig.Channels) != 0 {
+func Setup(config Config) (*Watcher, error) {
+	if len(config.InformersConfig.Channels) != 0 {
 		var p string
-		if len(options.InformersConfig.Channels) == 1 {
+		if len(config.InformersConfig.Channels) == 1 {
 			p = "the channel has"
 		} else {
-			p = fmt.Sprintf("%d channels have", len(options.InformersConfig.Channels))
+			p = fmt.Sprintf("%d channels have", len(config.InformersConfig.Channels))
 		}
 		klog.Warningf("watch: %s been replaced by a single channel: %s", p, channelNamePrintToStdout)
 	}
 
 	watcher := &Watcher{}
 
-	config := options.InformersConfig
+	informersConfig := config.InformersConfig
 
 	// watcher only prints event to stdout, all user defined channels will be
 	// dropped.
-	adapted := &informers.Config{
+	adapted := &informers.ConfigFile{
 		Channels: map[channels.ChannelName]informers.ChannelConfig{
 			channelNamePrintToStdout: {
 				Type: channels.ChannelTypePrint,
@@ -55,11 +55,11 @@ func Setup(options Options) (*Watcher, error) {
 				},
 			},
 		},
-		DefaultWorkers:      config.DefaultWorkers,
-		DefaultChannelNames: config.DefaultChannelNames,
-		MinResyncPeriod:     config.MinResyncPeriod,
+		DefaultWorkers:      informersConfig.DefaultWorkers,
+		DefaultChannelNames: informersConfig.DefaultChannelNames,
+		MinResyncPeriod:     informersConfig.MinResyncPeriod,
 	}
-	for _, namespace := range config.Namespaces {
+	for _, namespace := range informersConfig.Namespaces {
 		var resources []informers.ResourceConfig
 		for _, resource := range namespace.Resources {
 			resources = append(resources, informers.ResourceConfig{
@@ -82,9 +82,9 @@ func Setup(options Options) (*Watcher, error) {
 		})
 	}
 
-	informerSet, err := informers.Setup(informers.Options{
-		KubeConfig: options.KubeConfig,
-		Config:     adapted,
+	informerSet, err := informers.Setup(informers.Config{
+		KubeConfig: config.KubeConfig,
+		ConfigFile: adapted,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "setup informers error")

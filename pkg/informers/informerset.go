@@ -21,14 +21,14 @@ import (
 	"time"
 )
 
-type Options struct {
+type Config struct {
 	KubeConfig string
 
-	Config *Config
+	ConfigFile *ConfigFile
 }
 
-func (o *Options) Validate() error {
-	if err := o.Config.Validate(); err != nil {
+func (c *Config) Validate() error {
+	if err := c.ConfigFile.Validate(); err != nil {
 		return errors.Wrap(err, "invalid config")
 	}
 	return nil
@@ -85,12 +85,12 @@ func (set *InformerSet) Shutdown() {
 }
 
 // Setup setups new InformerSet
-func Setup(options Options) (*InformerSet, error) {
+func Setup(options Config) (*InformerSet, error) {
 	if err := options.Validate(); err != nil {
 		return nil, errors.Wrap(err, "invalid options")
 	}
 
-	config := options.Config
+	config := options.ConfigFile
 
 	informerSet := &InformerSet{}
 

@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Options struct {
+type Config struct {
 	Version string
 
 	Env string
@@ -22,17 +22,17 @@ type App struct {
 	Router *gin.Engine
 }
 
-func SetupApp(options *Options) (*App, error) {
-	if options == nil {
-		options = &Options{}
+func SetupApp(config *Config) (*App, error) {
+	if config == nil {
+		config = &Config{}
 	}
 
 	app := &App{}
-	app.Version = options.Version
-	app.Addr = options.Addr
-	app.Env = options.Env
+	app.Version = config.Version
+	app.Addr = config.Addr
+	app.Env = config.Env
 
-	if options.GinDebug {
+	if config.GinDebug {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
