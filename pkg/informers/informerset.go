@@ -110,8 +110,11 @@ func Setup(options Options) (*InformerSet, error) {
 		return nil, errors.Wrap(err, "dynamic.NewForConfig error")
 	}
 
+	i := 0
 	channelMap := make(channels.ChannelMap)
 	for name, channelConfig := range config.Channels {
+		i += 1
+		klog.Infof("setup channel %d/%d: %s, type: %s", i, len(config.Channels), name, channelConfig.Type)
 		channel, err := setupChannelFromConfig(&channelConfig)
 		if err != nil {
 			return nil, errors.Wrap(err, "setup channel error")

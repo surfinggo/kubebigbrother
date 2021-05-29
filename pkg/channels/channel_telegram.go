@@ -120,7 +120,7 @@ func NewChannelTelegram(config *ChannelTelegramConfig) (*ChannelTelegram, error)
 		return nil, errors.New("invalid token, too short")
 	}
 
-	klog.V(2).Infof("using Telegram token: %s...", config.Token[:15])
+	klog.V(2).Infof("Telegram token: %s...", config.Token[:15])
 
 	var httpClient *http.Client
 	if config.Proxy != "" {

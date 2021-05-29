@@ -81,6 +81,8 @@ func (c *ChannelCallback) Handle(ctx *EventProcessContext) error {
 
 // NewChannelCallback creates callback channel
 func NewChannelCallback(config *ChannelCallbackConfig) (*ChannelCallback, error) {
+	klog.V(2).Infof("callback url: %s", config.URL)
+
 	var httpClient *http.Client
 	if config.Proxy != "" {
 		proxyUrl, err := url.Parse(config.Proxy)

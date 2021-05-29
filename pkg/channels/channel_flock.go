@@ -107,6 +107,12 @@ func (c *ChannelFlock) Handle(ctx *EventProcessContext) error {
 
 // NewChannelFlock creates callback channel
 func NewChannelFlock(config *ChannelFlockConfig) (*ChannelFlock, error) {
+	if len(config.URL) < 70 {
+		return nil, errors.New("invalid url, too short")
+	}
+
+	klog.V(2).Infof("Flock url: %s...", config.URL[:45])
+
 	var httpClient *http.Client
 	if config.Proxy != "" {
 		proxyUrl, err := url.Parse(config.Proxy)
