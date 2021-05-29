@@ -3,6 +3,7 @@ module github.com/spongeprojects/kubebigbrother
 go 1.15
 
 require (
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/muesli/termenv v0.8.1
 	github.com/pkg/errors v0.9.1

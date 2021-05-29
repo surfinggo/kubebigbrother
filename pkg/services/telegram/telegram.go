@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"k8s.io/klog/v2"
@@ -32,28 +33,23 @@ func NewBot(token, proxy string) (*tb.Bot, error) {
 
 	count := 1
 	for {
-		t := "time"
-		if count > 1 {
-			t = "times"
-		}
+		t := humanize.Ordinal(count)
 
-		klog.V(1).Infof("[%d %s] trying to connect Telegram...", count, t)
+		klog.V(1).Infof("[%s time] trying to connect Telegram...", t)
 
 		bot, err := tb.NewBot(*setting)
 		if err == nil {
-			klog.V(1).Infof("[%d %s] Telegram connected", count, t)
+			klog.V(1).Infof("[%s time] Telegram connected", t)
 			return bot, nil
 		}
 
 		if count >= 10 {
 			return nil, errors.Wrapf(err,
-				"[%d %s] connect Telegram error, max retry exceeded",
-				count, t)
+				"[%s time] connect Telegram error, max retry exceeded", t)
 		}
 
 		klog.V(1).Info(errors.Wrapf(err,
-			"[%d %s] connect Telegram error, retrying...",
-			count, t))
+			"[%s time] connect Telegram error, retrying...", t))
 
 		time.Sleep(2 * time.Second)
 

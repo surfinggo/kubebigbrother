@@ -220,7 +220,7 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := event.NewAdded(s)
-					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
+					klog.V(5).Infof("received: [%s] [%s]", e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
 						Event:             e,
 						ChannelsToProcess: buildChannelsToProcess(e, channelNames),
@@ -235,7 +235,7 @@ func Setup(options Options) (*InformerSet, error) {
 						return
 					}
 					e := event.NewDeleted(s)
-					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
+					klog.V(5).Infof("received: [%s] [%s]", e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
 						Event:             e,
 						ChannelsToProcess: buildChannelsToProcess(e, channelNames),
@@ -275,7 +275,7 @@ func Setup(options Options) (*InformerSet, error) {
 					}
 					if resourceConfig.UpdateOn == nil || updated {
 						e := event.NewUpdated(s, oldS)
-						klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
+						klog.V(5).Infof("received: [%s] [%s]", e.Type, utils.GroupVersionKindName(s))
 						queue.Add(&eventWrapper{
 							Event:             e,
 							ChannelsToProcess: buildChannelsToProcess(e, channelNames),

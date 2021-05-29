@@ -52,7 +52,7 @@ func (i *Informer) processNextItem() bool {
 		return false
 	}
 	item := obj.(*eventWrapper)
-	klog.V(5).Infof("new item from queue: [%s] %s", item.Event.Type, item.GroupVersionKindName())
+	klog.V(5).Infof("new item from queue: [%s] [%s]", item.Event.Type, item.GroupVersionKindName())
 
 	i.processingItems.Add(1)
 
