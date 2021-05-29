@@ -138,6 +138,30 @@ type Config struct {
 	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
 }
 
+// Validate validates Config values
+func (c *Config) Validate() error {
+	for name, channel := range c.Channels {
+		switch channel.Type {
+		case channels.ChannelTypeCallback:
+			if channel.Callback == nil {
+				return errors.Errorf(
+					"config missing for callback channel, name: %s", name)
+			}
+		case channels.ChannelTypePrint:
+			if channel.Print == nil {
+				return errors.Errorf(
+					"config missing for print channel, name: %s", name)
+			}
+		case channels.ChannelTypeTelegram:
+			if channel.Telegram == nil {
+				return errors.Errorf(
+					"config missing for Telegram channel, name: %s", name)
+			}
+		}
+	}
+	return nil
+}
+
 func (c *Config) buildResyncPeriodFunc() (f ResyncPeriodFunc, err error) {
 	if c.MinResyncPeriod == "" {
 		c.MinResyncPeriod = "12h"
@@ -200,7 +224,7 @@ func LoadConfigFromFile(file string) (*Config, error) {
 	return &config, nil
 }
 
-func buildChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
+func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	switch config.Type {
 	case channels.ChannelTypeCallback:
 		return channels.NewChannelCallback(&channels.ChannelCallbackConfig{

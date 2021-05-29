@@ -12,12 +12,21 @@ import (
 
 // NewBot creates a new Telegram bot
 func NewBot(token, proxy string) (*tb.Bot, error) {
+	if len(token) < 40 {
+		return nil, errors.New("invalid token, too short")
+	}
+
+	klog.V(1).Infof("using Telegram token: %s...", token[:15])
+
 	var httpClient *http.Client
 	if proxy != "" {
 		proxyUrl, err := url.Parse(proxy)
 		if err != nil {
 			return nil, errors.Wrapf(err, "invalid proxy url: %s", proxy)
 		}
+
+		klog.V(1).Infof("connect to Telegram via proxy: %s", proxyUrl)
+
 		httpClient = &http.Client{
 			Transport: &http.Transport{
 				Proxy: http.ProxyURL(proxyUrl),
@@ -26,6 +35,7 @@ func NewBot(token, proxy string) (*tb.Bot, error) {
 	} else {
 		httpClient = http.DefaultClient
 	}
+
 	setting := &tb.Settings{
 		Token:  token,
 		Client: httpClient,
@@ -35,7 +45,7 @@ func NewBot(token, proxy string) (*tb.Bot, error) {
 	for {
 		t := humanize.Ordinal(count)
 
-		klog.V(1).Infof("[%s time] trying to connect Telegram...", t)
+		klog.V(1).Infof("[%s time] trying to connect to Telegram...", t)
 
 		bot, err := tb.NewBot(*setting)
 		if err == nil {
@@ -43,13 +53,12 @@ func NewBot(token, proxy string) (*tb.Bot, error) {
 			return bot, nil
 		}
 
-		if count >= 10 {
-			return nil, errors.Wrapf(err,
-				"[%s time] connect Telegram error, max retry exceeded", t)
-		}
+		klog.V(1).Infof("[%s time] connect to Telegram error: %s", t, err)
 
-		klog.V(1).Info(errors.Wrapf(err,
-			"[%s time] connect Telegram error, retrying...", t))
+		if count >= 10 {
+			return nil, errors.Wrap(err,
+				"connect to Telegram error, max retry exceeded")
+		}
 
 		time.Sleep(2 * time.Second)
 

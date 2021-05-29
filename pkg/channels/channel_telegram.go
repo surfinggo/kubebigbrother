@@ -92,7 +92,7 @@ func NewChannelTelegram(config *ChannelTelegramConfig) (*ChannelTelegram, error)
 
 	bot, err := telegram.NewBot(config.Token, config.Proxy)
 	if err != nil {
-		return nil, errors.Wrap(err, "create Telegram bot error")
+		return nil, errors.Wrap(err, "create Telegram client error")
 	}
 
 	var tbRecipients []tb.Recipient

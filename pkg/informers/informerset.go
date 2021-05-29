@@ -28,6 +28,13 @@ type Options struct {
 	Config *Config
 }
 
+func (o *Options) Validate() error {
+	if err := o.Config.Validate(); err != nil {
+		return errors.Wrap(err, "invalid config")
+	}
+	return nil
+}
+
 type Interface interface {
 	// Start starts all informers registered,
 	// Start is non-blocking, you should always call Shutdown before exit.
@@ -77,7 +84,12 @@ func (set *InformerSet) Shutdown() {
 	}
 }
 
+// Setup setups new InformerSet
 func Setup(options Options) (*InformerSet, error) {
+	if err := options.Validate(); err != nil {
+		return nil, errors.Wrap(err, "invalid options")
+	}
+
 	config := options.Config
 
 	informerSet := &InformerSet{}
@@ -100,9 +112,9 @@ func Setup(options Options) (*InformerSet, error) {
 
 	channelMap := make(channels.ChannelMap)
 	for name, channelConfig := range config.Channels {
-		channel, err := buildChannelFromConfig(&channelConfig)
+		channel, err := setupChannelFromConfig(&channelConfig)
 		if err != nil {
-			return nil, errors.Wrap(err, "build channel error")
+			return nil, errors.Wrap(err, "setup channel error")
 		}
 		channelMap[name] = channel
 	}
