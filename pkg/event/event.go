@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -45,6 +46,18 @@ func (e *Event) GroupVersionKindName() string {
 // NamespaceKey returns namespaced key for the affected resource
 func (e *Event) NamespaceKey() string {
 	return utils.NamespaceKey(e.Obj)
+}
+
+// Color returns theme color for the type of the event
+func (e *Event) Color() string {
+	switch e.Type {
+	case TypeAdded:
+		return style.Success
+	case TypeDeleted:
+		return style.Warning
+	default:
+		return style.Info
+	}
 }
 
 // NewAdded creates added event

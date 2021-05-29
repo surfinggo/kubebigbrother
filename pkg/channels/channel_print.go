@@ -65,16 +65,7 @@ func (c *ChannelPrint) Handle(ctx *EventProcessContext) error {
 
 	if c.IsStdout {
 		printFunc := func() error {
-			var styled string
-			switch ctx.Event.Type {
-			case event.TypeAdded:
-				styled = style.Success(buf.String()).String()
-			case event.TypeDeleted:
-				styled = style.Warning(buf.String()).String()
-			default:
-				styled = style.Info(buf.String()).String()
-			}
-
+			styled := style.Fg(ctx.Event.Color(), buf.String()).String()
 			if _, err := c.Writer.Write([]byte(styled)); err != nil {
 				return errors.Wrap(err, "write error")
 			}
