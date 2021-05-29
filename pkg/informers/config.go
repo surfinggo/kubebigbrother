@@ -24,7 +24,12 @@ type ChannelTelegramConfig struct {
 
 // ChannelCallbackConfig is config for ChannelCallback, read from config file
 type ChannelCallbackConfig struct {
-	URL string `json:"url" yaml:"url"`
+	Method          string `json:"method" yaml:"method"`
+	URL             string `json:"url" yaml:"url"`
+	UseTemplate     bool   `json:"useTemplate" yaml:"useTemplate"`
+	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
+	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
+	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
 }
 
 // ChannelPrintConfig is config for ChannelPrint, read from config file
@@ -228,7 +233,12 @@ func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 	switch config.Type {
 	case channels.ChannelTypeCallback:
 		return channels.NewChannelCallback(&channels.ChannelCallbackConfig{
-			URL: config.Callback.URL,
+			Method:          config.Callback.Method,
+			URL:             config.Callback.URL,
+			UseTemplate:     config.Callback.UseTemplate,
+			AddedTemplate:   config.Callback.AddedTemplate,
+			DeletedTemplate: config.Callback.DeletedTemplate,
+			UpdatedTemplate: config.Callback.UpdatedTemplate,
 		})
 	case channels.ChannelTypePrint:
 		return channels.NewChannelPrint(&channels.ChannelPrintConfig{

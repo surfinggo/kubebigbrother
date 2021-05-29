@@ -7,7 +7,16 @@ channels:
   callback-demo-full: # channel name
     type: callback # channel type
     callback: # configuration for type: callback
+      method: POST # callback HTTP method, default to POST
       url: "http://localhost:8984/api/v1/callback-channel-test" # send notification to this url
+      useTemplate: true # when set to false, callback channel sends raw JSON data to the url
+      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
+      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
+      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
+  callback-demo-minimum:
+    type: callback
+    callback:
+      url: "http://localhost:8984/api/v1/callback-channel-test"
   print-demo-full:
     type: print
     print: # configuration for type: print
