@@ -16,7 +16,7 @@ func NewBot(token, proxy string) (*tb.Bot, error) {
 		return nil, errors.New("invalid token, too short")
 	}
 
-	klog.V(1).Infof("using Telegram token: %s...", token[:15])
+	klog.V(2).Infof("using Telegram token: %s...", token[:15])
 
 	var httpClient *http.Client
 	if proxy != "" {
@@ -25,7 +25,7 @@ func NewBot(token, proxy string) (*tb.Bot, error) {
 			return nil, errors.Wrapf(err, "invalid proxy url: %s", proxy)
 		}
 
-		klog.V(1).Infof("connect to Telegram via proxy: %s", proxyUrl)
+		klog.V(2).Infof("connect to Telegram via proxy: %s", proxyUrl)
 
 		httpClient = &http.Client{
 			Transport: &http.Transport{
@@ -45,15 +45,15 @@ func NewBot(token, proxy string) (*tb.Bot, error) {
 	for {
 		t := humanize.Ordinal(count)
 
-		klog.V(1).Infof("[%s time] trying to connect to Telegram...", t)
+		klog.V(2).Infof("[%s time] trying to connect to Telegram...", t)
 
 		bot, err := tb.NewBot(*setting)
 		if err == nil {
-			klog.V(1).Infof("[%s time] Telegram connected", t)
+			klog.V(2).Infof("[%s time] Telegram connected", t)
 			return bot, nil
 		}
 
-		klog.V(1).Infof("[%s time] connect to Telegram error: %s", t, err)
+		klog.V(2).Infof("[%s time] connect to Telegram error: %s", t, err)
 
 		if count >= 10 {
 			return nil, errors.Wrap(err,
