@@ -37,7 +37,7 @@ func Setup(config Config) (*Watcher, error) {
 		} else {
 			p = fmt.Sprintf("%d channels have", len(config.InformersConfig.Channels))
 		}
-		klog.Warningf("watch: %s been replaced by a single channel: %s", p, channelNamePrintToStdout)
+		klog.Warningf("watch: %s been replaced by %s", p, channelNamePrintToStdout)
 	}
 
 	watcher := &Watcher{}

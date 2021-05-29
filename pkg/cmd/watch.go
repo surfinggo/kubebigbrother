@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/spongeprojects/kubebigbrother/pkg/cmd/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/cmd/watcher"
 	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
+	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils/signals"
 	"github.com/spongeprojects/kubebigbrother/staging/fileorcreate"
@@ -34,6 +36,13 @@ func NewWatchCommand() *cobra.Command {
 		Use:   "watch",
 		Short: "Watch events lively",
 		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(style.Fg(style.Warning, ""+
+				"--------------------------------------------------\n"+
+				"|  Watch should only be used for debugging.      |\n"+
+				"|  In watch mode, all channels will be replaced  |\n"+
+				"|  by a single \"print to stdout\" channel.        |\n"+
+				"--------------------------------------------------"))
+
 			o := getWatchOptions()
 
 			informersConfigPath := o.InformersOptions.InformersConfig
