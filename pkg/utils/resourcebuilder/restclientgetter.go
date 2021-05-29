@@ -20,18 +20,22 @@ type PersistentRESTClientGetter struct {
 	RESTMapper               meta.RESTMapper
 }
 
+// ToRESTConfig implements RESTClientGetter
 func (g *PersistentRESTClientGetter) ToRESTConfig() (*rest.Config, error) {
 	return g.RESTConfig, nil
 }
 
+// ToDiscoveryClient implements RESTClientGetter
 func (g *PersistentRESTClientGetter) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
 	return g.CachedDiscoveryInterface, nil
 }
 
+// ToRESTMapper implements RESTClientGetter
 func (g *PersistentRESTClientGetter) ToRESTMapper() (meta.RESTMapper, error) {
 	return g.RESTMapper, nil
 }
 
+// NewPersistentRESTClientGetter creates new PersistentRESTClientGetter
 func NewPersistentRESTClientGetter(kubeconfig string) (*PersistentRESTClientGetter, error) {
 	restConfig, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {

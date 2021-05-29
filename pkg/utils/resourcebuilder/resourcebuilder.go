@@ -6,10 +6,12 @@ import (
 	"k8s.io/cli-runtime/pkg/resource"
 )
 
+// Interface is used to parse resource name
 type Interface interface {
 	ParseGroupResource(resourceArg string) (schema.GroupVersionResource, error)
 }
 
+// ResourceBuilder is used to parse resource name
 type ResourceBuilder struct {
 	ClientGetter resource.RESTClientGetter
 }
@@ -29,12 +31,14 @@ func (b *ResourceBuilder) ParseGroupResource(resourceArg string) (schema.GroupVe
 	return infos[0].Mapping.Resource, nil
 }
 
+// NewFromClientGetter creates new ResourceBuilder
 func NewFromClientGetter(clientGetter resource.RESTClientGetter) (*ResourceBuilder, error) {
 	return &ResourceBuilder{
 		ClientGetter: clientGetter,
 	}, nil
 }
 
+// New creates new ResourceBuilder
 func New(kubeconfig string) (*ResourceBuilder, error) {
 	clientGetter, err := NewPersistentRESTClientGetter(kubeconfig)
 	if err != nil {
