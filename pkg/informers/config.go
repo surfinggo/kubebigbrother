@@ -76,7 +76,7 @@ type ResourceConfig struct {
 	Workers int `json:"workers" yaml:"workers"`
 }
 
-func (c *ResourceConfig) buildResyncPeriodFuncWithDefault(defaultFunc resyncPeriodFunc) (resyncPeriodFunc, error) {
+func (c *ResourceConfig) buildResyncPeriodFuncWithDefault(defaultFunc ResyncPeriodFunc) (ResyncPeriodFunc, error) {
 	f, set, err := c.buildResyncPeriodFunc()
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ type NamespaceConfig struct {
 	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
 }
 
-func (c *NamespaceConfig) buildResyncPeriodFuncWithDefault(defaultFunc resyncPeriodFunc) (resyncPeriodFunc, error) {
+func (c *NamespaceConfig) buildResyncPeriodFuncWithDefault(defaultFunc ResyncPeriodFunc) (ResyncPeriodFunc, error) {
 	f, set, err := c.buildResyncPeriodFunc()
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func (c *NamespaceConfig) buildResyncPeriodFuncWithDefault(defaultFunc resyncPer
 	return f, nil
 }
 
-func (c *NamespaceConfig) buildResyncPeriodFunc() (f resyncPeriodFunc, set bool, err error) {
+func (c *NamespaceConfig) buildResyncPeriodFunc() (f ResyncPeriodFunc, set bool, err error) {
 	return buildResyncPeriodFunc(c.MinResyncPeriod)
 }
 
@@ -142,7 +142,7 @@ type Config struct {
 	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
 }
 
-func (c *Config) buildResyncPeriodFunc() (f resyncPeriodFunc, err error) {
+func (c *Config) buildResyncPeriodFunc() (f ResyncPeriodFunc, err error) {
 	if c.MinResyncPeriod == "" {
 		c.MinResyncPeriod = "12h"
 	}
@@ -150,9 +150,10 @@ func (c *Config) buildResyncPeriodFunc() (f resyncPeriodFunc, err error) {
 	return f, err
 }
 
-type resyncPeriodFunc func() time.Duration
+// ResyncPeriodFunc is a function to build resync period (time.Duration)
+type ResyncPeriodFunc func() time.Duration
 
-func buildResyncPeriodFunc(resyncPeriod string) (f resyncPeriodFunc, set bool, err error) {
+func buildResyncPeriodFunc(resyncPeriod string) (f ResyncPeriodFunc, set bool, err error) {
 	duration, set, err := parseResyncPeriod(resyncPeriod)
 	if err != nil {
 		return nil, false, err

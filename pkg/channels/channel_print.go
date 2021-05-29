@@ -28,8 +28,13 @@ type ChannelPrint struct {
 	TmplUpdated *template.Template
 }
 
+// NewProcessData implements Channel
+func (c *ChannelPrint) NewProcessData() interface{} {
+	return nil
+}
+
 // Handle implements Channel
-func (c *ChannelPrint) Handle(e *event.Event) error {
+func (c *ChannelPrint) Handle(e *event.Event, _ interface{}) error {
 	var t *template.Template
 	switch e.Type {
 	case event.TypeAdded:

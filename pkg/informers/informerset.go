@@ -107,6 +107,16 @@ func Setup(options Options) (*InformerSet, error) {
 		channelMap[name] = channel
 	}
 
+	buildChannelToProcess := func(names []channels.ChannelName) map[channels.ChannelName]interface{} {
+		m := make(map[channels.ChannelName]interface{})
+		for _, name := range names {
+			if channel, ok := channelMap[name]; ok {
+				m[name] = channel.NewProcessData()
+			}
+		}
+		return m
+	}
+
 	defaultResyncPeriodFunc, err := config.buildResyncPeriodFunc()
 	if err != nil {
 		return nil, errors.Wrap(err, "config.BuildResyncPeriodFunc error")
@@ -208,8 +218,8 @@ func Setup(options Options) (*InformerSet, error) {
 					e := event.NewAdded(s)
 					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
-						Event:        e,
-						ChannelNames: channelNames,
+						Event:             e,
+						ChannelsToProcess: buildChannelToProcess(channelNames),
 					})
 				}
 			}
@@ -223,8 +233,8 @@ func Setup(options Options) (*InformerSet, error) {
 					e := event.NewDeleted(s)
 					klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
 					queue.Add(&eventWrapper{
-						Event:        e,
-						ChannelNames: channelNames,
+						Event:             e,
+						ChannelsToProcess: buildChannelToProcess(channelNames),
 					})
 				}
 			}
@@ -263,8 +273,8 @@ func Setup(options Options) (*InformerSet, error) {
 						e := event.NewUpdated(s, oldS)
 						klog.V(5).Infof("received: [%s] %s", e.Type, utils.GroupVersionKindName(s))
 						queue.Add(&eventWrapper{
-							Event:        e,
-							ChannelNames: channelNames,
+							Event:             e,
+							ChannelsToProcess: buildChannelToProcess(channelNames),
 						})
 					}
 				}

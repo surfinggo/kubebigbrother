@@ -22,5 +22,12 @@ type ChannelMap map[ChannelName]Channel
 
 // Channel is interface of a channel
 type Channel interface {
-	Handle(e *event.Event) error
+	// NewProcessData builds a new copy of data to process,
+	// for example, NewProcessData returns []recipient in Telegram channel，
+	// if any error occurs and the processing is retried,
+	// the channel can know which recipients have already been noticed successfully.
+	NewProcessData() interface{}
+
+	// Handle handles an event
+	Handle(e *event.Event, processData interface{}) error
 }

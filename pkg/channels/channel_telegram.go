@@ -29,8 +29,13 @@ type ChannelTelegram struct {
 	TmplUpdated *template.Template
 }
 
+// NewProcessData implements Channel
+func (c *ChannelTelegram) NewProcessData() interface{} {
+	return nil
+}
+
 // Handle implements Channel
-func (c *ChannelTelegram) Handle(e *event.Event) error {
+func (c *ChannelTelegram) Handle(e *event.Event, _ interface{}) error {
 	var t *template.Template
 	switch e.Type {
 	case event.TypeAdded:
