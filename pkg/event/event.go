@@ -24,7 +24,7 @@ type Event struct {
 	Obj *unstructured.Unstructured `json:"obj"`
 
 	// OldObj is only set for EventTypeUpdated
-	OldObj *unstructured.Unstructured `json:"oldObj"`
+	OldObj *unstructured.Unstructured `json:"oldObj,omitempty"`
 
 	// gvkNameCache is a cache for GroupVersionKindName
 	gvkNameCache string
