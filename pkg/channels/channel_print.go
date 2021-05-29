@@ -5,10 +5,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
-	"html/template"
 	"io"
 	"k8s.io/klog/v2"
 	"os"
+	"text/template"
 )
 
 // ChannelPrintConfig is config for ChannelPrint

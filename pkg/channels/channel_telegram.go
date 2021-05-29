@@ -7,8 +7,8 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"github.com/spongeprojects/kubebigbrother/pkg/services/telegram"
 	tb "gopkg.in/tucnak/telebot.v2"
-	"html/template"
 	"strings"
+	"text/template"
 )
 
 // ChannelTelegramConfig is config for ChannelTelegram

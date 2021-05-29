@@ -3,9 +3,9 @@ package channels
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"html/template"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"strings"
+	"text/template"
 )
 
 // parseTemplates parses added, deleted and updated templates
