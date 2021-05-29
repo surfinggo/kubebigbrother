@@ -17,6 +17,18 @@ channels:
     type: callback
     callback:
       url: "http://localhost:8984/api/v1/callback-channel-test"
+  flock-demo-full: # channel name
+    type: flock # channel type
+    flock: # configuration for type: flock
+      url: "https://api.flock.com/hooks/sendMessage/{your_webhook_id}" # send notification to this url
+      titleTemplate: "New Event!" # message title template, optional
+      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
+      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
+      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
+  flock-demo-minimum:
+    type: flock
+    flock:
+      url: "https://api.flock.com/hooks/sendMessage/{your_webhook_id}"
   print-demo-full:
     type: print
     print: # configuration for type: print
@@ -32,7 +44,7 @@ channels:
   telegram-demo-full:
     type: telegram
     telegram: # configuration for type: telegram
-      token: "xxx" # telegram bot token
+      token: "{your_token}" # telegram bot token
       recipients: # list of chat ids
       - 648014523
       proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
@@ -42,7 +54,7 @@ channels:
   telegram-demo-minimum:
     type: telegram
     telegram:
-      token: "xxx"
+      token: "{your_token}"
       recipients:
       - 648014523
 
@@ -113,26 +125,15 @@ namespaces:
 #    noticeWhenDeleted: true
 #  - resource: "deployments.v1.apps"
 #    noticeWhenDeleted: true
-#- namespace: "demo" # demonstration 6: callback
+#- namespace: "demo" # demonstration 6: channels
 #  resources:
 #  - resource: "configmaps"
 #    noticeWhenAdded: true
 #    noticeWhenDeleted: true
 #    channelNames:
 #    - callback-demo-full
-#- namespace: "demo" # demonstration 7: print
-#  resources:
-#  - resource: "configmaps"
-#    noticeWhenAdded: true
-#    noticeWhenDeleted: true
-#    channelNames:
+#    - flock-demo-full
 #    - print-demo-full
-#- namespace: "demo" # demonstration 8: telegram
-#  resources:
-#  - resource: "configmaps"
-#    noticeWhenAdded: true
-#    noticeWhenDeleted: true
-#    channelNames:
 #    - telegram-demo-full
 
 # global default channels names

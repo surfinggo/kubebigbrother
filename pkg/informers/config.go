@@ -33,6 +33,15 @@ type ChannelCallbackConfig struct {
 	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
 }
 
+// ChannelFlockConfig is config for ChannelFlock, read from config file
+type ChannelFlockConfig struct {
+	URL             string `json:"url" yaml:"url"`
+	TitleTemplate   string `json:"titleTemplate" yaml:"titleTemplate"`
+	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
+	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
+	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+}
+
 // ChannelPrintConfig is config for ChannelPrint, read from config file
 type ChannelPrintConfig struct {
 	Writer          string `json:"writer" yaml:"writer"`
@@ -48,6 +57,7 @@ type ChannelConfig struct {
 	Type channels.ChannelType `json:"type" yaml:"type"`
 
 	Callback *ChannelCallbackConfig `json:"callback" yaml:"callback"`
+	Flock    *ChannelFlockConfig    `json:"flock" yaml:"flock"`
 	Print    *ChannelPrintConfig    `json:"print" yaml:"print"`
 	Telegram *ChannelTelegramConfig `json:"telegram" yaml:"telegram"`
 }
@@ -166,6 +176,11 @@ func (c *Config) Validate() error {
 				return errors.Errorf(
 					"config missing for callback channel, name: %s", name)
 			}
+		case channels.ChannelTypeFlock:
+			if channel.Flock == nil {
+				return errors.Errorf(
+					"config missing for Flock channel, name: %s", name)
+			}
 		case channels.ChannelTypePrint:
 			if channel.Print == nil {
 				return errors.Errorf(
@@ -275,6 +290,14 @@ func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 			AddedTemplate:   config.Callback.AddedTemplate,
 			DeletedTemplate: config.Callback.DeletedTemplate,
 			UpdatedTemplate: config.Callback.UpdatedTemplate,
+		})
+	case channels.ChannelTypeFlock:
+		return channels.NewChannelFlock(&channels.ChannelFlockConfig{
+			URL:             config.Flock.URL,
+			TitleTemplate:   config.Flock.TitleTemplate,
+			AddedTemplate:   config.Flock.AddedTemplate,
+			DeletedTemplate: config.Flock.DeletedTemplate,
+			UpdatedTemplate: config.Flock.UpdatedTemplate,
 		})
 	case channels.ChannelTypePrint:
 		return channels.NewChannelPrint(&channels.ChannelPrintConfig{

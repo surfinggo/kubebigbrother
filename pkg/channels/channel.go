@@ -11,9 +11,10 @@ type ChannelName string
 type ChannelType string
 
 const (
-	ChannelTypeTelegram = "telegram" // send message to Telegram
 	ChannelTypeCallback = "callback" // send message to callback url
+	ChannelTypeFlock    = "flock"    // send message to Flock
 	ChannelTypePrint    = "print"    // write message to writer
+	ChannelTypeTelegram = "telegram" // send message to Telegram
 )
 
 // ChannelMap maps from ChannelName to Channel
