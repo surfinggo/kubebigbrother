@@ -43,6 +43,17 @@ type ChannelPrintConfig struct {
 	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
 }
 
+// ChannelSlackConfig is config for ChannelSlack, read from config file
+type ChannelSlackConfig struct {
+	Token           string `json:"token" yaml:"token"`
+	Proxy           string `json:"proxy" yaml:"proxy"`
+	WebhookURL      string `json:"webhookURL" yaml:"webhookURL"`
+	TitleTemplate   string `json:"titleTemplate" yaml:"titleTemplate"`
+	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
+	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
+	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+}
+
 // ChannelTelegramConfig is config for ChannelTelegram, read from config file
 type ChannelTelegramConfig struct {
 	Token           string   `json:"token" yaml:"token"`
@@ -61,6 +72,7 @@ type ChannelConfig struct {
 	Callback *ChannelCallbackConfig `json:"callback" yaml:"callback"`
 	Flock    *ChannelFlockConfig    `json:"flock" yaml:"flock"`
 	Print    *ChannelPrintConfig    `json:"print" yaml:"print"`
+	Slack    *ChannelSlackConfig    `json:"slack" yaml:"slack"`
 	Telegram *ChannelTelegramConfig `json:"telegram" yaml:"telegram"`
 }
 
@@ -189,6 +201,11 @@ func (c *ConfigFile) Validate() error {
 				return errors.Errorf(
 					"config missing for print channel, name: %s", name)
 			}
+		case channels.ChannelTypeSlack:
+			if channel.Slack == nil {
+				return errors.Errorf(
+					"config missing for Slack channel, name: %s", name)
+			}
 		case channels.ChannelTypeTelegram:
 			if channel.Telegram == nil {
 				return errors.Errorf(
@@ -311,6 +328,16 @@ func setupChannelFromConfig(config *ChannelConfig) (channels.Channel, error) {
 			AddedTemplate:   config.Print.AddedTemplate,
 			DeletedTemplate: config.Print.DeletedTemplate,
 			UpdatedTemplate: config.Print.UpdatedTemplate,
+		})
+	case channels.ChannelTypeSlack:
+		return channels.NewChannelSlack(&channels.ChannelSlackConfig{
+			Token:           config.Slack.Token,
+			Proxy:           config.Slack.Proxy,
+			WebhookURL:      config.Slack.WebhookURL,
+			TitleTemplate:   config.Slack.TitleTemplate,
+			AddedTemplate:   config.Slack.AddedTemplate,
+			DeletedTemplate: config.Slack.DeletedTemplate,
+			UpdatedTemplate: config.Slack.UpdatedTemplate,
 		})
 	case channels.ChannelTypeTelegram:
 		return channels.NewChannelTelegram(&channels.ChannelTelegramConfig{
