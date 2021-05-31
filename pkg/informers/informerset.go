@@ -51,10 +51,11 @@ type InformerSet struct {
 
 func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 	for i, factory := range set.Factories {
-		klog.Infof("starting factory %d/%d", i+1, len(set.Factories))
+		klog.V(1).Infof("starting namespaced factory %d/%d: n%d", i+1, len(set.Factories), i)
 		go factory.Start(stopCh)
 	}
 
+	klog.Info("waiting for caches to sync...")
 	for i, factory := range set.Factories {
 		for gvr, ok := range factory.WaitForCacheSync(stopCh) {
 			if !ok {
@@ -63,9 +64,10 @@ func (set *InformerSet) Start(stopCh <-chan struct{}) error {
 			}
 		}
 	}
+	klog.Info("caches synced, starting informers...")
 
 	for i, resourceInformer := range set.ResourceInformers {
-		klog.Infof("starting informer %d/%d: %s, workers: %d, resource: %s",
+		klog.V(1).Infof("starting informer %d/%d: %s, workers: %d, resource: %s",
 			i+1, len(set.ResourceInformers), resourceInformer.ID,
 			resourceInformer.Workers, resourceInformer.Resource)
 		for i := 0; i < resourceInformer.Workers; i++ {
@@ -114,7 +116,7 @@ func Setup(options Config) (*InformerSet, error) {
 	channelMap := make(channels.ChannelMap)
 	for name, channelConfig := range config.Channels {
 		i += 1
-		klog.Infof("setup channel %d/%d: %s, type: %s", i, len(config.Channels), name, channelConfig.Type)
+		klog.V(1).Infof("setup channel %d/%d: %s, type: %s", i, len(config.Channels), name, channelConfig.Type)
 		channel, err := setupChannelFromConfig(&channelConfig)
 		if err != nil {
 			return nil, errors.Wrap(err, "setup channel error")
@@ -149,7 +151,7 @@ func Setup(options Config) (*InformerSet, error) {
 	if defaultMaxRetries < 1 {
 		defaultMaxRetries = 3
 	}
-	klog.V(1).Infof(
+	klog.V(2).Infof(
 		"global default: workers: %d, max retries: %d, channel names: %s",
 		defaultWorkers, defaultMaxRetries, defaultChannelNames)
 
@@ -157,7 +159,7 @@ func Setup(options Config) (*InformerSet, error) {
 		nID := fmt.Sprintf("n%d", i) // unique id
 		nDesc := fmt.Sprintf(".Namespaces[%d]", i)
 
-		klog.Infof("[%s] setup namespace %d/%d: %s",
+		klog.V(1).Infof("[%s] setup namespace %d/%d: %s",
 			nID, i+1, len(config.Namespaces), namespaceConfig.Namespace)
 
 		namespaceDefaultResyncPeriodFunc, err := namespaceConfig.buildResyncPeriodFuncWithDefault(
@@ -178,7 +180,7 @@ func Setup(options Config) (*InformerSet, error) {
 		if namespaceDefaultMaxRetries < 1 {
 			namespaceDefaultMaxRetries = defaultMaxRetries
 		}
-		klog.V(1).Infof(
+		klog.V(2).Infof(
 			"[%s] namespace default: workers: %d, max retries: %d, channel names: %v",
 			nID, namespaceDefaultWorkers,
 			namespaceDefaultMaxRetries,
@@ -194,7 +196,7 @@ func Setup(options Config) (*InformerSet, error) {
 			rID := fmt.Sprintf("%sr%d", nID, j) // unique rID
 			rDesc := fmt.Sprintf("%s.Resources[%d]", nDesc, i)
 
-			klog.Infof("[%s] setup resource %d/%d: %s",
+			klog.V(1).Infof("[%s] setup resource %d/%d: %s",
 				rID, j+1, len(namespaceConfig.Resources), resourceConfig.Resource)
 
 			gvr, err := informerSet.ResourceBuilder.ParseGroupResource(resourceConfig.Resource)
@@ -229,7 +231,7 @@ func Setup(options Config) (*InformerSet, error) {
 			if maxRetries < 1 {
 				maxRetries = namespaceDefaultMaxRetries
 			}
-			klog.V(1).Infof(
+			klog.V(2).Infof(
 				"[%s] gvr: [%v], workers: %d, max retries: %d, channel names: %v",
 				rID, gvr, workers, maxRetries, channelNames)
 
@@ -248,7 +250,6 @@ func Setup(options Config) (*InformerSet, error) {
 						"cannot be false simultaneously in %s", rDesc)
 			}
 			if resourceConfig.NoticeWhenAdded {
-				klog.V(1).Infof("[%s] set AddFunc", rID)
 				handlerFuncs.AddFunc = func(obj interface{}) {
 					s, ok := obj.(*unstructured.Unstructured)
 					if !ok {
@@ -264,7 +265,6 @@ func Setup(options Config) (*InformerSet, error) {
 				}
 			}
 			if resourceConfig.NoticeWhenDeleted {
-				klog.V(1).Infof("[%s] set DeleteFunc", rID)
 				handlerFuncs.DeleteFunc = func(obj interface{}) {
 					s, ok := obj.(*unstructured.Unstructured)
 					if !ok {
@@ -280,7 +280,6 @@ func Setup(options Config) (*InformerSet, error) {
 				}
 			}
 			if resourceConfig.NoticeWhenUpdated {
-				klog.V(1).Infof("[%s] set UpdateFunc", rID)
 				handlerFuncs.UpdateFunc = func(oldObj, obj interface{}) {
 					oldS, ok1 := oldObj.(*unstructured.Unstructured)
 					s, ok2 := obj.(*unstructured.Unstructured)

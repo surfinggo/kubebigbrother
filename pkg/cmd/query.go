@@ -46,7 +46,7 @@ func NewQueryCommand() *cobra.Command {
 				fmt.Println("nothing")
 			}
 			for _, event := range events {
-				fmt.Printf("ID: %d, %s\n", event.ID, event.Description)
+				fmt.Printf("ID: %d, %s\n", event.ID, event.Obj)
 			}
 		},
 	}
