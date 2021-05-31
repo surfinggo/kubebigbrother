@@ -1,6 +1,8 @@
 package informers
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
@@ -158,11 +160,23 @@ func (b *Bootstrapper) buildResourceInformer(
 	namespaceDefaultChannelNames []ChannelName,
 	namespaceDefaultWorkers int,
 	namespaceDefaultMaxRetries int,
-	resourceID, resourceDesc string, c ResourceConfig) (*Informer, error) {
+	resourceID string,
+	resourceDesc string,
+	c ResourceConfig) (*Informer, error) {
 	gvr, err := b.resourceBuilder.ParseGroupResource(c.Resource)
 	if err != nil {
 		return nil, errors.Wrapf(err,
 			"invalid resource in %s: %s", resourceDesc, c.Resource)
+	}
+
+	// n0r0-deployments.apps.v1-xxx
+	md5sum := md5.New().Sum([]byte(fmt.Sprintf("%s-%s", resourceID, gvr)))
+	informerConfigHash := fmt.Sprintf("%s-%s.%s.%s-md5:%s",
+		resourceID, gvr.Resource, gvr.Group, gvr.Version,
+		hex.EncodeToString(md5sum)[:8])
+
+	saveSilently := func(e *event.Event) {
+		b.config.EventStore.SaveSilently(e.ToModel(informerConfigHash))
 	}
 
 	resyncPeriodFunc, err := c.buildResyncPeriodFunc(
@@ -200,8 +214,14 @@ func (b *Bootstrapper) buildResourceInformer(
 				return
 			}
 			e := event.NewAdded(s)
+
 			klog.V(5).Infof("[%s] received: [%s] [%s]",
 				resourceID, e.Type, utils.GroupVersionKindName(s))
+
+			if b.config.SaveEvent {
+				go saveSilently(e)
+			}
+
 			queue.Add(&eventWrapper{
 				Event:             e,
 				ChannelsToProcess: b.buildChannelsToProcess(e, channelNames),
@@ -215,8 +235,14 @@ func (b *Bootstrapper) buildResourceInformer(
 				return
 			}
 			e := event.NewDeleted(s)
+
 			klog.V(5).Infof("[%s] received: [%s] [%s]",
 				resourceID, e.Type, utils.GroupVersionKindName(s))
+
+			if b.config.SaveEvent {
+				go saveSilently(e)
+			}
+
 			queue.Add(&eventWrapper{
 				Event:             e,
 				ChannelsToProcess: b.buildChannelsToProcess(e, channelNames),
@@ -257,8 +283,14 @@ func (b *Bootstrapper) buildResourceInformer(
 			}
 			if c.UpdateOn == nil || updated {
 				e := event.NewUpdated(s, oldS)
+
 				klog.V(5).Infof("[%s] received: [%s] [%s]",
 					resourceID, e.Type, utils.GroupVersionKindName(s))
+
+				if b.config.SaveEvent {
+					go saveSilently(e)
+				}
+
 				queue.Add(&eventWrapper{
 					Event:             e,
 					ChannelsToProcess: b.buildChannelsToProcess(e, channelNames),

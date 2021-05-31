@@ -40,6 +40,8 @@ func Setup(config Config) (*Controller, error) {
 	informerInstance, err := informers.Setup(informers.Config{
 		KubeConfig: config.KubeConfig,
 		ConfigFile: config.InformersConfig,
+		SaveEvent:  true,
+		EventStore: event_store.New(db),
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "setup informers error")

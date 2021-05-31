@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"time"
 )
 
@@ -11,16 +10,16 @@ type Event struct {
 	ID        uint      `gorm:"primarykey" json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 
-	// InformerChecksum is md5 value of an informer config,
+	// InformerConfigHash is unique value represents the informer config,
 	// every Event belongs to an informer.
-	InformerChecksum string `json:"informer_checksum"`
+	InformerConfigHash string `json:"informer_config_hash"`
 
-	EventType event.Type `json:"event_type"`
-	Group     string     `json:"group"`
-	Version   string     `json:"version"`
-	Kind      string     `json:"kind"`
-	Namespace string     `json:"namespace"`
-	Name      string     `json:"name"`
-	Obj       []byte     `json:"obj"`
-	OldObj    []byte     `json:"old_obj"`
+	EventType string `json:"event_type"`
+	Group     string `json:"group"`
+	Version   string `json:"version"`
+	Kind      string `json:"kind"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Obj       []byte `json:"obj"`
+	OldObj    []byte `json:"old_obj"`
 }

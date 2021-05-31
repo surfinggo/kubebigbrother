@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
+	"github.com/spongeprojects/kubebigbrother/pkg/models"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -58,6 +59,31 @@ func (e *Event) Color() string {
 	default:
 		return style.Info
 	}
+}
+
+// ToModel translate Event into *models.Event
+func (e *Event) ToModel(informerConfigHash string) *models.Event {
+	model := &models.Event{
+		InformerConfigHash: informerConfigHash,
+		EventType:          string(e.Type),
+		Namespace:          e.Obj.GetNamespace(),
+		Name:               e.Obj.GetName(),
+	}
+
+	gvk := e.Obj.GroupVersionKind()
+	model.Group = gvk.Group
+	model.Version = gvk.Version
+	model.Kind = gvk.Kind
+
+	objJSON, _ := e.Obj.MarshalJSON()
+	model.Obj = objJSON
+
+	if e.OldObj != nil {
+		oldObjJSON, _ := e.OldObj.MarshalJSON()
+		model.OldObj = oldObjJSON
+	}
+
+	return model
 }
 
 // NewAdded creates added event
