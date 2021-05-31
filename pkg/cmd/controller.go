@@ -54,7 +54,7 @@ func NewControllerCommand() *cobra.Command {
 
 			c, err := controller.Setup(controller.Config{
 				DBDialect:       o.DatabaseOptions.DBDialect,
-				DBArgs:          o.DatabaseOptions.DBDialect,
+				DBArgs:          o.DatabaseOptions.DBArgs,
 				KubeConfig:      o.KubeconfigOptions.Kubeconfig,
 				InformersConfig: informersConfig,
 			})
