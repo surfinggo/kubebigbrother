@@ -7,7 +7,7 @@ import (
 
 // ChannelToProcess defines a channel to process
 type ChannelToProcess struct {
-	ChannelName         channels.ChannelName
+	ChannelName         ChannelName
 	EventProcessContext *channels.EventProcessContext
 }
 

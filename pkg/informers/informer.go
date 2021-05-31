@@ -5,6 +5,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
 	"strings"
@@ -17,6 +18,9 @@ type Informer struct {
 
 	// Resource is the resource to watch, e.g. "deployments.v1.apps"
 	Resource string
+
+	// GVR is group version kind of Resource
+	GVR schema.GroupVersionResource
 
 	// UpdateOn defines fields to watch, used with NoticeWhenUpdated
 	UpdateOn []string
@@ -72,10 +76,10 @@ func (i *Informer) processNextItem() bool {
 // processItem process an item synchronously
 func (i *Informer) processItem(item *eventWrapper) error {
 	errs := make(map[ChannelToProcess]error)
-	for _, channelToProcess := range item.ChannelsToProcess {
-		if channel, ok := i.ChannelMap[channelToProcess.ChannelName]; ok {
-			if err := channel.Handle(channelToProcess.EventProcessContext); err != nil {
-				errs[channelToProcess] = err
+	for _, ch := range item.ChannelsToProcess {
+		if channel, ok := i.ChannelMap[ch.ChannelName]; ok {
+			if err := channel.Handle(ch.EventProcessContext); err != nil {
+				errs[ch] = err
 			}
 		}
 	}
@@ -87,9 +91,9 @@ func (i *Informer) processItem(item *eventWrapper) error {
 
 	var channelToProcessLeft []ChannelToProcess
 	var es []string
-	for channelToProcess, err := range errs {
-		channelToProcessLeft = append(channelToProcessLeft, channelToProcess)
-		es = append(es, fmt.Sprintf("channel %s error: %s", channelToProcess.ChannelName, err))
+	for ch, err := range errs {
+		channelToProcessLeft = append(channelToProcessLeft, ch)
+		es = append(es, fmt.Sprintf("channel %s error: %s", ch.ChannelName, err))
 	}
 	item.ChannelsToProcess = channelToProcessLeft
 	return errors.Errorf("process error: %s", strings.Join(es, ","))

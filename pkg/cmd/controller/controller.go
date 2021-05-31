@@ -28,14 +28,14 @@ func (c *Controller) Shutdown() {
 }
 
 func Setup(config Config) (*Controller, error) {
-	recorder := &Controller{}
+	controller := &Controller{}
 
 	db, err := gormdb.New(config.DBDialect, config.DBArgs)
 	if err != nil {
 		return nil, errors.Wrap(err, "create db instance error")
 	}
 
-	recorder.EventStore = event_store.New(db)
+	controller.EventStore = event_store.New(db)
 
 	informerInstance, err := informers.Setup(informers.Config{
 		KubeConfig: config.KubeConfig,
@@ -44,7 +44,7 @@ func Setup(config Config) (*Controller, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "setup informers error")
 	}
-	recorder.Informers = informerInstance
+	controller.Informers = informerInstance
 
-	return recorder, nil
+	return controller, nil
 }
