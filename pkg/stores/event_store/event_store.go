@@ -9,6 +9,8 @@ import (
 
 type Interface interface {
 	List() (events []models.Event, err error)
+	IsCurrentlyAdded(informerConfigHash,
+		group, version, resource, namespace, name string) (exist bool, err error)
 	Save(event *models.Event) (err error)
 	SaveSilently(event *models.Event)
 }
@@ -30,6 +32,28 @@ func (s *Store) SaveSilently(event *models.Event) {
 	if err := s.Save(event); err != nil {
 		klog.Warning(errors.Wrap(err, "save event error"))
 	}
+}
+
+func (s *Store) IsCurrentlyAdded(informerConfigHash,
+	group, version, resource, namespace, name string) (yes bool, err error) {
+	var e models.Event
+	if err := s.DB.Where("informer_config_hash = ?", informerConfigHash).
+		// TODO: use event.EventType ADDED and DELETED without import loop
+		Where("event_type in ?", []string{"ADDED", "DELETED"}).
+		Where("event_group = ?", group).
+		Where("version = ?", version).
+		Where("resource = ?", resource).
+		Where("namespace = ?", namespace).
+		Where("name = ?", name).
+		Order("create_time desc").
+		First(&e).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	// the latest event type is ADDED means the kind is in cache
+	return e.EventType == "ADDED", nil
 }
 
 func New(db *gorm.DB) Interface {

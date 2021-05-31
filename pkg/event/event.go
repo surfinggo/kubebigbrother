@@ -5,6 +5,7 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/models"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // Type of event
@@ -62,7 +63,8 @@ func (e *Event) Color() string {
 }
 
 // ToModel translate Event into *models.Event
-func (e *Event) ToModel(informerConfigHash string) *models.Event {
+func (e *Event) ToModel(
+	informerConfigHash string, gvr schema.GroupVersionResource) *models.Event {
 	model := &models.Event{
 		InformerConfigHash: informerConfigHash,
 		EventType:          string(e.Type),
@@ -70,9 +72,10 @@ func (e *Event) ToModel(informerConfigHash string) *models.Event {
 		Name:               e.Obj.GetName(),
 	}
 
+	model.Group = gvr.Group
+	model.Version = gvr.Version
+	model.Resource = gvr.Resource
 	gvk := e.Obj.GroupVersionKind()
-	model.Group = gvk.Group
-	model.Version = gvk.Version
 	model.Kind = gvk.Kind
 
 	objJSON, _ := e.Obj.MarshalJSON()

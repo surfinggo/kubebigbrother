@@ -176,7 +176,7 @@ func (b *Bootstrapper) buildResourceInformer(
 		hex.EncodeToString(md5sum)[:8])
 
 	saveSilently := func(e *event.Event) {
-		b.config.EventStore.SaveSilently(e.ToModel(informerConfigHash))
+		b.config.EventStore.SaveSilently(e.ToModel(informerConfigHash, gvr))
 	}
 
 	resyncPeriodFunc, err := c.buildResyncPeriodFunc(
@@ -215,8 +215,23 @@ func (b *Bootstrapper) buildResourceInformer(
 			}
 			e := event.NewAdded(s)
 
+			if b.config.SaveEvent {
+				isCurrentlyAdded, err := b.config.EventStore.IsCurrentlyAdded(
+					informerConfigHash,
+					gvr.Group, gvr.Version, gvr.Resource,
+					e.Obj.GetNamespace(), e.Obj.GetName())
+				if err != nil {
+					klog.Warning(errors.Wrap(err, "find latest record error"))
+				} else if isCurrentlyAdded {
+					klog.V(5).Infof(
+						"[%s] resource is currently added, skip ADDED event: [%s] [%s]",
+						resourceID, e.Type, e.GroupVersionKindName())
+					return // ADDED event are emitted when controller restart
+				}
+			}
+
 			klog.V(5).Infof("[%s] received: [%s] [%s]",
-				resourceID, e.Type, utils.GroupVersionKindName(s))
+				resourceID, e.Type, e.GroupVersionKindName())
 
 			if b.config.SaveEvent {
 				go saveSilently(e)
