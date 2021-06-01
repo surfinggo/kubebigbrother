@@ -43,6 +43,19 @@ channels:
     type: print
     print:
       writer: stdout
+  slack-demo-full: # channel name
+    type: slack # channel type
+    slack: # configuration for type: slack
+      webhookURL: "https://hooks.slack.com/services/{your_secret}"
+      proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
+      titleTemplate: "New Event!" # message title template, optional
+      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
+      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
+      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
+  slack-demo-minimum:
+    type: slack
+    slack:
+      webhookURL: "https://hooks.slack.com/services/{your_secret}"
   telegram-demo-full:
     type: telegram
     telegram: # configuration for type: telegram
@@ -134,9 +147,15 @@ namespaces:
 #    noticeWhenDeleted: true
 #    channelNames:
 #    - callback-demo-full
+#    - callback-demo-minimum
 #    - flock-demo-full
+#    - flock-demo-minimum
 #    - print-demo-full
+#    - print-demo-minimum
+#    - slack-demo-full
+#    - slack-demo-minimum
 #    - telegram-demo-full
+#    - telegram-demo-minimum
 
 # global default channels names
 # this value can be override by .namespace.defaultChannelNames and .resource.channelNames
