@@ -4,6 +4,7 @@ import router from './main_router'
 import store from './store'
 import axios from './main_axios'
 import fontawesome from './main_fontawesome'
+import prism from './main_prism'
 import utils from './main_utils'
 
 import App from './App.vue'
@@ -19,5 +20,6 @@ app.use(router)
 app.use(store)
 app.use(axios)
 app.use(fontawesome)
+app.use(prism)
 app.use(utils)
 app.mount('#app')
