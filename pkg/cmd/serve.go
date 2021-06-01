@@ -11,17 +11,19 @@ import (
 )
 
 type serveOptions struct {
-	GlobalOptions   *genericoptions.GlobalOptions
-	DatabaseOptions *genericoptions.DatabaseOptions
+	GlobalOptions    *genericoptions.GlobalOptions
+	DatabaseOptions  *genericoptions.DatabaseOptions
+	InformersOptions *genericoptions.InformersOptions
 
 	Addr string
 }
 
 func getServeOptions() *serveOptions {
 	o := &serveOptions{
-		GlobalOptions:   genericoptions.GetGlobalOptions(),
-		DatabaseOptions: genericoptions.GetDatabaseOptions(),
-		Addr:            viper.GetString("addr"),
+		GlobalOptions:    genericoptions.GetGlobalOptions(),
+		DatabaseOptions:  genericoptions.GetDatabaseOptions(),
+		InformersOptions: genericoptions.GetInformersOptions(),
+		Addr:             viper.GetString("addr"),
 	}
 	return o
 }
@@ -33,10 +35,13 @@ func newServeCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			o := getServeOptions()
 
+			informersConfigPath := o.InformersOptions.InformersConfig
+
 			app, err := server.SetupApp(&server.Config{
-				Version: Version,
-				Env:     o.GlobalOptions.Env,
-				Addr:    o.Addr,
+				Version:             Version,
+				Env:                 o.GlobalOptions.Env,
+				Addr:                o.Addr,
+				InformersConfigPath: informersConfigPath,
 			})
 			if err != nil {
 				klog.Exit(errors.Wrap(err, "setup app error"))

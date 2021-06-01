@@ -19,14 +19,17 @@ type Controller struct {
 	Informers  informers.Interface
 }
 
+// Start starts the Controller
 func (c *Controller) Start(stopCh <-chan struct{}) error {
 	return c.Informers.Start(stopCh)
 }
 
+// Shutdown shutdowns the Controller
 func (c *Controller) Shutdown() {
 	c.Informers.Shutdown()
 }
 
+// Setup sets up a new Controller
 func Setup(config Config) (*Controller, error) {
 	controller := &Controller{}
 

@@ -35,7 +35,7 @@ func e(statusCode int, reason, description string) *E {
 	}
 }
 
-func (app *App) HandleError(c *gin.Context, err error) {
+func (app *App) handle(c *gin.Context, err error) {
 	switch t := err.(type) {
 	case *E:
 		if t.StatusCode != 0 {
@@ -60,7 +60,7 @@ func ShouldBindQuery(c *gin.Context, i interface{}) error {
 //  returns false when failed, and response is written automatically
 func (app *App) MustBindQuery(c *gin.Context, i interface{}) bool {
 	if err := ShouldBindQuery(c, i); err != nil {
-		app.HandleError(c, err)
+		app.handle(c, err)
 		return false
 	}
 	return true
@@ -77,7 +77,7 @@ func ShouldBindJSON(c *gin.Context, i interface{}) error {
 // returns false when failed, and response is written automatically
 func (app *App) MustBindJSON(c *gin.Context, i interface{}) bool {
 	if err := ShouldBindJSON(c, i); err != nil {
-		app.HandleError(c, err)
+		app.handle(c, err)
 		return false
 	}
 	return true

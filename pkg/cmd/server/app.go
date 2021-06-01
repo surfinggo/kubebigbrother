@@ -7,17 +7,18 @@ import (
 type Config struct {
 	Version string
 
-	Env string
-
-	Addr     string
-	GinDebug bool
+	Addr                string
+	Env                 string
+	GinDebug            bool
+	InformersConfigPath string
 }
 
 type App struct {
 	Version string
 
-	Addr string
-	Env  string
+	Addr                string
+	Env                 string
+	InformersConfigPath string
 
 	Router *gin.Engine
 }
@@ -31,6 +32,7 @@ func SetupApp(config *Config) (*App, error) {
 	app.Version = config.Version
 	app.Addr = config.Addr
 	app.Env = config.Env
+	app.InformersConfigPath = config.InformersConfigPath
 
 	if config.GinDebug {
 		gin.SetMode(gin.DebugMode)
@@ -46,10 +48,11 @@ func SetupApp(config *Config) (*App, error) {
 		gin.Recovery(),
 	)
 
-	r.GET("/", app.Index)
-	r.Any("/healthz", app.Healthz)
-	r.GET("/api/v1/healthz", app.Healthz)
-	r.POST("/api/v1/callback-channel-test", app.CallbackChannelTest)
+	r.GET("/", app.HandlerIndex)
+	r.Any("/healthz", app.HandlerHealthz)
+	r.GET("/api/v1/healthz", app.HandlerHealthz)
+	r.POST("/api/v1/callback-channel-test", app.HandlerCallbackChannelTest)
+	r.GET("/api/v1/config", app.HandlerConfig)
 
 	r.HandleMethodNotAllowed = true
 
