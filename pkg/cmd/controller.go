@@ -31,7 +31,7 @@ func getControllerOptions() *controllerOptions {
 	return o
 }
 
-func NewControllerCommand() *cobra.Command {
+func newControllerCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "controller",
 		Short: "Run controller, watch events and persistent into database (only one instance should be running)",

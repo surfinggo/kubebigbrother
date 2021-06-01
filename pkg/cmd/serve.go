@@ -26,7 +26,7 @@ func getServeOptions() *serveOptions {
 	return o
 }
 
-func NewServeCommand() *cobra.Command {
+func newServeCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Run the server to serve backend APIs",

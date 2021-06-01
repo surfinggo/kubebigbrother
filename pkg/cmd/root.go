@@ -21,10 +21,10 @@ func NewKbbCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		NewControllerCommand(),
-		NewQueryCommand(),
-		NewServeCommand(),
-		NewWatchCommand(),
+		newControllerCommand(),
+		newQueryCommand(),
+		newServeCommand(),
+		newWatchCommand(),
 	)
 
 	f := cmd.PersistentFlags()

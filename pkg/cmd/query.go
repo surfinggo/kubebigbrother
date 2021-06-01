@@ -25,7 +25,7 @@ func getQueryOptions() *queryOptions {
 	return o
 }
 
-func NewQueryCommand() *cobra.Command {
+func newQueryCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "query",
 		Short: "Query event history",

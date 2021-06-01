@@ -31,7 +31,7 @@ func getWatchOptions() *watchOptions {
 	return o
 }
 
-func NewWatchCommand() *cobra.Command {
+func newWatchCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "watch",
 		Short: "Watch events lively",
