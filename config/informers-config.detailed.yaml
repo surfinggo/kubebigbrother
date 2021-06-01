@@ -1,9 +1,8 @@
-# define channels
-channels:
-  print-to-stdout:
-    type: print
+channels: # define channels
+  print-to-stdout: # channel name
+    type: print # channel type
     print: # configuration for type: print
-      writer: stdout
+      writer: stdout # writer, currently supported options: [stdout]
   callback-demo-full: # channel name
     type: callback # channel type
     callback: # configuration for type: callback
@@ -14,65 +13,65 @@ channels:
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
-  callback-demo-minimum:
-    type: callback
-    callback:
-      url: "http://localhost:8984/api/v1/callback-channel-test"
-  dingtalk-demo-full:
-    type: dingtalk
-    dingtalk:
-      webhookURL: "https://oapi.dingtalk.com/robot/send?access_token={your_token}"
+  callback-demo-minimum: # channel name
+    type: callback # channel type
+    callback: # configuration for type: callback
+      url: "http://localhost:8984/api/v1/callback-channel-test" # send notification to this url
+  dingtalk-demo-full: # channel name
+    type: dingtalk # channel type
+    dingtalk: # configuration for type: dingtalk
+      webhookURL: "https://oapi.dingtalk.com/robot/send?access_token={your_token}" # webhook url (get from bot config page)
       proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
-      atMobiles: # @ users with mobile phone numbers
+      atMobiles: # '@' users with mobile phone numbers
       - 18667006215
-      atAll: true # @ all members in group chat, when atAll=true, atMobiles will be ignored
+      atAll: true # '@' all members in group chat, when atAll=true, atMobiles will be ignored
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
-  dingtalk-demo-minimum:
-    type: dingtalk
-    dingtalk:
-      webhookURL: "https://oapi.dingtalk.com/robot/send?access_token={your_token}"
+  dingtalk-demo-minimum: # channel name
+    type: dingtalk # channel type
+    dingtalk: # configuration for type: dingtalk
+      webhookURL: "https://oapi.dingtalk.com/robot/send?access_token={your_token}" # webhook url (get from bot config page)
   flock-demo-full: # channel name
     type: flock # channel type
     flock: # configuration for type: flock
-      url: "https://api.flock.com/hooks/sendMessage/{your_webhook_id}" # send notification to this url
+      url: "https://api.flock.com/hooks/sendMessage/{your_webhook_id}" # url get from channel config page
       proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
       titleTemplate: "New Event!" # message title template, optional
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
-  flock-demo-minimum:
-    type: flock
-    flock:
-      url: "https://api.flock.com/hooks/sendMessage/{your_webhook_id}"
-  print-demo-full:
-    type: print
+  flock-demo-minimum: # channel name
+    type: flock # channel type
+    flock: # configuration for type: flock
+      url: "https://api.flock.com/hooks/sendMessage/{your_webhook_id}" # url get from channel config page
+  print-demo-full: # channel name
+    type: print # channel type
     print: # configuration for type: print
-      writer: stdout
+      writer: stdout # writer, currently supported options: [stdout]
       useTemplate: true # when set to false, print channel writes raw JSON bytes to the writer, default to false
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
-  print-demo-minimun:
-    type: print
-    print:
-      writer: stdout
+  print-demo-minimun: # channel name
+    type: print # channel type
+    print: # configuration for type: print
+      writer: stdout # writer, currently supported options: [stdout]
   slack-demo-full: # channel name
     type: slack # channel type
     slack: # configuration for type: slack
-      webhookURL: "https://hooks.slack.com/services/{your_secret}"
+      webhookURL: "https://hooks.slack.com/services/{your_secret}" # webhook url (get from channel config page)
       proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
       titleTemplate: "New Event!" # message title template, optional
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
-  slack-demo-minimum:
-    type: slack
-    slack:
-      webhookURL: "https://hooks.slack.com/services/{your_secret}"
-  telegram-demo-full:
-    type: telegram
+  slack-demo-minimum: # channel name
+    type: slack # channel type
+    slack: # configuration for type: slack
+      webhookURL: "https://hooks.slack.com/services/{your_secret}" # webhook url (get from channel config page)
+  telegram-demo-full: # channel name
+    type: telegram # channel type
     telegram: # configuration for type: telegram
       token: "{your_token}" # telegram bot token
       chatIDs: # list of chat ids
@@ -81,15 +80,14 @@ channels:
       addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
       deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
       updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
-  telegram-demo-minimum:
-    type: telegram
-    telegram:
+  telegram-demo-minimum: # channel name
+    type: telegram # channel type
+    telegram: # configuration for type: telegram
       token: "{your_token}"
-      chatIDs:
+      chatIDs: # list of chat ids
       - 648014523
 
-# defines resources to watch
-namespaces:
+namespaces: # defines resources to watch
 - namespace: "demo" # namespace in kubernetes, "" means all namespaces
   resources: # defines resources in this namespace
   - resource: "configmaps" # resource name in kubernetes
@@ -155,7 +153,7 @@ namespaces:
 #    noticeWhenDeleted: true
 #  - resource: "deployments.v1.apps"
 #    noticeWhenDeleted: true
-#- namespace: "demo" # demonstration 6: channels
+#- namespace: "demo" # demonstration 6: channels test
 #  resources:
 #  - resource: "configmaps"
 #    noticeWhenAdded: true
@@ -175,18 +173,22 @@ namespaces:
 #    - telegram-demo-minimum
 
 # global default channels names
-# this value can be override by .namespace.defaultChannelNames and .resource.channelNames
+# this value can be override by .namespace.defaultChannelNames and .resource.channelNames,
+# optional
 defaultChannelNames:
 - print-to-stdout
 
 # global default workers,
-# this value can be override by .namespace.defaultWorkers and .resource.workers
+# this value can be override by .namespace.defaultWorkers and .resource.workers,
+# optional, default to 3
 defaultWorkers: 3
 
 # global default max retries,
 # this value can be override by .namespace.defaultMaxRetries and .resource.maxRetries
+# optional, default to 3
 defaultMaxRetries: 3
 
 # global minimum resync period, actual resync period will between 12h to 24h,
 # this value can be override by .namespace.minResyncPeriod and .resource.resyncPeriod
+# optional, default to 12h
 minResyncPeriod: 12h
