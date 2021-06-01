@@ -1,13 +1,10 @@
 import {createApp} from 'vue'
-import VueAxios from 'vue-axios'
-import axios from 'axios'
-import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
-import {library} from '@fortawesome/fontawesome-svg-core'
-import {faHandHolding, faSpinner, faTachometerAlt, faTrash} from '@fortawesome/free-solid-svg-icons'
 
-import router from './router'
+import router from './main_router'
 import store from './store'
-import utils from './utils'
+import axios from './main_axios'
+import fontawesome from './main_fontawesome'
+import utils from './main_utils'
 
 import App from './App.vue'
 
@@ -15,15 +12,12 @@ import 'virtual:windi.css'
 
 import './index.css'
 
-library.add(faHandHolding, faSpinner, faTachometerAlt, faTrash)
 
 const app = createApp(App)
 
 app.use(router)
 app.use(store)
+app.use(axios)
+app.use(fontawesome)
 app.use(utils)
-app.use(VueAxios, axios)
-
-app.component('font-awesome-icon', FontAwesomeIcon)
-
 app.mount('#app')
