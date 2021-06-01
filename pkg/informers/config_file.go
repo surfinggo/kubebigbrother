@@ -40,6 +40,11 @@ func (c *ConfigFile) Validate() error {
 				return errors.Errorf(
 					"config missing for callback channel, name: %s", name)
 			}
+		case channels.ChannelTypeDingtalk:
+			if channel.Dingtalk == nil {
+				return errors.Errorf(
+					"config missing for Dingtalk channel, name: %s", name)
+			}
 		case channels.ChannelTypeFlock:
 			if channel.Flock == nil {
 				return errors.Errorf(

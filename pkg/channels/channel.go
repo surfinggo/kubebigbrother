@@ -12,6 +12,7 @@ type ChannelType string
 
 const (
 	ChannelTypeCallback = "callback" // send message to callback url
+	ChannelTypeDingtalk = "dingtalk" // send message to Dingtalk url
 	ChannelTypeFlock    = "flock"    // send message to Flock
 	ChannelTypePrint    = "print"    // write message to writer
 	ChannelTypeSlack    = "slack"    // send message to Slack

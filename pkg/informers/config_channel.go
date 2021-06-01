@@ -31,6 +31,29 @@ func (c *ChannelCallbackConfig) setupChannel() (*channels.ChannelCallback, error
 	})
 }
 
+// ChannelDingtalkConfig is config for ChannelDingtalk, read from config file
+type ChannelDingtalkConfig struct {
+	WebhookURL      string   `json:"webhookURL" yaml:"webhookURL"`
+	Proxy           string   `json:"proxy" yaml:"proxy"`
+	AtMobiles       []string `json:"atMobiles" yaml:"atMobiles"`
+	AtAll           bool     `json:"atAll" yaml:"atAll"`
+	AddedTemplate   string   `json:"addedTemplate" yaml:"addedTemplate"`
+	DeletedTemplate string   `json:"deletedTemplate" yaml:"deletedTemplate"`
+	UpdatedTemplate string   `json:"updatedTemplate" yaml:"updatedTemplate"`
+}
+
+func (c *ChannelDingtalkConfig) setupChannel() (*channels.ChannelDingtalk, error) {
+	return channels.NewChannelDingtalk(&channels.ChannelDingtalkConfig{
+		WebhookURL:      c.WebhookURL,
+		Proxy:           c.Proxy,
+		AtMobiles:       c.AtMobiles,
+		AtAll:           c.AtAll,
+		AddedTemplate:   c.AddedTemplate,
+		DeletedTemplate: c.DeletedTemplate,
+		UpdatedTemplate: c.UpdatedTemplate,
+	})
+}
+
 // ChannelFlockConfig is config for ChannelFlock, read from config file
 type ChannelFlockConfig struct {
 	URL             string `json:"url" yaml:"url"`
@@ -121,6 +144,7 @@ type ChannelConfig struct {
 	Type channels.ChannelType `json:"type" yaml:"type"`
 
 	Callback *ChannelCallbackConfig `json:"callback" yaml:"callback"`
+	Dingtalk *ChannelDingtalkConfig `json:"dingtalk" yaml:"dingtalk"`
 	Flock    *ChannelFlockConfig    `json:"flock" yaml:"flock"`
 	Print    *ChannelPrintConfig    `json:"print" yaml:"print"`
 	Slack    *ChannelSlackConfig    `json:"slack" yaml:"slack"`
@@ -131,6 +155,8 @@ func (c *ChannelConfig) setupChannel() (channels.Channel, error) {
 	switch c.Type {
 	case channels.ChannelTypeCallback:
 		return c.Callback.setupChannel()
+	case channels.ChannelTypeDingtalk:
+		return c.Dingtalk.setupChannel()
 	case channels.ChannelTypeFlock:
 		return c.Flock.setupChannel()
 	case channels.ChannelTypePrint:

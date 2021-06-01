@@ -18,6 +18,21 @@ channels:
     type: callback
     callback:
       url: "http://localhost:8984/api/v1/callback-channel-test"
+  dingtalk-demo-full:
+    type: dingtalk
+    dingtalk:
+      webhookURL: "https://oapi.dingtalk.com/robot/send?access_token={your_token}"
+      proxy: "http://127.0.0.1:7890" # HTTP proxy, optional
+      atMobiles: # @ users with mobile phone numbers
+      - 18667006215
+      atAll: true # @ all members in group chat, when atAll=true, atMobiles will be ignored
+      addedTemplate: "Added: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # added message template, optional
+      deletedTemplate: "Deleted: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # deleted message template, optional
+      updatedTemplate: "Updated: {{.Obj.GroupVersionKind}}, {{.Obj.GetNamespace}}/{{.Obj.GetName}}\n" # updated message template, optional
+  dingtalk-demo-minimum:
+    type: dingtalk
+    dingtalk:
+      webhookURL: "https://oapi.dingtalk.com/robot/send?access_token={your_token}"
   flock-demo-full: # channel name
     type: flock # channel type
     flock: # configuration for type: flock
@@ -148,6 +163,8 @@ namespaces:
 #    channelNames:
 #    - callback-demo-full
 #    - callback-demo-minimum
+#    - dingtalk-demo-full
+#    - dingtalk-demo-minimum
 #    - flock-demo-full
 #    - flock-demo-minimum
 #    - print-demo-full
