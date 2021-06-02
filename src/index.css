@@ -1,0 +1,7 @@
+.fcc {
+    @apply flex items-center justify-center;
+}
+
+.fcb {
+    @apply flex items-center justify-between;
+}

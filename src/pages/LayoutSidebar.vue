@@ -1,18 +1,15 @@
 <template>
-  <div class="bg-purple-600 px-4 py-2 text-white" id="sidebar">
-    <router-link class="" :to="{name: 'dashboard'}">
-      <div class="">{{ $store.state.app.siteName }}</div>
-      <div class="text-xs">{{ $store.state.app.siteDescription }}</div>
-    </router-link>
+  <div class="fixed text-gray-500 h-screen top-0 pt-16">
+    <div class="h-full overflow-y-scroll px-3">
+      <div class="h-8 pointer-events-none absolute inset-x-0 z-10 px-3">
+        <div class="h-8 bg-gradient-to-b from-white"></div>
+      </div>
+      <div class="py-3">
+        <sidebar-item icon="tachometer-alt" title="Dashboard" :to="{name: 'dashboard'}"/>
 
-    <sidebar-divider/>
-
-    <!-- Nav Item - Dashboard -->
-    <sidebar-item icon="tachometer-alt" title="Dashboard" :to="{name: 'dashboard'}"/>
-
-    <sidebar-divider/>
-
-
+        <sidebar-divider/>
+      </div>
+    </div>
   </div>
 </template>
 

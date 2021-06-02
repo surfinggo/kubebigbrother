@@ -1,7 +1,7 @@
 <template>
   <footer class="">
-    <div class="p-5 bg-gray-200 text-center text-xs">
-      <span>Copyright &copy; {{ year }}</span>
+    <div class="px-3 py-6 text-center text-xs">
+      <span>Copyright <a href="http://kubebigbrother.spongeprojects.com" target="_blank">SpongeProjects</a> &copy; {{ year }}</span>
     </div>
   </footer>
 </template>

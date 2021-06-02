@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div class="hover:text-gray-600 transition-colors duration-200">
     <router-link :to="to" class="">
       <font-awesome-icon fixed-width :icon="icon"/>
       <span class="ml-1">{{ title }}</span>

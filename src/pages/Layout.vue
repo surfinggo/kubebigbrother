@@ -1,12 +1,12 @@
 <!--
 ------------------wrapper-------------------------
+|   --------------------topbar-----------------  |
+|   |                                         |  |
+|   --------------------topbar-----------------  |
+|                                                |
 |   --sidebar--   ------------main------------   |
 |   |         |   |                          |   |
 |   |         |   |   -div (flex-grow: 1)-   |   |
-|   |         |   |   |                  |   |   |
-|   |         |   |   |   ---topbar---   |   |   |
-|   |         |   |   |   |          |   |   |   |
-|   |         |   |   |   ---topbar---   |   |   |
 |   |         |   |   |                  |   |   |
 |   s         s   |   |   ---content--   |   |   |
 |   i         i   |   |   |          |   |   |   |
@@ -27,20 +27,30 @@
 -->
 
 <template>
-  <div id="wrapper" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 h-screen">
-    <layout-sidebar class="col-span-1"/>
-    <layout-main class="col-span-2 md:col-span-3 lg:col-span-4"/>
+  <div id="wrapper" class="text-gray-600">
+    <layout-topbar/>
+    <div class="w-full">
+      <layout-sidebar class="w-60 xl:w-72"/>
+      <div class="flex flex-col pl-60 xl:pl-72">
+        <div class="flex-grow p-3">
+          <router-view class="" id="content"/>
+        </div>
+        <layout-footer/>
+      </div>
+    </div>
   </div>
 </template>
 
-<script>
-import LayoutMain from './LayoutMain.vue'
+<script lang="ts">
+import LayoutFooter from './LayoutFooter.vue'
 import LayoutSidebar from './LayoutSidebar.vue'
+import LayoutTopbar from './LayoutTopbar.vue'
 
 export default {
   components: {
-    LayoutMain,
+    LayoutFooter,
     LayoutSidebar,
+    LayoutTopbar,
   },
   created() {
     this.$store.commit('SET_SITE_NAME', 'Unknown')
