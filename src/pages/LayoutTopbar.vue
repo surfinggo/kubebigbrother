@@ -59,7 +59,7 @@
                 Informers Config
               </DialogTitle>
               <div class="mt-2">
-                <prism v-if="config" language="yaml" class="rounded !text-sm">{{ config }}</prism>
+                <prism v-if="config" language="json" class="rounded !text-sm">{{ config }}</prism>
               </div>
               <div class="mt-4 text-right">
                 <button
@@ -114,7 +114,6 @@ export default {
   },
   created() {
     window.addEventListener('keydown', this.onkey)
-
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.onkey)
