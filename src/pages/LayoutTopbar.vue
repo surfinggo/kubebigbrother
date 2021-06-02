@@ -1,5 +1,5 @@
 <template>
-  <div class="sticky top-0 w-full z-1 flex border-b border-gray-200 bg-white h-16">
+  <div class="fixed top-0 w-full z-1 flex border-b border-gray-200 bg-white h-16">
     <div class="fcc w-60 xl:w-72 px-3">
       <a class="overflow-hidden" href="/">
         <img :src="icon"/>

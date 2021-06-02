@@ -40,6 +40,8 @@ func newServeCommand() *cobra.Command {
 			app, err := server.SetupApp(&server.Config{
 				Version:             Version,
 				Env:                 o.GlobalOptions.Env,
+				DBDialect:           o.DatabaseOptions.DBDialect,
+				DBArgs:              o.DatabaseOptions.DBArgs,
 				Addr:                o.Addr,
 				InformersConfigPath: informersConfigPath,
 			})

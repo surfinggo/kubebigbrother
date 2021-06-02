@@ -1,7 +1,7 @@
 <template>
   <footer class="">
     <div class="fcc px-3 py-6 text-center text-xs">
-      <a class="mr-1" href="https://github.com/spongeprojects/kubebigbrother" target="_blank">SpongeProjects</a>
+      <a class="mr-1" href="https://github.com/spongeprojects/kubebigbrother" target="_blank">Kubebigbrother</a>
       <span class="mr-1">&copy; {{ year }}</span>
       <github-icon/>
     </div>

@@ -1,5 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import Dashboard from './pages/Dashboard.vue'
+import Events from './pages/Events.vue'
 import Layout from './pages/Layout.vue'
 
 const routes = [
@@ -12,6 +13,12 @@ const routes = [
                 name: 'dashboard',
                 component: Dashboard,
                 meta: {title: 'Dashboard'},
+            },
+            {
+                path: '/events/:informerName',
+                name: 'events',
+                component: Events,
+                meta: {title: 'Events'},
             },
         ],
     },

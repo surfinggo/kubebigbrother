@@ -30,8 +30,8 @@
   <div id="wrapper" class="text-gray-600">
     <layout-topbar :config="config"/>
     <div class="w-full">
-      <layout-sidebar class="w-60 xl:w-72"/>
-      <div class="flex flex-col pl-60 xl:pl-72">
+      <layout-sidebar :config="config" class="w-60 xl:w-72"/>
+      <div class="min-h-screen flex flex-col pl-60 xl:pl-72 pt-16">
         <div class="flex-grow p-3">
           <router-view class="" id="content"/>
         </div>
