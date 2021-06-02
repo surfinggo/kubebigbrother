@@ -1,26 +1,16 @@
 <template>
   <div>
-    <div>Config:</div>
-    <prism v-if="config" language="yaml" class="rounded !text-sm">{{ config }}</prism>
+    <div class="fcc h-53 bg-blue-100 rounded-2xl">Welcome to Kubebigbrother.</div>
   </div>
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue'
-
-export default defineComponent({
+export default {
   data() {
-    return {
-      config: '',
-    }
+    return {}
   },
   created() {
-    this.axios.get('/api/v1/config').then(r => {
-      this.config = r.data
-    }, r => {
-      console.log(r)
-    })
   },
   methods: {},
-})
+}
 </script>
