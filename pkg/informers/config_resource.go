@@ -6,6 +6,10 @@ import (
 )
 
 type ResourceConfig struct {
+	// Name is an unique value for this resource,
+	// the controller, server and query command use Name to query events
+	Name string `json:"name" yaml:"name"`
+
 	// Resource is the resource to watch, e.g. "deployments.v1.apps"
 	Resource string `json:"resource" yaml:"resource"`
 
@@ -37,6 +41,12 @@ type ResourceConfig struct {
 
 func (c *ResourceConfig) validate(
 	namespaceIndex, index int, channelNames []string) error {
+	if c.Name == "" {
+		return errors.Errorf(
+			"you must set a name for each resource to watch: .Namespaces[%d].Resources[%d]",
+			namespaceIndex, index)
+	}
+
 	for _, name := range c.ChannelNames {
 		if !magicconch.StringInSlice(string(name), channelNames) {
 			return errors.Errorf(

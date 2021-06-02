@@ -7,7 +7,8 @@ channels: # define channels
 namespaces: # defines resources to watch
 - namespace: "demo" # namespace in kubernetes, "" means all namespaces
   resources: # defines resources in this namespace
-  - resource: "configmaps" # resource name in kubernetes
+  - name: "demo-configmaps" # unique name
+    resource: "configmaps" # resource name in kubernetes
     noticeWhenAdded: true # record event when resource added
     noticeWhenDeleted: true # record event when resource deleted
     noticeWhenUpdated: true # record event when resource updated

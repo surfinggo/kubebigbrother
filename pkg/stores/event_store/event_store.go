@@ -9,7 +9,7 @@ import (
 
 type Interface interface {
 	List() (events []models.Event, err error)
-	IsCurrentlyAdded(informerConfigHash,
+	IsCurrentlyAdded(informerName,
 		group, version, resource, namespace, name string) (exist bool, err error)
 	Save(event *models.Event) (err error)
 	SaveSilently(event *models.Event)
@@ -34,10 +34,10 @@ func (s *Store) SaveSilently(event *models.Event) {
 	}
 }
 
-func (s *Store) IsCurrentlyAdded(informerConfigHash,
+func (s *Store) IsCurrentlyAdded(informerName,
 	group, version, resource, namespace, name string) (yes bool, err error) {
 	var e models.Event
-	if err := s.DB.Where("informer_config_hash = ?", informerConfigHash).
+	if err := s.DB.Where("informer_name = ?", informerName).
 		// TODO: use event.EventType ADDED and DELETED without import loop
 		Where("event_type in ?", []string{"ADDED", "DELETED"}).
 		Where("event_group = ?", group).

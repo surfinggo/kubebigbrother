@@ -10,9 +10,9 @@ type Event struct {
 	ID         uint      `gorm:"primarykey" json:"id"`
 	CreateTime time.Time `gorm:"autoCreateTime" json:"create_time"`
 
-	// InformerConfigHash is unique value represents the informer config,
+	// InformerName is unique value represents the informer config,
 	// every Event belongs to an informer.
-	InformerConfigHash string `json:"informer_config_hash"`
+	InformerName string `json:"informer_name"`
 
 	EventType string `json:"event_type"`
 	Group     string `gorm:"column:event_group" json:"group"`

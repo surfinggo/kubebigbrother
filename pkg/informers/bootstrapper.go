@@ -1,8 +1,6 @@
 package informers
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
@@ -39,6 +37,8 @@ type Bootstrapper struct {
 	resourceBuilder *resourcebuilder.ResourceBuilder
 
 	dynamicClient dynamic.Interface
+
+	duplicatedName map[string]bool
 }
 
 func (b *Bootstrapper) buildInformerSet() (*InformerSet, error) {
@@ -124,7 +124,7 @@ func (b *Bootstrapper) buildNamespacedInformerFactory(
 	var informers []*Informer
 	for i, resourceConfig := range c.Resources {
 		resourceID := fmt.Sprintf("%sr%d", namespaceID, i) // unique resourceID
-		resourceDesc := fmt.Sprintf("%s.Resources[%d]", i, i)
+		resourceDesc := fmt.Sprintf("%s.Resources[%d]", namespaceDesc, i)
 
 		klog.V(1).Infof("[%s] setup resource %d/%d: %s",
 			resourceID, i+1, len(c.Resources), resourceConfig.Resource)
@@ -163,20 +163,20 @@ func (b *Bootstrapper) buildResourceInformer(
 	resourceID string,
 	resourceDesc string,
 	c ResourceConfig) (*Informer, error) {
+	if _, ok := b.duplicatedName[c.Name]; ok {
+		return nil, errors.Errorf(
+			"duplicated informer name %s: %s)", resourceDesc, c.Name)
+	}
+	b.duplicatedName[c.Name] = true
+
 	gvr, err := b.resourceBuilder.ParseGroupResource(c.Resource)
 	if err != nil {
 		return nil, errors.Wrapf(err,
 			"invalid resource in %s: %s", resourceDesc, c.Resource)
 	}
 
-	// n0r0-deployments.apps.v1-xxx
-	md5sum := md5.New().Sum([]byte(fmt.Sprintf("%s-%s", resourceID, gvr)))
-	informerConfigHash := fmt.Sprintf("%s-%s.%s.%s-md5:%s",
-		resourceID, gvr.Resource, gvr.Group, gvr.Version,
-		hex.EncodeToString(md5sum)[:8])
-
 	saveSilently := func(e *event.Event) {
-		b.config.EventStore.SaveSilently(e.ToModel(informerConfigHash, gvr))
+		b.config.EventStore.SaveSilently(e.ToModel(c.Name, gvr))
 	}
 
 	resyncPeriodFunc, err := c.buildResyncPeriodFunc(
@@ -217,8 +217,7 @@ func (b *Bootstrapper) buildResourceInformer(
 
 			if b.config.SaveEvent {
 				isCurrentlyAdded, err := b.config.EventStore.IsCurrentlyAdded(
-					informerConfigHash,
-					gvr.Group, gvr.Version, gvr.Resource,
+					c.Name, gvr.Group, gvr.Version, gvr.Resource,
 					e.Obj.GetNamespace(), e.Obj.GetName())
 				if err != nil {
 					klog.Warning(errors.Wrap(err, "find latest record error"))
@@ -404,4 +403,12 @@ func (b *Bootstrapper) initDynamicClient() error {
 
 	b.dynamicClient = dynamicClient
 	return nil
+}
+
+// NewBootstrapper creates new Bootstrapper
+func NewBootstrapper(config *Config) *Bootstrapper {
+	return &Bootstrapper{
+		config:         config,
+		duplicatedName: make(map[string]bool),
+	}
 }

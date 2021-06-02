@@ -90,7 +90,8 @@ channels: # define channels
 namespaces: # defines resources to watch
 - namespace: "demo" # namespace in kubernetes, "" means all namespaces
   resources: # defines resources in this namespace
-  - resource: "configmaps" # resource name in kubernetes
+  - name: "demo-configmaps" # unique name
+    resource: "configmaps" # resource name in kubernetes
     noticeWhenAdded: true # record event when resource added
     noticeWhenDeleted: true # record event when resource deleted
     noticeWhenUpdated: true # record event when resource updated
@@ -119,43 +120,54 @@ namespaces: # defines resources to watch
   minResyncPeriod: 12h
 #- namespace: "demo" # another namespace with minimum configuration
 #  resources:
-#  - resource: "deployments"
+#  - name: "demo-deployments"
+#    resource: "deployments"
 #    noticeWhenAdded: true
 #    noticeWhenDeleted: true
 #    noticeWhenUpdated: true
 #    updateOn:
 #    - ".spec.replicas"
-#- namespace: "demo" # demonstration 1: namespace="" means all namespaces
+#- namespace: "" # demonstration 1: namespace="" means all namespaces
 #  resources:
-#  - resource: "secrets.v1."
+#  - name: "demo-secrets-1"
+#    resource: "secrets.v1."
 #    noticeWhenDeleted: true
 #- namespace: "demo" # demonstration 2: resource name alias
 #  resources:
-#  - resource: "cm"
+#  - name: "demo-configmaps-2" # unique name
+#    resource: "cm"
 #    noticeWhenDeleted: true
-#  - resource: "deploy"
+#  - name: "demo-deploy-2"
+#    resource: "deploy"
 #    noticeWhenDeleted: true
 #- namespace: "demo" # demonstration 3: short resource name
 #  resources:
-#  - resource: "configmaps"
+#  - name: "demo-configmaps-3"
+#    resource: "configmaps"
 #    noticeWhenDeleted: true
-#  - resource: "deployments"
+#  - name: "demo-deployments-3"
+#    resource: "deployments"
 #    noticeWhenDeleted: true
 #- namespace: "demo" # demonstration 4: resource name without version
 #  resources:
-#  - resource: "configmaps."
+#  - name: "demo-configmaps-4"
+#    resource: "configmaps."
 #    noticeWhenDeleted: true
-#  - resource: "deployments.apps"
+#  - name: "demo-deployments-4"
+#    resource: "deployments.apps"
 #    noticeWhenDeleted: true
 #- namespace: "demo" # demonstration 5: canonical resource name
 #  resources:
-#  - resource: "configmaps.v1."
+#  - name: "demo-configmaps-5"
+#    resource: "configmaps.v1."
 #    noticeWhenDeleted: true
-#  - resource: "deployments.v1.apps"
+#  - name: "demo-deployments-5"
+#    resource: "deployments.v1.apps"
 #    noticeWhenDeleted: true
 #- namespace: "demo" # demonstration 6: channels test
 #  resources:
-#  - resource: "configmaps"
+#  - name: "demo-configmaps-6"
+#    resource: "configmaps"
 #    noticeWhenAdded: true
 #    noticeWhenDeleted: true
 #    channelNames:

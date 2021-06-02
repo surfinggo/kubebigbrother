@@ -65,6 +65,5 @@ func (set *InformerSet) Shutdown() {
 
 // Setup setups new InformerSet
 func Setup(config Config) (*InformerSet, error) {
-	bootstrapper := Bootstrapper{config: &config}
-	return bootstrapper.buildInformerSet()
+	return NewBootstrapper(&config).buildInformerSet()
 }

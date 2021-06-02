@@ -64,12 +64,12 @@ func (e *Event) Color() string {
 
 // ToModel translate Event into *models.Event
 func (e *Event) ToModel(
-	informerConfigHash string, gvr schema.GroupVersionResource) *models.Event {
+	informerName string, gvr schema.GroupVersionResource) *models.Event {
 	model := &models.Event{
-		InformerConfigHash: informerConfigHash,
-		EventType:          string(e.Type),
-		Namespace:          e.Obj.GetNamespace(),
-		Name:               e.Obj.GetName(),
+		InformerName: informerName,
+		EventType:    string(e.Type),
+		Namespace:    e.Obj.GetNamespace(),
+		Name:         e.Obj.GetName(),
 	}
 
 	model.Group = gvr.Group
