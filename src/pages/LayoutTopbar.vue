@@ -54,7 +54,7 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95">
             <div
-                class="inline-block w-full max-w-3xl p-4 my-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+                class="inline-block w-full max-w-4xl p-4 my-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
               <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
                 Informers Config
               </DialogTitle>
@@ -90,6 +90,9 @@ export default {
     DialogOverlay,
     DialogTitle,
   },
+  props: {
+    config: {},
+  },
   setup() {
     const isOpen = ref(false)
 
@@ -107,22 +110,17 @@ export default {
     return {
       q: '',
       icon: Icon,
-      config: '',
     }
   },
   created() {
     window.addEventListener('keydown', this.onkey)
 
-    this.axios.get('/api/v1/config').then(r => {
-      this.config = r.data
-    })
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.onkey)
   },
   methods: {
     onkey(event: KeyboardEvent) {
-      console.log(event)
       if (event.key === 'k') {
         if (event.metaKey || event.ctrlKey) {
           this.$refs.q && this.$refs.q.focus()

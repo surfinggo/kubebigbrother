@@ -28,7 +28,7 @@
 
 <template>
   <div id="wrapper" class="text-gray-600">
-    <layout-topbar/>
+    <layout-topbar :config="config"/>
     <div class="w-full">
       <layout-sidebar class="w-60 xl:w-72"/>
       <div class="flex flex-col pl-60 xl:pl-72">
@@ -55,6 +55,15 @@ export default {
   created() {
     this.$store.commit('SET_SITE_NAME', 'Unknown')
     this.$store.commit('SET_SITE_DESCRIPTION', 'description undefined')
+
+    this.axios.get('/api/v1/config').then(r => {
+      this.config = r.data
+    })
+  },
+  data() {
+    return {
+      config: '',
+    }
   },
 }
 </script>
