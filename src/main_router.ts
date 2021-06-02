@@ -2,6 +2,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import Dashboard from './pages/Dashboard.vue'
 import Events from './pages/Events.vue'
 import Layout from './pages/Layout.vue'
+import Search from "./pages/Search.vue";
 
 const routes = [
     {
@@ -13,6 +14,12 @@ const routes = [
                 name: 'dashboard',
                 component: Dashboard,
                 meta: {title: 'Dashboard'},
+            },
+            {
+                path: '/search',
+                name: 'search',
+                component: Search,
+                meta: {title: 'Search'},
             },
             {
                 path: '/events/:informerName',

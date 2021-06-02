@@ -1,6 +1,7 @@
 package event_store
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/models"
 	"gorm.io/gorm"
@@ -10,6 +11,7 @@ import (
 type Interface interface {
 	List() (events []models.Event, err error)
 	ListByInformer(informerName string) (events []models.Event, err error)
+	Search(q string) (events []models.Event, err error)
 	IsCurrentlyAdded(informerName,
 		group, version, resource, namespace, name string) (exist bool, err error)
 	Save(event *models.Event) (err error)
@@ -21,15 +23,25 @@ type Store struct {
 }
 
 func (s *Store) List() (events []models.Event, err error) {
-	err = s.DB.Order("id desc").Limit(20).Find(&events).Error
+	err = s.DB.Order("id desc").Limit(50).Find(&events).Error
 	return
 }
 
 func (s *Store) ListByInformer(informerName string) (events []models.Event, err error) {
-	err = s.DB.Where("informer_name = ?", informerName).Order("id desc").Limit(20).Find(&events).Error
+	err = s.DB.Where("informer_name = ?", informerName).Order("id desc").Limit(50).Find(&events).Error
 	return
 }
 
+func (s *Store) Search(q string) (events []models.Event, err error) {
+	l := fmt.Sprintf("%%%s%%", q)
+	err = s.DB.Where("name like ?", l).
+		Or("namespace like ?", l).
+		Or("event_group like ?", l).
+		Or("version like ?", l).
+		Or("resource like ?", l).
+		Order("id desc").Limit(50).Find(&events).Error
+	return
+}
 func (s *Store) Save(event *models.Event) error {
 	return s.DB.Save(event).Error
 }

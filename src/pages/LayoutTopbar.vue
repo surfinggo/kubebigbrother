@@ -11,7 +11,7 @@
             text-gray-400 hover:text-gray-600 focus-within:text-gray-600 transition-colors duration-200 w-full py-2">
           <font-awesome-icon icon="search"/>
           <input v-model="q" ref="q" placeholder="Search events"
-                 class="outline-none"/>
+                 class="outline-none" @keydown.enter="search"/>
           <span class="text-sm py-0.5 px-1.5 border border-gray-300 rounded-md">
           <span class="sr-only">Press</span>
           <kbd class="font-sans"><abbr title="Command" class="no-underline">⌘</abbr></kbd>
@@ -126,6 +126,13 @@ export default {
         }
       }
     },
+    search() {
+      this.$router.push({
+        name: 'search', query: {
+          'q': this.q,
+        }
+      })
+    }
   }
 }
 </script>
