@@ -6,26 +6,27 @@ import (
 	"github.com/spongeprojects/magicconch"
 )
 
-// ConfigFile is struct of informers config file
+// ConfigFile is struct of informers config file,
+// order of fields affects order of fields in JSON
 type ConfigFile struct {
-	// Namespaces defines namespaces and resources to watch
-	Namespaces []NamespaceConfig `json:"namespaces" yaml:"namespaces"`
-
 	// Channels defines channels that receive notifications
 	Channels map[ChannelName]ChannelConfig `json:"channels" yaml:"channels"`
 
+	// Namespaces defines namespaces and resources to watch
+	Namespaces []NamespaceConfig `json:"namespaces" yaml:"namespaces"`
+
 	// DefaultChannelNames defines default channels
-	DefaultChannelNames []ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
+	DefaultChannelNames []ChannelName `json:"defaultChannelNames,omitempty" yaml:"defaultChannelNames,omitempty"`
 
 	// DefaultWorkers is the default number of workers
-	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
+	DefaultWorkers int `json:"defaultWorkers,omitempty" yaml:"defaultWorkers,omitempty"`
 
 	// DefaultMaxRetries is the default max retry times
-	DefaultMaxRetries int `json:"defaultMaxRetries" yaml:"defaultMaxRetries"`
+	DefaultMaxRetries int `json:"defaultMaxRetries,omitempty" yaml:"defaultMaxRetries,omitempty"`
 
 	// MinResyncPeriod is the resync period in reflectors;
 	// actual resync period will be random between MinResyncPeriod and 2*minResyncPeriod.
-	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
+	MinResyncPeriod string `json:"minResyncPeriod,omitempty" yaml:"minResyncPeriod,omitempty"`
 }
 
 // Validate validates ConfigFile values

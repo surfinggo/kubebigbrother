@@ -10,13 +10,13 @@ type ChannelName = channels.ChannelName
 
 // ChannelCallbackConfig is config for ChannelCallback, read from config file
 type ChannelCallbackConfig struct {
-	Method          string `json:"method" yaml:"method"`
+	Method          string `json:"method,omitempty" yaml:"method,omitempty"`
 	URL             string `json:"url" yaml:"url"`
-	Proxy           string `json:"proxy" yaml:"proxy"`
-	UseTemplate     bool   `json:"useTemplate" yaml:"useTemplate"`
-	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+	Proxy           string `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	UseTemplate     bool   `json:"useTemplate,omitempty" yaml:"useTemplate,omitempty"`
+	AddedTemplate   string `json:"addedTemplate,omitempty" yaml:"addedTemplate,omitempty"`
+	DeletedTemplate string `json:"deletedTemplate,omitempty" yaml:"deletedTemplate,omitempty"`
+	UpdatedTemplate string `json:"updatedTemplate,omitempty" yaml:"updatedTemplate,omitempty"`
 }
 
 func (c *ChannelCallbackConfig) setupChannel() (*channels.ChannelCallback, error) {
@@ -34,12 +34,12 @@ func (c *ChannelCallbackConfig) setupChannel() (*channels.ChannelCallback, error
 // ChannelDingtalkConfig is config for ChannelDingtalk, read from config file
 type ChannelDingtalkConfig struct {
 	WebhookURL      string   `json:"webhookURL" yaml:"webhookURL"`
-	Proxy           string   `json:"proxy" yaml:"proxy"`
-	AtMobiles       []string `json:"atMobiles" yaml:"atMobiles"`
-	AtAll           bool     `json:"atAll" yaml:"atAll"`
-	AddedTemplate   string   `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string   `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string   `json:"updatedTemplate" yaml:"updatedTemplate"`
+	Proxy           string   `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	AtMobiles       []string `json:"atMobiles,omitempty" yaml:"atMobiles,omitempty"`
+	AtAll           bool     `json:"atAll,omitempty" yaml:"atAll,omitempty"`
+	AddedTemplate   string   `json:"addedTemplate,omitempty" yaml:"addedTemplate,omitempty"`
+	DeletedTemplate string   `json:"deletedTemplate,omitempty" yaml:"deletedTemplate,omitempty"`
+	UpdatedTemplate string   `json:"updatedTemplate,omitempty" yaml:"updatedTemplate,omitempty"`
 }
 
 func (c *ChannelDingtalkConfig) setupChannel() (*channels.ChannelDingtalk, error) {
@@ -57,11 +57,11 @@ func (c *ChannelDingtalkConfig) setupChannel() (*channels.ChannelDingtalk, error
 // ChannelFlockConfig is config for ChannelFlock, read from config file
 type ChannelFlockConfig struct {
 	URL             string `json:"url" yaml:"url"`
-	Proxy           string `json:"proxy" yaml:"proxy"`
-	TitleTemplate   string `json:"titleTemplate" yaml:"titleTemplate"`
-	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+	Proxy           string `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	TitleTemplate   string `json:"titleTemplate,omitempty" yaml:"titleTemplate,omitempty"`
+	AddedTemplate   string `json:"addedTemplate,omitempty" yaml:"addedTemplate,omitempty"`
+	DeletedTemplate string `json:"deletedTemplate,omitempty" yaml:"deletedTemplate,omitempty"`
+	UpdatedTemplate string `json:"updatedTemplate,omitempty" yaml:"updatedTemplate,omitempty"`
 }
 
 func (c *ChannelFlockConfig) setupChannel() (*channels.ChannelFlock, error) {
@@ -78,10 +78,10 @@ func (c *ChannelFlockConfig) setupChannel() (*channels.ChannelFlock, error) {
 // ChannelPrintConfig is config for ChannelPrint, read from config file
 type ChannelPrintConfig struct {
 	Writer          string `json:"writer" yaml:"writer"`
-	UseTemplate     bool   `json:"useTemplate" yaml:"useTemplate"`
-	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+	UseTemplate     bool   `json:"useTemplate,omitempty" yaml:"useTemplate,omitempty"`
+	AddedTemplate   string `json:"addedTemplate,omitempty" yaml:"addedTemplate,omitempty"`
+	DeletedTemplate string `json:"deletedTemplate,omitempty" yaml:"deletedTemplate,omitempty"`
+	UpdatedTemplate string `json:"updatedTemplate,omitempty" yaml:"updatedTemplate,omitempty"`
 }
 
 func (c *ChannelPrintConfig) setupChannel() (*channels.ChannelPrint, error) {
@@ -97,12 +97,12 @@ func (c *ChannelPrintConfig) setupChannel() (*channels.ChannelPrint, error) {
 // ChannelSlackConfig is config for ChannelSlack, read from config file
 type ChannelSlackConfig struct {
 	Token           string `json:"token" yaml:"token"`
-	Proxy           string `json:"proxy" yaml:"proxy"`
+	Proxy           string `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 	WebhookURL      string `json:"webhookURL" yaml:"webhookURL"`
-	TitleTemplate   string `json:"titleTemplate" yaml:"titleTemplate"`
-	AddedTemplate   string `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string `json:"updatedTemplate" yaml:"updatedTemplate"`
+	TitleTemplate   string `json:"titleTemplate,omitempty" yaml:"titleTemplate,omitempty"`
+	AddedTemplate   string `json:"addedTemplate,omitempty" yaml:"addedTemplate,omitempty"`
+	DeletedTemplate string `json:"deletedTemplate,omitempty" yaml:"deletedTemplate,omitempty"`
+	UpdatedTemplate string `json:"updatedTemplate,omitempty" yaml:"updatedTemplate,omitempty"`
 }
 
 func (c *ChannelSlackConfig) setupChannel() (*channels.ChannelSlack, error) {
@@ -121,10 +121,10 @@ func (c *ChannelSlackConfig) setupChannel() (*channels.ChannelSlack, error) {
 type ChannelTelegramConfig struct {
 	Token           string   `json:"token" yaml:"token"`
 	ChatIDs         []string `json:"chatIDs" yaml:"chatIDs"`
-	Proxy           string   `json:"proxy" yaml:"proxy"`
-	AddedTemplate   string   `json:"addedTemplate" yaml:"addedTemplate"`
-	DeletedTemplate string   `json:"deletedTemplate" yaml:"deletedTemplate"`
-	UpdatedTemplate string   `json:"updatedTemplate" yaml:"updatedTemplate"`
+	Proxy           string   `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	AddedTemplate   string   `json:"addedTemplate,omitempty" yaml:"addedTemplate,omitempty"`
+	DeletedTemplate string   `json:"deletedTemplate,omitempty" yaml:"deletedTemplate,omitempty"`
+	UpdatedTemplate string   `json:"updatedTemplate,omitempty" yaml:"updatedTemplate,omitempty"`
 }
 
 func (c *ChannelTelegramConfig) setupChannel() (*channels.ChannelTelegram, error) {
@@ -143,12 +143,12 @@ type ChannelConfig struct {
 	// Type is the type of the channel
 	Type channels.ChannelType `json:"type" yaml:"type"`
 
-	Callback *ChannelCallbackConfig `json:"callback" yaml:"callback"`
-	Dingtalk *ChannelDingtalkConfig `json:"dingtalk" yaml:"dingtalk"`
-	Flock    *ChannelFlockConfig    `json:"flock" yaml:"flock"`
-	Print    *ChannelPrintConfig    `json:"print" yaml:"print"`
-	Slack    *ChannelSlackConfig    `json:"slack" yaml:"slack"`
-	Telegram *ChannelTelegramConfig `json:"telegram" yaml:"telegram"`
+	Callback *ChannelCallbackConfig `json:"callback,omitempty" yaml:"callback,omitempty"`
+	Dingtalk *ChannelDingtalkConfig `json:"dingtalk,omitempty" yaml:"dingtalk,omitempty"`
+	Flock    *ChannelFlockConfig    `json:"flock,omitempty" yaml:"flock,omitempty"`
+	Print    *ChannelPrintConfig    `json:"print,omitempty" yaml:"print,omitempty"`
+	Slack    *ChannelSlackConfig    `json:"slack,omitempty" yaml:"slack,omitempty"`
+	Telegram *ChannelTelegramConfig `json:"telegram,omitempty" yaml:"telegram,omitempty"`
 }
 
 func (c *ChannelConfig) setupChannel() (channels.Channel, error) {

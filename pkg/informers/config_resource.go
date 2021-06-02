@@ -20,19 +20,19 @@ type ResourceConfig struct {
 	NoticeWhenUpdated bool `json:"noticeWhenUpdated" yaml:"noticeWhenUpdated"`
 
 	// UpdateOn defines fields to watch, used with NoticeWhenUpdated
-	UpdateOn []string `json:"updateOn" yaml:"updateOn"`
+	UpdateOn []string `json:"updateOn,omitempty" yaml:"updateOn,omitempty"`
 
 	// ChannelNames defines channels to send notification
-	ChannelNames []ChannelName `json:"channelNames" yaml:"channelNames"`
+	ChannelNames []ChannelName `json:"channelNames,omitempty" yaml:"channelNames,omitempty"`
 
 	// ResyncPeriod is the resync period in reflectors for this resource
-	ResyncPeriod string `json:"resyncPeriod" yaml:"resyncPeriod"`
+	ResyncPeriod string `json:"resyncPeriod,omitempty" yaml:"resyncPeriod,omitempty"`
 
 	// Workers is the number of workers
-	Workers int `json:"workers" yaml:"workers"`
+	Workers int `json:"workers,omitempty" yaml:"workers,omitempty"`
 
 	// MaxRetries is the max retry times
-	MaxRetries int `json:"maxRetries" yaml:"maxRetries"`
+	MaxRetries int `json:"maxRetries,omitempty" yaml:"maxRetries,omitempty"`
 }
 
 func (c *ResourceConfig) validate(

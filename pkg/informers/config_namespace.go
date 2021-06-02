@@ -13,17 +13,17 @@ type NamespaceConfig struct {
 	Resources []ResourceConfig `json:"resources" yaml:"resources"`
 
 	// DefaultChannelNames defines default channels in this namespace
-	DefaultChannelNames []ChannelName `json:"defaultChannelNames" yaml:"defaultChannelNames"`
+	DefaultChannelNames []ChannelName `json:"defaultChannelNames,omitempty" yaml:"defaultChannelNames,omitempty"`
 
 	// DefaultWorkers is the default number of workers in this namespace
-	DefaultWorkers int `json:"defaultWorkers" yaml:"defaultWorkers"`
+	DefaultWorkers int `json:"defaultWorkers,omitempty" yaml:"defaultWorkers,omitempty"`
 
 	// DefaultMaxRetries is the default max retry times in this namespace
-	DefaultMaxRetries int `json:"defaultMaxRetries" yaml:"defaultMaxRetries"`
+	DefaultMaxRetries int `json:"defaultMaxRetries,omitempty" yaml:"defaultMaxRetries,omitempty"`
 
 	// MinResyncPeriod is the resync period in reflectors in this namespace;
 	// actual resync period will be random between MinResyncPeriod and 2*minResyncPeriod.
-	MinResyncPeriod string `json:"minResyncPeriod" yaml:"minResyncPeriod"`
+	MinResyncPeriod string `json:"minResyncPeriod,omitempty" yaml:"minResyncPeriod,omitempty"`
 }
 
 func (c *NamespaceConfig) validate(index int, channelNames []string) error {
