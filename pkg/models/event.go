@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"time"
 )
 
@@ -21,6 +23,22 @@ type Event struct {
 	Kind      string `json:"kind"`
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
-	Obj       []byte `json:"obj"`
-	OldObj    []byte `json:"old_obj"`
+	Obj       []byte `json:"obj,omitempty"`
+	OldObj    []byte `json:"old_obj,omitempty"`
+}
+
+func (e *Event) GetObj() (obj *unstructured.Unstructured) {
+	if e.Obj == nil {
+		return nil
+	}
+	_ = json.Unmarshal(e.Obj, &obj)
+	return obj
+}
+
+func (e *Event) GetOldObj() (obj *unstructured.Unstructured) {
+	if e.OldObj == nil {
+		return nil
+	}
+	_ = json.Unmarshal(e.OldObj, &obj)
+	return obj
 }

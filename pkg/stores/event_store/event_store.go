@@ -15,6 +15,7 @@ type ListOptions struct {
 }
 
 type Interface interface {
+	Find(id uint) (event *models.Event, err error)
 	List(options ListOptions) (events []models.Event, err error)
 	IsCurrentlyAdded(informerName,
 		group, version, resource, namespace, name string) (exist bool, err error)
@@ -24,6 +25,11 @@ type Interface interface {
 
 type Store struct {
 	DB *gorm.DB
+}
+
+func (s *Store) Find(id uint) (event *models.Event, err error) {
+	err = s.DB.First(&event, id).Error
+	return
 }
 
 func (s *Store) List(options ListOptions) (events []models.Event, err error) {

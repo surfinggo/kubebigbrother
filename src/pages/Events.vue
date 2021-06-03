@@ -56,22 +56,37 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95">
             <div
-                class="inline-block w-full max-w-xl p-4 my-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+                class="inline-block w-full max-w-4xl p-4 my-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
               <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                Event Detail
+                <div class="fcb">
+                  <span>Event Detail</span>
+                  <JsonYamlSwitch v-model="useYaml"/>
+                </div>
               </DialogTitle>
               <div class="mt-2">
-                <prism v-if="evt" language="json" class="rounded !text-sm">{{ evt }}</prism>
+                <prism v-if="evtData && !useYaml" language="json"
+                       class="rounded !text-sm">{{ evtData.event }}
+                </prism>
+                <prism v-if="evtData && useYaml" language="yaml"
+                       class="rounded !text-sm">{{ atob(evtData.event_yaml) }}
+                </prism>
               </div>
               <div class="mt-2 text-sm">Resource object:</div>
               <div class="mt-2">
-                <prism v-if="evt" language="json" class="rounded !text-sm">{{ base64decode(evt.obj) }}</prism>
+                <prism v-if="evtData && !useYaml" language="json"
+                       class="rounded !text-sm">{{ evtData.obj }}
+                </prism>
+                <prism v-if="evtData && useYaml" language="yaml"
+                       class="rounded !text-sm">{{ atob(evtData.obj_yaml) }}
+                </prism>
               </div>
-              <div class="mt-2 text-sm" v-if="evt && evt.old_obj">Old object (when updated):</div>
+              <div class="mt-2 text-sm" v-if="evtData && evtData.old_obj">Old object (when updated):</div>
               <div class="mt-2">
-                <prism v-if="evt && evt.old_obj" language="json" class="rounded !text-sm">{{
-                    base64decode(evt.old_obj)
-                  }}
+                <prism v-if="evtData && evtData.old_obj && !useYaml" language="json"
+                       class="rounded !text-sm">{{ evtData.old_obj }}
+                </prism>
+                <prism v-if="evtData && evtData.old_obj && useYaml" language="yaml"
+                       class="rounded !text-sm">{{ atob(evtData.old_obj_yaml) }}
                 </prism>
               </div>
               <div class="mt-4 text-right">
@@ -94,10 +109,12 @@
 //@ts-ignore
 import {DateTime} from "luxon"
 import {ref} from "vue";
+import JsonYamlSwitch from "../components/JsonYamlSwitch.vue";
 import {Dialog, DialogOverlay, DialogTitle, TransitionChild, TransitionRoot,} from '@headlessui/vue'
 
 export default {
   components: {
+    JsonYamlSwitch,
     TransitionRoot,
     TransitionChild,
     Dialog,
@@ -106,14 +123,16 @@ export default {
   },
   setup() {
     const isOpen = ref(false)
+    const useYaml = ref(false)
 
     return {
       isOpen,
+      useYaml,
     }
   },
   data() {
     return {
-      evt: null,
+      evtData: null,
       events: [],
       refresher: null,
     }
@@ -135,10 +154,14 @@ export default {
   methods: {
     closeModal() {
       this.isOpen = false
+      this.evtData = null
     },
     openModal(e) {
-      this.evt = e
       this.isOpen = true
+      this.axios.get('/api/v1/events/' + e.id).then(r => {
+        console.log(r)
+        this.evtData = r.data
+      })
     },
     refresh() {
       this.$http.get('/api/v1/events', {
@@ -152,11 +175,8 @@ export default {
     lux(t) {
       return DateTime.fromISO(t).toFormat("yyyy-MM-dd HH:mm:ss")
     },
-    base64decode(bytes) {
-      if (!bytes) {
-        return ''
-      }
-      return JSON.parse(atob(bytes))
+    atob(v) {
+      return atob(v)
     }
   }
 }

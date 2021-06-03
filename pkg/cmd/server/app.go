@@ -66,7 +66,8 @@ func SetupApp(config *Config) (*App, error) {
 	r.GET("/api/v1/healthz", app.HandlerHealthz)
 	r.POST("/api/v1/callback-channel-test", app.HandlerCallbackChannelTest)
 	r.GET("/api/v1/config", app.HandlerConfig)
-	r.GET("/api/v1/events", app.HandlerEvent)
+	r.GET("/api/v1/events", app.HandlerEventList)
+	r.GET("/api/v1/events/:id", app.HandlerEvent)
 
 	r.HandleMethodNotAllowed = true
 
