@@ -4,7 +4,14 @@
       <div class="h-6 pointer-events-none absolute inset-x-0 z-10 px-3">
         <div class="h-6 bg-gradient-to-b from-white"></div>
       </div>
-      <div class="py-3">
+      <div class="py-6">
+        <div
+            class="px-3 mb-3 tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
+          <router-link :to="{name: 'dashboard'}">
+            OVERVIEW
+          </router-link>
+        </div>
+
         <div v-for="namespace in config.namespaces" :key="namespace.namespace" class="mb-6">
           <div class="px-3 mb-3 tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
             NAMESPACE: {{ namespace.namespace || '*' }}

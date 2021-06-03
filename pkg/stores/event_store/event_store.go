@@ -8,10 +8,14 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type ListOptions struct {
+	InformerName string
+	Q            string
+	After        uint
+}
+
 type Interface interface {
-	List() (events []models.Event, err error)
-	ListByInformer(informerName string) (events []models.Event, err error)
-	Search(q string) (events []models.Event, err error)
+	List(options ListOptions) (events []models.Event, err error)
 	IsCurrentlyAdded(informerName,
 		group, version, resource, namespace, name string) (exist bool, err error)
 	Save(event *models.Event) (err error)
@@ -22,26 +26,30 @@ type Store struct {
 	DB *gorm.DB
 }
 
-func (s *Store) List() (events []models.Event, err error) {
-	err = s.DB.Order("id desc").Limit(50).Find(&events).Error
+func (s *Store) List(options ListOptions) (events []models.Event, err error) {
+	query := s.DB
+
+	if options.InformerName != "" {
+		query = query.Where("informer_name = ?", options.InformerName)
+	}
+
+	if options.Q != "" {
+		l := fmt.Sprintf("%%%s%%", options.Q)
+		query = query.Where("name like ?", l).
+			Or("namespace like ?", l).
+			Or("event_group like ?", l).
+			Or("version like ?", l).
+			Or("resource like ?", l)
+	}
+
+	if options.After != 0 {
+		query = query.Where("id > ?", options.After)
+	}
+
+	err = query.Order("id desc").Limit(50).Find(&events).Error
 	return
 }
 
-func (s *Store) ListByInformer(informerName string) (events []models.Event, err error) {
-	err = s.DB.Where("informer_name = ?", informerName).Order("id desc").Limit(50).Find(&events).Error
-	return
-}
-
-func (s *Store) Search(q string) (events []models.Event, err error) {
-	l := fmt.Sprintf("%%%s%%", q)
-	err = s.DB.Where("name like ?", l).
-		Or("namespace like ?", l).
-		Or("event_group like ?", l).
-		Or("version like ?", l).
-		Or("resource like ?", l).
-		Order("id desc").Limit(50).Find(&events).Error
-	return
-}
 func (s *Store) Save(event *models.Event) error {
 	return s.DB.Save(event).Error
 }

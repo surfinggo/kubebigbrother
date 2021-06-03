@@ -1,5 +1,4 @@
 import {createRouter, createWebHistory} from 'vue-router'
-import Dashboard from './pages/Dashboard.vue'
 import Events from './pages/Events.vue'
 import Layout from './pages/Layout.vue'
 import Search from "./pages/Search.vue";
@@ -12,8 +11,8 @@ const routes = [
             {
                 path: '',
                 name: 'dashboard',
-                component: Dashboard,
-                meta: {title: 'Dashboard'},
+                component: Events,
+                meta: {title: 'Events'},
             },
             {
                 path: '/search',
