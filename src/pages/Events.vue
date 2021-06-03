@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div
+        v-if="broken"
+        class="transition-all duration-1000 text-right mt-3"
+        :class="brokenBlinkState ? 'text-red-400' : 'text-red-700'"
+    >
+      <font-awesome-icon icon="unlink"/>
+      sync error, please refresh the page
+    </div>
     <div v-for="event in events" :key="event.id">
       <div class="py-8 flex flex-wrap md:flex-nowrap">
         <div class="md:w-64 md:mb-0 mb-6 flex-shrink-0 flex flex-col">
@@ -133,6 +141,10 @@ export default {
   data() {
     return {
       evtData: null,
+      getting: false,
+      broken: false,
+      brokenBlinkState: false,
+      brokenBlink: null, // setInterval to change brokenBlink
       events: [],
       refresher: null,
     }
@@ -152,8 +164,12 @@ export default {
   created() {
     this.refresh()
     this.refresher = setInterval(this.refresh, 3000)
+    this.brokenBlink = setInterval(() => {
+      this.brokenBlinkState = !this.brokenBlinkState
+    }, 800)
   },
   beforeUnmount() {
+    clearInterval(this.brokenBlink)
     clearInterval(this.refresher)
   },
   methods: {
@@ -169,12 +185,21 @@ export default {
       })
     },
     refresh() {
+      if (this.getting) {
+        return
+      }
+      this.getting = true
       this.$http.get('/api/v1/events', {
         params: {
           informerName: this.$route.params.informerName
         }
       }).then(r => {
         this.events = r.data.events
+      }, () => {
+        this.broken = true
+        clearInterval(this.refresher)
+      }).finally(() => {
+        this.getting = false
       })
     },
     lux(t) {
