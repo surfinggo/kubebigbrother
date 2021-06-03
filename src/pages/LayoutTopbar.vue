@@ -57,18 +57,7 @@
                 class="inline-block w-full max-w-4xl p-4 my-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
               <DialogTitle as="h3" class="fcb text-lg font-medium leading-6 text-gray-900">
                 <span>Informers Config</span>
-                <span class="fcc text-sm">
-                <Switch
-                    v-model="useYaml"
-                    class="bg-blue-400 relative inline-flex flex-shrink-0 h-[20px] w-[36px] border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none"
-                >
-                  <span :class="useYaml ? 'translate-x-4' : 'translate-x-0'"
-                        class="pointer-events-none inline-block h-[16px] w-[16px] rounded-full bg-white shadow-lg transform ring-0 transition ease-in-out duration-200"
-                  />
-                </Switch>
-                  <span class="ml-1" :class="useYaml ? 'text-gray-500' : 'text-gray-900'">JSON</span>/<span
-                    :class="useYaml ? 'text-gray-900' : 'text-gray-500'">YAML</span>
-                </span>
+                <JsonYamlSwitch v-model="useYaml"/>
               </DialogTitle>
               <div class="mt-2">
                 <prism v-if="useYaml" language="yaml"
@@ -99,7 +88,8 @@
 <script lang="ts">
 import Icon from '/icon-text-right.png'
 import {ref} from 'vue'
-import {Dialog, DialogOverlay, DialogTitle, Switch, TransitionChild, TransitionRoot} from '@headlessui/vue'
+import {Dialog, DialogOverlay, DialogTitle, TransitionChild, TransitionRoot} from '@headlessui/vue'
+import JsonYamlSwitch from '../components/JsonYamlSwitch.vue'
 
 export default {
   components: {
@@ -108,7 +98,7 @@ export default {
     Dialog,
     DialogOverlay,
     DialogTitle,
-    Switch,
+    JsonYamlSwitch,
   },
   props: {
     config: {},
