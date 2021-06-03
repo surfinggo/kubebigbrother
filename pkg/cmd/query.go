@@ -38,7 +38,7 @@ func newQueryCommand() *cobra.Command {
 			}
 
 			store := event_store.New(db)
-			events, err := store.List()
+			events, err := store.List(event_store.ListOptions{})
 			if err != nil {
 				klog.Exit(errors.Wrap(err, "list events error"))
 			}

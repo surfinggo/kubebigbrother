@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
+	"gopkg.in/yaml.v3"
 )
 
 // HandlerConfig returns the currently used config
@@ -14,5 +15,14 @@ func (app *App) HandlerConfig(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, informersConfig)
+	yamlBytes, err := yaml.Marshal(informersConfig)
+	if err != nil {
+		app.handle(c, errors.Wrap(err, "yaml marshal error"))
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"json": informersConfig,
+		"yaml": yamlBytes,
+	})
 }

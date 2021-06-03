@@ -28,7 +28,7 @@
 
 <template>
   <div id="wrapper" class="text-gray-600">
-    <layout-topbar :config="config"/>
+    <layout-topbar :config="config" :config-yaml="configYaml"/>
     <div class="w-full">
       <layout-sidebar :config="config"/>
       <div class="min-h-screen flex flex-col pl-60 xl:pl-72 pt-16">
@@ -57,12 +57,14 @@ export default {
     this.$store.commit('SET_SITE_DESCRIPTION', 'description undefined')
 
     this.axios.get('/api/v1/config').then(r => {
-      this.config = r.data
+      this.config = r.data.json
+      this.configYaml = atob(r.data.yaml)
     })
   },
   data() {
     return {
       config: '',
+      configYaml: '',
     }
   },
 }
