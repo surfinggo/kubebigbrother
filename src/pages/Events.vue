@@ -11,7 +11,7 @@
     <div v-for="event in events" :key="event.id">
       <div class="py-8 flex flex-wrap md:flex-nowrap">
         <div class="md:w-64 md:mb-0 mb-6 flex-shrink-0 flex flex-col">
-          <span class="font-semibold title-font text-gray-700">{{ event.event_type }}</span>
+          <span class="font-semibold title-font" :class="typeColor(event.event_type)">{{ event.event_type }}</span>
           <span class="text-sm text-gray-500">ID: {{ event.id }}</span>
           <span class="text-sm text-gray-500">Time: {{ lux(event.create_time) }}</span>
         </div>
@@ -201,6 +201,13 @@ export default {
       }).finally(() => {
         this.getting = false
       })
+    },
+    typeColor(t) {
+      return {
+        'ADDED': 'text-green-500',
+        'DELETED': 'text-yellow-500',
+        'UPDATED': 'text-blue-500'
+      }[t] || 'text-gray-500'
     },
     lux(t) {
       return DateTime.fromISO(t).toFormat("yyyy-MM-dd HH:mm:ss")
