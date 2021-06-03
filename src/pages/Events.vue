@@ -166,11 +166,13 @@ export default {
   watch: {
     '$route.query.q': function () {
       clearInterval(this.refresher)
+      this.getting = false // TODO: force refresh, can be optimized
       this.refresh()
       this.refresher = setInterval(this.refresh, 3000)
     },
     '$route.params.informerName': function () {
       clearInterval(this.refresher)
+      this.getting = false // TODO: force refresh, can be optimized
       this.refresh()
       this.refresher = setInterval(this.refresh, 3000)
     }
@@ -194,7 +196,6 @@ export default {
     openModal(e) {
       this.isOpen = true
       this.axios.get('/api/v1/events/' + e.id).then(r => {
-        console.log(r)
         this.evtData = r.data
       })
     },
@@ -205,7 +206,8 @@ export default {
       this.getting = true
       this.$http.get('/api/v1/events', {
         params: {
-          informerName: this.$route.params.informerName
+          informerName: this.$route.params.informerName,
+          q: this.$route.query.q,
         }
       }).then(r => {
         this.events = r.data.events
