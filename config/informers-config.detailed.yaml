@@ -1,3 +1,6 @@
+# this config template provides a overview of all available fields,
+# you can use it as a reference to kubebigbrother configuration.
+
 channels: # define channels
   print-to-stdout: # channel name
     type: print # channel type
