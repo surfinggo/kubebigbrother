@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed text-gray-500 h-screen top-0 pt-16">
+  <div class="fixed text-gray-500 h-screen top-0 pt-16 w-60 xl:w-72">
     <div class="h-full overflow-y-scroll px-3">
       <div class="h-6 pointer-events-none absolute inset-x-0 z-10 px-3">
         <div class="h-6 bg-gradient-to-b from-white"></div>
