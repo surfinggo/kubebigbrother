@@ -73,29 +73,43 @@
               </DialogTitle>
               <div class="mt-2">
                 <prism v-if="evtData && !useYaml" language="json"
-                       class="rounded !text-sm">{{ evtData.event }}
+                       class="rounded !text-sm"
+                       style="max-height: calc(12rem)">
+                  {{ evtData.event }}
                 </prism>
                 <prism v-if="evtData && useYaml" language="yaml"
-                       class="rounded !text-sm">{{ atob(evtData.event_yaml) }}
+                       class="rounded !text-sm"
+                       style="max-height: calc(12rem)">
+                  {{ atob(evtData.event_yaml) }}
                 </prism>
               </div>
-              <div class="mt-2 text-sm">Resource object:</div>
-              <div class="mt-2">
-                <prism v-if="evtData && !useYaml" language="json"
-                       class="rounded !text-sm">{{ evtData.obj }}
-                </prism>
-                <prism v-if="evtData && useYaml" language="yaml"
-                       class="rounded !text-sm">{{ atob(evtData.obj_yaml) }}
-                </prism>
-              </div>
-              <div class="mt-2 text-sm" v-if="evtData && evtData.old_obj">Old object (when updated):</div>
-              <div class="mt-2">
-                <prism v-if="evtData && evtData.old_obj && !useYaml" language="json"
-                       class="rounded !text-sm">{{ evtData.old_obj }}
-                </prism>
-                <prism v-if="evtData && evtData.old_obj && useYaml" language="yaml"
-                       class="rounded !text-sm">{{ atob(evtData.old_obj_yaml) }}
-                </prism>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="" :class="evtData && evtData.old_obj ? '' : 'col-span-2'">
+                  <div class="mt-2 text-sm">Resource object:</div>
+                  <div class="mt-2">
+                    <prism v-if="evtData && !useYaml" language="json"
+                           class="rounded !text-sm"
+                           style="max-height: calc(100vh - 28rem)">{{ evtData.obj }}
+                    </prism>
+                    <prism v-if="evtData && useYaml" language="yaml"
+                           class="rounded !text-sm"
+                           style="max-height: calc(100vh - 28rem)">{{ atob(evtData.obj_yaml) }}
+                    </prism>
+                  </div>
+                </div>
+                <div>
+                  <div class="mt-2 text-sm" v-if="evtData && evtData.old_obj">Old object (when updated):</div>
+                  <div class="mt-2">
+                    <prism v-if="evtData && evtData.old_obj && !useYaml" language="json"
+                           class="rounded !text-sm"
+                           style="max-height: calc(100vh - 28rem)">{{ evtData.old_obj }}
+                    </prism>
+                    <prism v-if="evtData && evtData.old_obj && useYaml" language="yaml"
+                           class="rounded !text-sm"
+                           style="max-height: calc(100vh - 28rem)">{{ atob(evtData.old_obj_yaml) }}
+                    </prism>
+                  </div>
+                </div>
               </div>
               <div class="mt-4 text-right">
                 <button
