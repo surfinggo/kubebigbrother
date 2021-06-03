@@ -18,6 +18,7 @@
     "@headlessui/vue": "^1.2.0",
     "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.5",
+    "@vueuse/core": "^4.11.2",
     "axios": "^0.21.1",
     "luxon": "^1.26.0",
     "prismjs": "^1.23.0",
