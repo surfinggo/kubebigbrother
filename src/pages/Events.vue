@@ -138,6 +138,11 @@ export default {
     }
   },
   watch: {
+    '$route.query.q': function () {
+      clearInterval(this.refresher)
+      this.refresh()
+      this.refresher = setInterval(this.refresh, 3000)
+    },
     '$route.params.informerName': function () {
       clearInterval(this.refresher)
       this.refresh()

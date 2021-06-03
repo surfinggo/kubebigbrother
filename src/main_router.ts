@@ -1,7 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import Events from './pages/Events.vue'
 import Layout from './pages/Layout.vue'
-import Search from "./pages/Search.vue";
 
 const routes = [
     {
@@ -17,7 +16,7 @@ const routes = [
             {
                 path: '/search',
                 name: 'search',
-                component: Search,
+                component: Events,
                 meta: {title: 'Search'},
             },
             {
