@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import Icon from '/icon-text-right.png'
+import Icon from '/icon-text-right-bg-transparent.png'
 import {ref} from 'vue'
 import {Dialog, DialogOverlay, DialogTitle, TransitionChild, TransitionRoot} from '@headlessui/vue'
 import JsonYamlSwitch from '../components/JsonYamlSwitch.vue'
