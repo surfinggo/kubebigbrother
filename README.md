@@ -1,3 +1,5 @@
+![Icon](./public/banner.jpg)
+
 # kubebigbrother
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/spongeprojects/kubebigbrother?style=flat)](https://goreportcard.com/report/github.com/spongeprojects/kubebigbrother)
