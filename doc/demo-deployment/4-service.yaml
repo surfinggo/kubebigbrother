@@ -1,0 +1,70 @@
+# Ingress provides internal access to the workloads.
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubebigbrother
+  namespace: kubebigbrother
+  labels:
+    part-of: kubebigbrother
+spec:
+  ports:
+  - name: backend
+    port: 8984
+    targetPort: 8984
+  - name: frontend
+    port: 80
+    targetPort: 80
+  selector:
+    app: kubebigbrother
+---
+# Ingress provides external access to the services.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: kubebigbrother
+    part-of: kubebigbrother
+  name: kubebigbrother
+  namespace: kubebigbrother
+spec:
+  rules:
+  - host: kubebigbrother-demo.spongeprojects.com # use your own domain when applying
+    http:
+      paths:
+      - backend:
+          service:
+            name: kubebigbrother
+            port:
+              name: frontend
+        path: /
+        pathType: Prefix
+      - backend:
+          service:
+            name: kubebigbrother
+            port:
+              name: backend
+        path: /api
+        pathType: Prefix
+---
+# IngressRoute config in case you are using Traefik
+#apiVersion: traefik.containo.us/v1alpha1
+#kind: IngressRoute
+#metadata:
+#  name: kubebigbrother
+#  namespace: kubebigbrother
+#spec:
+#  entryPoints:
+#  - web
+#  routes:
+#  - kind: Rule
+#    match: Host(`kubebigbrother-demo.spongeprojects.com`) # use your own domain when applying
+#    services:
+#    - kind: Service
+#      name: kubebigbrother
+#      port: frontend
+#  - kind: Rule
+#    match: Host(`kubebigbrother-demo.spongeprojects.com`) && PathPrefix(`/api`) # use your own domain when applying
+#    services:
+#    - kind: Service
+#      name: kubebigbrother
+#      port: backend

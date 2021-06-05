@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubebigbrother
+  namespace: kubebigbrother
+  labels:
+    app: kubebigbrother
+    part-of: kubebigbrother
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubebigbrother
+  template:
+    metadata:
+      labels:
+        app: kubebigbrother
+        part-of: kubebigbrother
+    spec:
+      containers:
+      - name: controller
+        image: spongeprojects/kubebigbrother:edge
+        command:
+        - /kbb
+        args:
+        - controller
+        - --env
+        - production
+        - --config
+        - /config/config.yaml
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: data
+          mountPath: /data
+      - name: server
+        image: spongeprojects/kubebigbrother:edge
+        ports:
+        - containerPort: 8984
+        command:
+        - /kbb
+        args:
+        - serve
+        - --env
+        - production
+        - --config
+        - /config/config.yaml
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: data
+          mountPath: /data
+      - name: ui
+        image: spongeprojects/kubebigbrother-ui:edge
+        ports:
+        - containerPort: 80
+      serviceAccountName: kubebigbrother
+      volumes:
+      - name: config
+        configMap:
+          name: kubebigbrother
+      - name: data
+        emptyDir:
+          sizeLimit: 1Gi
