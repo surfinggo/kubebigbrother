@@ -16,7 +16,7 @@
           <span class="text-sm text-gray-500">Time: {{ lux(event.create_time) }}</span>
         </div>
         <div class="md:flex-grow">
-          <h2 class="text-xl font-medium text-gray-900 title-font mb-2">
+          <h2 class="text-xl font-medium text-gray-900 title-font mb-2 break-all sm:break-words">
             {{ event.kind }}
             <span class="font-bold text-indigo-500">{{ event.name }}</span>
             has been

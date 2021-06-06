@@ -31,7 +31,7 @@
     <layout-topbar :channels="channels" :watchers="watchers" :clusterwatchers="clusterwatchers"/>
     <div class="w-full">
       <layout-sidebar :watchers="watchers" :clusterwatchers="clusterwatchers"/>
-      <div class="min-h-screen flex flex-col pl-60 xl:pl-72 pt-16">
+      <div class="min-h-screen flex flex-col pl-30 sm:pl-60 xl:pl-72 pt-16">
         <div class="flex-grow p-3">
           <router-view/>
         </div>

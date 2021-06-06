@@ -12,12 +12,14 @@
           <font-awesome-icon icon="search"/>
           <input v-model="q" ref="q" placeholder="Search events"
                  class="outline-none" @keydown.enter="search"/>
+          <span class="hidden sm:inline">
           <span class="text-sm py-0.5 px-1.5 border border-gray-300 rounded-md">
           <span class="sr-only">Press</span>
           <kbd class="font-sans"><abbr title="Command" class="no-underline">⌘</abbr></kbd>
           <span class="sr-only">and</span>
           <kbd class="font-sans">K</kbd>
           <span class="sr-only">to search</span>
+          </span>
         </span>
         </div>
       </div>
@@ -62,10 +64,11 @@
                 <div>
                   <div class="border-b font-bold">Channels</div>
                   <div v-for="channel in channels" :key="channel.metadata.name" class="item">
-                    <div>{{ channel.metadata.name }}: </div>
+                    <div>{{ channel.metadata.name }}:</div>
                     <prism language="json"
                            class="rounded !text-sm"
-                    >{{ channel.spec }}</prism>
+                    >{{ channel.spec }}
+                    </prism>
                   </div>
                 </div>
                 <div>
@@ -74,16 +77,18 @@
                     <div>{{ watcher.metadata.name }}:</div>
                     <prism language="json"
                            class="rounded !text-sm"
-                    >{{ watcher.spec }}</prism>
+                    >{{ watcher.spec }}
+                    </prism>
                   </div>
                 </div>
                 <div>
                   <div class="border-b font-bold">Watchers</div>
                   <div v-for="watcher in watchers" :key="watcher.metadata.name" class="item">
-                    <div>{{ watcher.metadata.namespace }}/{{ watcher.metadata.name }}: </div>
+                    <div>{{ watcher.metadata.namespace }}/{{ watcher.metadata.name }}:</div>
                     <prism language="json"
                            class="rounded !text-sm"
-                    >{{ watcher.spec }}</prism>
+                    >{{ watcher.spec }}
+                    </prism>
                   </div>
                 </div>
               </div>
