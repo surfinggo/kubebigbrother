@@ -9,6 +9,36 @@
 
 Kubebigbrother is a platform that monitors and records everything happens in the cluster.
 
+[🏠 Homepage](https://kubebigbrother.spongeprojects.com/)
+
+[🥳 Live demo](https://kubebigbrother-demo.spongeprojects.com/)
+
+## Features
+
+### ☸️ Cloud Native
+
+Built upon Kubernetes informers, watch Kubernetes native events.
+
+### 🔩 CRD Support
+
+Custom resource definitions are treated just like default resources.
+
+### 🔭 Just Watch
+
+Just watch events, nothing is touched.
+
+### 💌 Get Noticed
+
+Get noticed when anything you are interested happens.
+
+### 🤗 Rich Channels Support
+
+Send notifications to Slack, Telegram, Dingtalk, or HTTP webhooks, or...
+
+### 👀 About Big Brother
+
+Big brother is watching you.
+
 ## Usage
 
 There are two interfaces of kubebigbrother: the GUI, and the CLI.
@@ -147,11 +177,16 @@ Supported flags:
 
 ## Config
 
-You can specify
-
 ### Channels
 
 Currently, kbb supports these channel types:
+
+- Callback (webhooks)
+- Dingtalk
+- Flock
+- Print (like to stdout)  
+- Slack
+- Telegram
 
 ## Development
 
