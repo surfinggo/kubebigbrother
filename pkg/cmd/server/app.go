@@ -3,30 +3,41 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	spgc "github.com/spongeprojects/client-go/client/clientset/versioned"
+	spgi "github.com/spongeprojects/client-go/client/informers/externalversions"
+	spgl "github.com/spongeprojects/client-go/client/listers/spongeprojects.com/v1alpha1"
 	"github.com/spongeprojects/kubebigbrother/pkg/gormdb"
 	"github.com/spongeprojects/kubebigbrother/pkg/stores/event_store"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clientcmd"
+	"time"
 )
 
 type Config struct {
+	Env     string
 	Version string
 
-	Addr                string
-	Env                 string
-	DBDialect           string
-	DBArgs              string
-	GinDebug            bool
-	InformersConfigPath string
+	Addr       string
+	DBDialect  string
+	DBArgs     string
+	GinDebug   bool
+	Kubeconfig string
 }
 
 type App struct {
 	Version string
 
-	Addr                string
-	Env                 string
-	InformersConfigPath string
+	Addr string
+	Env  string
 
-	EventStore event_store.Interface
-	Router     *gin.Engine
+	EventStore             event_store.Interface
+	ChannelInformer        cache.SharedIndexInformer
+	WatcherInformer        cache.SharedIndexInformer
+	ClusterWatcherInformer cache.SharedIndexInformer
+	ChannelLister          spgl.ChannelLister
+	WatcherLister          spgl.WatcherLister
+	ClusterWatcherLister   spgl.ClusterWatcherLister
+	Router                 *gin.Engine
 }
 
 func SetupApp(config *Config) (*App, error) {
@@ -38,7 +49,6 @@ func SetupApp(config *Config) (*App, error) {
 	app.Version = config.Version
 	app.Addr = config.Addr
 	app.Env = config.Env
-	app.InformersConfigPath = config.InformersConfigPath
 
 	if config.GinDebug {
 		gin.SetMode(gin.DebugMode)
@@ -52,6 +62,31 @@ func SetupApp(config *Config) (*App, error) {
 	}
 
 	app.EventStore = event_store.New(db)
+
+	restConfig, err := clientcmd.BuildConfigFromFlags("", config.Kubeconfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "get kube config error")
+	}
+
+	spgClientset, err := spgc.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "new clientset error")
+	}
+
+	spgInformerFactory := spgi.NewSharedInformerFactory(spgClientset, 12*time.Hour)
+	channelsInformer := spgInformerFactory.Spongeprojects().V1alpha1().Channels().Informer()
+	watchersInformer := spgInformerFactory.Spongeprojects().V1alpha1().Watchers().Informer()
+	clusterwatchersInformer := spgInformerFactory.Spongeprojects().V1alpha1().ClusterWatchers().Informer()
+	channelsLister := spgInformerFactory.Spongeprojects().V1alpha1().Channels().Lister()
+	watchersLister := spgInformerFactory.Spongeprojects().V1alpha1().Watchers().Lister()
+	clusterwatchersLister := spgInformerFactory.Spongeprojects().V1alpha1().ClusterWatchers().Lister()
+
+	app.ChannelInformer = channelsInformer
+	app.WatcherInformer = watchersInformer
+	app.ClusterWatcherInformer = clusterwatchersInformer
+	app.ChannelLister = channelsLister
+	app.WatcherLister = watchersLister
+	app.ClusterWatcherLister = clusterwatchersLister
 
 	r := gin.New()
 	r.Use(
@@ -76,6 +111,14 @@ func SetupApp(config *Config) (*App, error) {
 	return app, nil
 }
 
-func (app *App) Serve() error {
+func (app *App) Run(stopCh chan struct{}) error {
+	go app.ChannelInformer.Run(stopCh)
+	go app.WatcherInformer.Run(stopCh)
+	go app.ClusterWatcherInformer.Run(stopCh)
+
+	cache.WaitForCacheSync(stopCh, app.ChannelInformer.HasSynced)
+	cache.WaitForCacheSync(stopCh, app.WatcherInformer.HasSynced)
+	cache.WaitForCacheSync(stopCh, app.ClusterWatcherInformer.HasSynced)
+
 	return app.Router.Run(app.Addr)
 }

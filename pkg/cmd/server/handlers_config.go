@@ -3,26 +3,29 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"github.com/spongeprojects/kubebigbrother/pkg/informers"
-	"gopkg.in/yaml.v3"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 // HandlerConfig returns the currently used config
 func (app *App) HandlerConfig(c *gin.Context) {
-	informersConfig, err := informers.LoadConfigFromFile(app.InformersConfigPath)
+	channels, err := app.ChannelLister.List(labels.Everything())
 	if err != nil {
-		app.handle(c, errors.Wrap(err, "load config file error"))
-		return
+		app.handle(c, errors.Wrap(err, "list channels error"))
 	}
 
-	yamlBytes, err := yaml.Marshal(informersConfig)
+	watchers, err := app.WatcherLister.List(labels.Everything())
 	if err != nil {
-		app.handle(c, errors.Wrap(err, "yaml marshal error"))
-		return
+		app.handle(c, errors.Wrap(err, "list watchers error"))
+	}
+
+	clusterwatchers, err := app.ClusterWatcherLister.List(labels.Everything())
+	if err != nil {
+		app.handle(c, errors.Wrap(err, "list clusterwatchers error"))
 	}
 
 	c.JSON(200, gin.H{
-		"json": informersConfig,
-		"yaml": yamlBytes,
+		"channels":        channels,
+		"watchers":        watchers,
+		"clusterwatchers": clusterwatchers,
 	})
 }

@@ -28,9 +28,9 @@
 
 <template>
   <div id="wrapper" class="text-gray-600">
-    <layout-topbar :config="config" :config-yaml="configYaml"/>
+    <layout-topbar :channels="channels" :watchers="watchers" :clusterwatchers="clusterwatchers"/>
     <div class="w-full">
-      <layout-sidebar :config="config"/>
+      <layout-sidebar :watchers="watchers" :clusterwatchers="clusterwatchers"/>
       <div class="min-h-screen flex flex-col pl-60 xl:pl-72 pt-16">
         <div class="flex-grow p-3">
           <router-view/>
@@ -57,14 +57,16 @@ export default {
     this.$store.commit('SET_SITE_DESCRIPTION', 'description undefined')
 
     this.axios.get('/api/v1/config').then(r => {
-      this.config = r.data.json
-      this.configYaml = atob(r.data.yaml)
+      this.channels = r.data.channels
+      this.watchers = r.data.watchers
+      this.clusterwatchers = r.data.clusterwatchers
     })
   },
   data() {
     return {
-      config: '',
-      configYaml: '',
+      channels: [],
+      watchers: [],
+      clusterwatchers: [],
     }
   },
 }

@@ -7,25 +7,20 @@ import (
 	"github.com/spf13/viper"
 	"github.com/spongeprojects/kubebigbrother/pkg/cmd/genericoptions"
 	"github.com/spongeprojects/kubebigbrother/pkg/cmd/watcher"
-	"github.com/spongeprojects/kubebigbrother/pkg/crumbs"
 	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
-	"github.com/spongeprojects/kubebigbrother/pkg/informers"
 	"github.com/spongeprojects/kubebigbrother/pkg/utils/signals"
-	"github.com/spongeprojects/kubebigbrother/staging/fileorcreate"
 	"github.com/spongeprojects/magicconch"
 	"k8s.io/klog/v2"
 )
 
 type watchOptions struct {
 	GlobalOptions     *genericoptions.GlobalOptions
-	InformersOptions  *genericoptions.InformersOptions
 	KubeconfigOptions *genericoptions.KubeconfigOptions
 }
 
 func getWatchOptions() *watchOptions {
 	o := &watchOptions{
 		GlobalOptions:     genericoptions.GetGlobalOptions(),
-		InformersOptions:  genericoptions.GetInformersOptions(),
 		KubeconfigOptions: genericoptions.GetKubeconfigOptions(),
 	}
 	return o
@@ -45,23 +40,8 @@ func newWatchCommand() *cobra.Command {
 
 			o := getWatchOptions()
 
-			informersConfigPath := o.InformersOptions.InformersConfig
-
-			if o.GlobalOptions.IsDebugging() {
-				err := fileorcreate.Ensure(informersConfigPath, crumbs.InformersConfigFileTemplate)
-				if err != nil {
-					klog.Error(errors.Wrap(err, "apply informers config template error"))
-				}
-			}
-
-			informersConfig, err := informers.LoadConfigFromFile(informersConfigPath)
-			if err != nil {
-				klog.Exit(errors.Wrap(err, "informers.LoadConfigFromFile error"))
-			}
-
 			w, err := watcher.Setup(watcher.Config{
-				KubeConfig:      o.KubeconfigOptions.Kubeconfig,
-				InformersConfig: informersConfig,
+				Kubeconfig: o.KubeconfigOptions.Kubeconfig,
 			})
 			if err != nil {
 				klog.Exit(errors.Wrap(err, "setup watcher error"))
@@ -79,7 +59,6 @@ func newWatchCommand() *cobra.Command {
 	}
 
 	f := cmd.PersistentFlags()
-	genericoptions.AddInformersFlags(f)
 	genericoptions.AddKubeconfigFlags(f)
 	magicconch.Must(viper.BindPFlags(f))
 

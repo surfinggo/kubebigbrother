@@ -11,19 +11,21 @@ import (
 )
 
 type serveOptions struct {
-	GlobalOptions    *genericoptions.GlobalOptions
-	DatabaseOptions  *genericoptions.DatabaseOptions
-	InformersOptions *genericoptions.InformersOptions
+	GlobalOptions     *genericoptions.GlobalOptions
+	DatabaseOptions   *genericoptions.DatabaseOptions
+	KubeconfigOptions *genericoptions.KubeconfigOptions
 
-	Addr string
+	GinDebug bool
+	Addr     string
 }
 
 func getServeOptions() *serveOptions {
 	o := &serveOptions{
-		GlobalOptions:    genericoptions.GetGlobalOptions(),
-		DatabaseOptions:  genericoptions.GetDatabaseOptions(),
-		InformersOptions: genericoptions.GetInformersOptions(),
-		Addr:             viper.GetString("addr"),
+		GlobalOptions:     genericoptions.GetGlobalOptions(),
+		DatabaseOptions:   genericoptions.GetDatabaseOptions(),
+		KubeconfigOptions: genericoptions.GetKubeconfigOptions(),
+		GinDebug:          viper.GetBool("gin-debug"),
+		Addr:              viper.GetString("addr"),
 	}
 	return o
 }
@@ -35,15 +37,14 @@ func newServeCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			o := getServeOptions()
 
-			informersConfigPath := o.InformersOptions.InformersConfig
-
 			app, err := server.SetupApp(&server.Config{
-				Version:             Version,
-				Env:                 o.GlobalOptions.Env,
-				DBDialect:           o.DatabaseOptions.DBDialect,
-				DBArgs:              o.DatabaseOptions.DBArgs,
-				Addr:                o.Addr,
-				InformersConfigPath: informersConfigPath,
+				Env:        o.GlobalOptions.Env,
+				Version:    Version,
+				Addr:       o.Addr,
+				DBDialect:  o.DatabaseOptions.DBDialect,
+				DBArgs:     o.DatabaseOptions.DBArgs,
+				GinDebug:   o.GinDebug,
+				Kubeconfig: o.KubeconfigOptions.Kubeconfig,
 			})
 			if err != nil {
 				klog.Exit(errors.Wrap(err, "setup app error"))
@@ -52,7 +53,10 @@ func newServeCommand() *cobra.Command {
 			klog.Infof("env: %s", app.Env)
 			klog.Infof("listening on: %s", app.Addr)
 
-			err = app.Serve()
+			stopCh := make(chan struct{})
+			defer close(stopCh)
+
+			err = app.Run(stopCh)
 			if err != nil {
 				klog.Exit(err)
 			}
@@ -61,7 +65,9 @@ func newServeCommand() *cobra.Command {
 
 	f := cmd.PersistentFlags()
 	f.String("addr", "0.0.0.0:8984", "serving address")
+	f.Bool("gin-debug", false, "enable gin debug mode")
 	genericoptions.AddDatabaseFlags(f)
+	genericoptions.AddKubeconfigFlags(f)
 	magicconch.Must(viper.BindPFlags(f))
 
 	return cmd

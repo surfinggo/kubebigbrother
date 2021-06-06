@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"github.com/spongeprojects/kubebigbrother/pkg/models"
 	"github.com/spongeprojects/kubebigbrother/pkg/stores/event_store"
 	"github.com/spongeprojects/magicconch"
 	"gopkg.in/yaml.v3"
@@ -10,8 +11,16 @@ import (
 
 // HandlerEventList queries events
 func (app *App) HandlerEventList(c *gin.Context) {
+	namespace := c.Query("namespace")
+	name := c.Query("name")
+	var informerName string
+	if namespace != "" {
+		informerName = models.WatcherInformerName(namespace, name)
+	} else if name != "" {
+		informerName = models.ClusterWatcherInformerName(name)
+	}
 	events, err := app.EventStore.List(event_store.ListOptions{
-		InformerName: c.Query("informerName"),
+		InformerName: informerName,
 		Q:            c.Query("q"),
 		After:        magicconch.StringToUint(c.Query("after")),
 	})

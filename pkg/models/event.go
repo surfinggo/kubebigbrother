@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"time"
 )
@@ -41,4 +42,12 @@ func (e *Event) GetOldObj() (obj *unstructured.Unstructured) {
 	}
 	_ = json.Unmarshal(e.OldObj, &obj)
 	return obj
+}
+
+func WatcherInformerName(namespace, name string) string {
+	return fmt.Sprintf("watcher-%s-%s", namespace, name)
+}
+
+func ClusterWatcherInformerName(name string) string {
+	return fmt.Sprintf("clusterwatcher-%s", name)
 }

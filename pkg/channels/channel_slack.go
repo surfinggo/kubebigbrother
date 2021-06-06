@@ -4,23 +4,13 @@ import (
 	"bytes"
 	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
+	spg "github.com/spongeprojects/client-go/api/spongeprojects.com/v1alpha1"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/url"
 	"text/template"
 )
-
-// ChannelSlackConfig is config for ChannelSlack
-type ChannelSlackConfig struct {
-	Token           string
-	Proxy           string
-	WebhookURL      string
-	TitleTemplate   string
-	AddedTemplate   string
-	DeletedTemplate string
-	UpdatedTemplate string
-}
 
 // ChannelSlack is the callback channel
 type ChannelSlack struct {
@@ -83,7 +73,7 @@ func (c *ChannelSlack) Handle(ctx *EventProcessContext) error {
 }
 
 // NewChannelSlack creates callback channel
-func NewChannelSlack(config *ChannelSlackConfig) (*ChannelSlack, error) {
+func NewChannelSlack(config *spg.ChannelSlackConfig) (*ChannelSlack, error) {
 	var httpClient *http.Client
 	if config.Proxy != "" {
 		proxyUrl, err := url.Parse(config.Proxy)

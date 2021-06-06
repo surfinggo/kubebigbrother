@@ -20,8 +20,14 @@ const routes = [
                 meta: {title: 'Search'},
             },
             {
-                path: '/events/:informerName',
-                name: 'events',
+                path: '/events/:name',
+                name: 'clusterwatcher',
+                component: Events,
+                meta: {title: 'Events'},
+            },
+            {
+                path: '/events/:namespace/:name',
+                name: 'watcher',
                 component: Events,
                 meta: {title: 'Events'},
             },

@@ -12,16 +12,24 @@
           </router-link>
         </div>
 
-        <div v-for="namespace in config.namespaces" :key="namespace.namespace" class="mb-6">
-          <div class="px-3 mb-3 tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
-            NAMESPACE: {{ namespace.namespace || '*' }}
-          </div>
-          <router-link v-for="resource in namespace.resources" :key="resource.resource"
-                       class="w-full px-3 mb-3 transition-colors duration-200 relative block hover:text-gray-900 text-gray-500 cursor-pointer"
-                       :to="{name: 'events', params: {informerName: resource.name}}">
-            <span class="ml-1">{{ resource.resource }}</span>
-          </router-link>
+        <div
+            class="px-3 mt-6 mb-3 tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
+          CLUSTER WATCHERS:
         </div>
+        <router-link v-for="watcher in clusterwatchers" :key="watcher.metadata.name"
+                     class="w-full px-3 mb-3 transition-colors duration-200 relative block hover:text-gray-900 text-gray-500 cursor-pointer"
+                     :to="{name: 'clusterwatcher', params: {name: watcher.metadata.name}}">
+          <span class="ml-1">{{ watcher.metadata.name }}</span>
+        </router-link>
+        <div
+            class="px-3 mt-6 mb-3 tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
+          WATCHERS:
+        </div>
+        <router-link v-for="watcher in watchers" :key="watcher.metadata.name"
+                     class="w-full px-3 mb-3 transition-colors duration-200 relative block hover:text-gray-900 text-gray-500 cursor-pointer"
+                     :to="{name: 'watcher', params: {namespace: watcher.metadata.namespace, name: watcher.metadata.name}}">
+          <span class="ml-1">{{ watcher.metadata.namespace }}/{{ watcher.metadata.name }}</span>
+        </router-link>
       </div>
     </div>
   </div>
@@ -30,7 +38,8 @@
 <script>
 export default {
   props: {
-    config: {},
+    watchers: {},
+    clusterwatchers: {},
   },
   methods: {}
 }

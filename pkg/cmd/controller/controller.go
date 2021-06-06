@@ -5,13 +5,17 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/gormdb"
 	"github.com/spongeprojects/kubebigbrother/pkg/informers"
 	"github.com/spongeprojects/kubebigbrother/pkg/stores/event_store"
+	"time"
 )
 
 type Config struct {
-	DBDialect       string
-	DBArgs          string
-	KubeConfig      string
-	InformersConfig *informers.ConfigFile
+	DBDialect           string
+	DBArgs              string
+	Kubeconfig          string
+	DefaultWorkers      int
+	DefaultMaxRetries   int
+	DefaultChannelNames []string
+	MinResyncPeriod     time.Duration
 }
 
 type Controller struct {
@@ -41,10 +45,13 @@ func Setup(config Config) (*Controller, error) {
 	controller.EventStore = event_store.New(db)
 
 	informerInstance, err := informers.Setup(informers.Config{
-		KubeConfig: config.KubeConfig,
-		ConfigFile: config.InformersConfig,
-		SaveEvent:  true,
-		EventStore: event_store.New(db),
+		Kubeconfig:          config.Kubeconfig,
+		DefaultWorkers:      config.DefaultWorkers,
+		DefaultMaxRetries:   config.DefaultMaxRetries,
+		DefaultChannelNames: config.DefaultChannelNames,
+		MinResyncPeriod:     config.MinResyncPeriod,
+		JustWatch:           false,
+		EventStore:          controller.EventStore,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "setup informers error")

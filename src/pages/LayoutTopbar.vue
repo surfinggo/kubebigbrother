@@ -56,18 +56,36 @@
             <div
                 class="inline-block w-full max-w-4xl p-4 my-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
               <DialogTitle as="h3" class="fcb text-lg font-medium leading-6 text-gray-900">
-                <span>Informers Config</span>
-                <JsonYamlSwitch v-model="useYaml"/>
+                <span>Current Configs</span>
               </DialogTitle>
-              <div class="mt-2">
-                <prism v-if="useYaml" language="yaml"
-                       class="overflow-y-scroll rounded !text-sm"
-                       style="max-height: calc(100vh - 12rem)">{{ configYaml }}
-                </prism>
-                <prism v-else language="json"
-                       class="overflow-y-scroll rounded !text-sm"
-                       style="max-height: calc(100vh - 12rem)">{{ config }}
-                </prism>
+              <div class="mt-2 overflow-y-scroll" style="max-height: calc(100vh - 12rem)">
+                <div>
+                  <div class="border-b font-bold">Channels</div>
+                  <div v-for="channel in channels" :key="channel.metadata.name" class="item">
+                    <div>{{ channel.metadata.name }}: </div>
+                    <prism language="json"
+                           class="rounded !text-sm"
+                    >{{ channel.spec }}</prism>
+                  </div>
+                </div>
+                <div>
+                  <div class="border-b font-bold">Cluster Watchers</div>
+                  <div v-for="watcher in clusterwatchers" :key="watcher.metadata.name" class="item">
+                    <div>{{ watcher.metadata.name }}:</div>
+                    <prism language="json"
+                           class="rounded !text-sm"
+                    >{{ watcher.spec }}</prism>
+                  </div>
+                </div>
+                <div>
+                  <div class="border-b font-bold">Watchers</div>
+                  <div v-for="watcher in watchers" :key="watcher.metadata.name" class="item">
+                    <div>{{ watcher.metadata.namespace }}/{{ watcher.metadata.name }}: </div>
+                    <prism language="json"
+                           class="rounded !text-sm"
+                    >{{ watcher.spec }}</prism>
+                  </div>
+                </div>
               </div>
               <div class="mt-4 text-right">
                 <button
@@ -89,7 +107,6 @@
 import Icon from '/icon-text-right-bg-transparent.png'
 import {ref} from 'vue'
 import {Dialog, DialogOverlay, DialogTitle, TransitionChild, TransitionRoot} from '@headlessui/vue'
-import JsonYamlSwitch from '../components/JsonYamlSwitch.vue'
 
 export default {
   components: {
@@ -98,11 +115,11 @@ export default {
     Dialog,
     DialogOverlay,
     DialogTitle,
-    JsonYamlSwitch,
   },
   props: {
-    config: {},
-    configYaml: {},
+    channels: {},
+    watchers: {},
+    clusterwatchers: {},
   },
   setup() {
     const isOpen = ref(false)
@@ -149,3 +166,8 @@ export default {
 }
 </script>
 
+<style scoped>
+.item {
+  @apply mt-3 mb-3 p-3 bg-gray-200 rounded-lg text-gray-800;
+}
+</style>

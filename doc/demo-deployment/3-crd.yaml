@@ -1,0 +1,290 @@
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Channel
+metadata:
+  name: print-to-stdout
+spec:
+  type: print
+  print:
+    writer: stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: csr
+  namespace: demo
+spec:
+  resource: csr
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: configmaps
+  namespace: demo
+spec:
+  resource: configmaps
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: cronjobs
+  namespace: demo
+spec:
+  resource: cronjobs
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: daemonsets
+  namespace: demo
+spec:
+  resource: daemonsets
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: deployments
+  namespace: demo
+spec:
+  resource: deployments
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: horizontalpodautoscalers
+  namespace: demo
+spec:
+  resource: horizontalpodautoscalers
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: ingresses
+  namespace: demo
+spec:
+  resource: ingresses
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: pvc
+  namespace: demo
+spec:
+  resource: pvc
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: pods
+  namespace: demo
+spec:
+  resource: pods
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: rolebindings
+  namespace: demo
+spec:
+  resource: rolebindings
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: roles
+  namespace: demo
+spec:
+  resource: roles
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: secrets
+  namespace: demo
+spec:
+  resource: secrets
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: serviceaccounts
+  namespace: demo
+spec:
+  resource: serviceaccounts
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: statefulsets
+  namespace: demo
+spec:
+  resource: statefulsets
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: Watcher
+metadata:
+  name: validatingwebhookconfigurations
+  namespace: demo
+spec:
+  resource: validatingwebhookconfigurations
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: ClusterWatcher
+metadata:
+  name: clusterrolebindings
+spec:
+  resource: clusterrolebindings
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: ClusterWatcher
+metadata:
+  name: clusterroles
+spec:
+  resource: clusterroles
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: ClusterWatcher
+metadata:
+  name: crd
+spec:
+  resource: crd
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: ClusterWatcher
+metadata:
+  name: ingressclasses
+spec:
+  resource: ingressclasses
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: ClusterWatcher
+metadata:
+  name: namespaces
+spec:
+  resource: namespaces
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: ClusterWatcher
+metadata:
+  name: nodes
+spec:
+  resource: nodes
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---
+apiVersion: "spongeprojects.com/v1alpha1"
+kind: ClusterWatcher
+metadata:
+  name: pv
+spec:
+  resource: pv
+  noticeWhenAdded: true
+  noticeWhenDeleted: true
+  noticeWhenUpdated: true
+  channelNames:
+  - print-to-stdout
+---

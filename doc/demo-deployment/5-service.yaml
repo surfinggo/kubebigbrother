@@ -47,24 +47,24 @@ spec:
         pathType: Prefix
 ---
 # IngressRoute config in case you are using Traefik
-#apiVersion: traefik.containo.us/v1alpha1
-#kind: IngressRoute
-#metadata:
-#  name: kubebigbrother
-#  namespace: kubebigbrother
-#spec:
-#  entryPoints:
-#  - web
-#  routes:
-#  - kind: Rule
-#    match: Host(`kubebigbrother-demo.spongeprojects.com`) # use your own domain when applying
-#    services:
-#    - kind: Service
-#      name: kubebigbrother
-#      port: frontend
-#  - kind: Rule
-#    match: Host(`kubebigbrother-demo.spongeprojects.com`) && PathPrefix(`/api`) # use your own domain when applying
-#    services:
-#    - kind: Service
-#      name: kubebigbrother
-#      port: backend
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kubebigbrother
+  namespace: kubebigbrother
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host(`kubebigbrother-demo.spongeprojects.com`) # use your own domain when applying
+    services:
+    - kind: Service
+      name: kubebigbrother
+      port: frontend
+  - kind: Rule
+    match: Host(`kubebigbrother-demo.spongeprojects.com`) && PathPrefix(`/api`) # use your own domain when applying
+    services:
+    - kind: Service
+      name: kubebigbrother
+      port: backend

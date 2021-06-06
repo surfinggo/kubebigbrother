@@ -4,23 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/pkg/errors"
+	spg "github.com/spongeprojects/client-go/api/spongeprojects.com/v1alpha1"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/url"
 	"text/template"
 )
-
-// ChannelDingtalkConfig is config for ChannelDingtalk
-type ChannelDingtalkConfig struct {
-	WebhookURL      string
-	Proxy           string
-	AtMobiles       []string
-	AtAll           bool
-	AddedTemplate   string
-	DeletedTemplate string
-	UpdatedTemplate string
-}
 
 // ChannelDingtalk is the callback channel
 type ChannelDingtalk struct {
@@ -113,7 +103,7 @@ func (c *ChannelDingtalk) Handle(ctx *EventProcessContext) error {
 }
 
 // NewChannelDingtalk creates callback channel
-func NewChannelDingtalk(config *ChannelDingtalkConfig) (*ChannelDingtalk, error) {
+func NewChannelDingtalk(config *spg.ChannelDingtalkConfig) (*ChannelDingtalk, error) {
 	if len(config.WebhookURL) < 70 {
 		return nil, errors.New("invalid url, too short")
 	}

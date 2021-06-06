@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	spg "github.com/spongeprojects/client-go/api/spongeprojects.com/v1alpha1"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"k8s.io/klog/v2"
 	"net/http"
@@ -12,16 +13,6 @@ import (
 	"strings"
 	"text/template"
 )
-
-// ChannelTelegramConfig is config for ChannelTelegram
-type ChannelTelegramConfig struct {
-	Token           string
-	ChatIDs         []string
-	Proxy           string
-	AddedTemplate   string
-	DeletedTemplate string
-	UpdatedTemplate string
-}
 
 // ChannelTelegram is the Telegram channel
 type ChannelTelegram struct {
@@ -120,7 +111,7 @@ func (c *ChannelTelegram) Handle(ctx *EventProcessContext) error {
 }
 
 // NewChannelTelegram creates new Telegram channel
-func NewChannelTelegram(config *ChannelTelegramConfig) (*ChannelTelegram, error) {
+func NewChannelTelegram(config *spg.ChannelTelegramConfig) (*ChannelTelegram, error) {
 	if len(config.Token) < 40 {
 		return nil, errors.New("invalid token, too short")
 	}

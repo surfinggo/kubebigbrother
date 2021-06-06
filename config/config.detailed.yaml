@@ -1,5 +1,4 @@
 db-dialect: sqlite # database dialect
 db-args: tmp/kubebigbrother.sqlite # database args
 env: debug # environment (environments with special meaning: [debug])
-informers-config: /path/to/informers-config.yaml # path to informers config file
 kubeconfig: /path/to/kubeconfig # path to kubeconfig

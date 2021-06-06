@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubebigbrother
+  namespace: kubebigbrother
+data:
+  config.yaml: |
+    db-dialect: sqlite # database dialect
+    db-args: /data/kubebigbrother.sqlite # database args
+    env: debug # environment (environments with special meaning: [debug])

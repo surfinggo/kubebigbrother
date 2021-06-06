@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spongeprojects/kubebigbrother/pkg/channels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
 	"strings"
@@ -31,7 +32,11 @@ type Informer struct {
 	// Queue is a rate limiting queue
 	Queue workqueue.RateLimitingInterface
 
+	Informer cache.SharedIndexInformer
+
 	processingItems *sync.WaitGroup
+
+	StopCh chan struct{}
 
 	// Workers is number of workers
 	Workers int
@@ -135,4 +140,5 @@ func (i *Informer) handleErr(item *eventWrapper, result error) {
 
 func (i *Informer) ShutDown() {
 	i.Queue.ShutDown()
+	close(i.StopCh)
 }

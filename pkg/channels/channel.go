@@ -4,9 +4,6 @@ import (
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 )
 
-// ChannelName is name of channel
-type ChannelName string
-
 // ChannelType is type of channel
 type ChannelType string
 
@@ -19,8 +16,8 @@ const (
 	ChannelTypeTelegram = "telegram" // send message to Telegram
 )
 
-// ChannelMap maps from ChannelName to Channel
-type ChannelMap map[ChannelName]Channel
+// ChannelMap maps from string to Channel
+type ChannelMap map[string]Channel
 
 // Channel is interface of a channel
 type Channel interface {

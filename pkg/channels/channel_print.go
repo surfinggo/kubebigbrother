@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/pkg/errors"
+	spg "github.com/spongeprojects/client-go/api/spongeprojects.com/v1alpha1"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"github.com/spongeprojects/kubebigbrother/pkg/helpers/style"
 	"io"
@@ -11,15 +12,6 @@ import (
 	"os"
 	"text/template"
 )
-
-// ChannelPrintConfig is config for ChannelPrint
-type ChannelPrintConfig struct {
-	Writer          string
-	UseTemplate     bool
-	AddedTemplate   string
-	DeletedTemplate string
-	UpdatedTemplate string
-}
 
 // ChannelPrint is the channel to print event to writer
 type ChannelPrint struct {
@@ -88,7 +80,7 @@ const (
 )
 
 // NewChannelPrint creates print channel
-func NewChannelPrint(config *ChannelPrintConfig) (*ChannelPrint, error) {
+func NewChannelPrint(config *spg.ChannelPrintConfig) (*ChannelPrint, error) {
 	var writer io.Writer
 	switch config.Writer {
 	case PrintWriterStdout, "":

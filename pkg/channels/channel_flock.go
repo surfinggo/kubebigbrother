@@ -4,22 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/pkg/errors"
+	spg "github.com/spongeprojects/client-go/api/spongeprojects.com/v1alpha1"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/url"
 	"text/template"
 )
-
-// ChannelFlockConfig is config for ChannelFlock
-type ChannelFlockConfig struct {
-	URL             string
-	Proxy           string
-	TitleTemplate   string
-	AddedTemplate   string
-	DeletedTemplate string
-	UpdatedTemplate string
-}
 
 // ChannelFlock is the callback channel
 type ChannelFlock struct {
@@ -111,7 +102,7 @@ func (c *ChannelFlock) Handle(ctx *EventProcessContext) error {
 }
 
 // NewChannelFlock creates callback channel
-func NewChannelFlock(config *ChannelFlockConfig) (*ChannelFlock, error) {
+func NewChannelFlock(config *spg.ChannelFlockConfig) (*ChannelFlock, error) {
 	if len(config.URL) < 70 {
 		return nil, errors.New("invalid url, too short")
 	}

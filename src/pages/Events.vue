@@ -164,13 +164,7 @@ export default {
     }
   },
   watch: {
-    '$route.query.q': function () {
-      clearInterval(this.refresher)
-      this.getting = false // TODO: force refresh, can be optimized
-      this.refresh()
-      this.refresher = setInterval(this.refresh, 3000)
-    },
-    '$route.params.informerName': function () {
+    '$route.fullPath': function () {
       clearInterval(this.refresher)
       this.getting = false // TODO: force refresh, can be optimized
       this.refresh()
@@ -178,6 +172,7 @@ export default {
     }
   },
   created() {
+    console.log(this.$route)
     this.refresh()
     this.refresher = setInterval(this.refresh, 3000)
     this.brokenBlink = setInterval(() => {
@@ -206,7 +201,8 @@ export default {
       this.getting = true
       this.$http.get('/api/v1/events', {
         params: {
-          informerName: this.$route.params.informerName,
+          namespace: this.$route.params.namespace,
+          name: this.$route.params.name,
           q: this.$route.query.q,
         }
       }).then(r => {

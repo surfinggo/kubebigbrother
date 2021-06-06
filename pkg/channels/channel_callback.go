@@ -4,23 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/pkg/errors"
+	spg "github.com/spongeprojects/client-go/api/spongeprojects.com/v1alpha1"
 	"github.com/spongeprojects/kubebigbrother/pkg/event"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/url"
 	"text/template"
 )
-
-// ChannelCallbackConfig is config for ChannelCallback
-type ChannelCallbackConfig struct {
-	Method          string
-	URL             string
-	Proxy           string
-	UseTemplate     bool
-	AddedTemplate   string
-	DeletedTemplate string
-	UpdatedTemplate string
-}
 
 // ChannelCallback is the callback channel
 type ChannelCallback struct {
@@ -85,7 +75,7 @@ func (c *ChannelCallback) Handle(ctx *EventProcessContext) error {
 }
 
 // NewChannelCallback creates callback channel
-func NewChannelCallback(config *ChannelCallbackConfig) (*ChannelCallback, error) {
+func NewChannelCallback(config *spg.ChannelCallbackConfig) (*ChannelCallback, error) {
 	klog.V(2).Infof("callback url: %s", config.URL)
 
 	var httpClient *http.Client
