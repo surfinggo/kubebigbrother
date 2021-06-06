@@ -9,9 +9,9 @@
 
 Kubebigbrother is a platform that monitors and records everything happens in the cluster.
 
-[🏠 Homepage](https://kubebigbrother.spongeprojects.com/)
+## [🏠 Homepage](https://kubebigbrother.spongeprojects.com/)
 
-[🥳 Live demo](https://kubebigbrother-demo.spongeprojects.com/)
+## [🥳 Live demo](http://kubebigbrother-demo.spongeprojects.com/)
 
 ## Features
 
